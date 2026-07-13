@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  credentials
+  google
+  facebook
+}
+
+enum StockStatus {
+  in_stock
+  out_of_stock
+  unknown
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String?
+  authProvider AuthProvider @default(credentials) @map("auth_provider")
+  isAdmin      Boolean      @default(false) @map("is_admin")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  favorites Favorite[]
+
+  @@map("users")
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  brand         String
+  model         String
+  category      String
+  specs         Json     @default("{}")
+  canonicalName String   @unique @map("canonical_name")
+  imageUrl      String?  @map("image_url")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  offers    Offer[]
+  favorites Favorite[]
+
+  @@index([category])
+  @@index([brand, model])
+  @@map("products")
+}
+
+model Vendor {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  logo            String?
+  trustScore      Float?   @map("trust_score")
+  avgDeliveryTime Int?     @map("avg_delivery_time")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  offers Offer[]
+
+  @@map("vendors")
+}
+
+model Offer {
+  id           String      @id @default(cuid())
+  productId    String      @map("product_id")
+  vendorId     String      @map("vendor_id")
+  price        Decimal     @db.Decimal(10, 3)
+  stockStatus  StockStatus @default(unknown) @map("stock_status")
+  url          String
+  shippingCost Decimal?    @db.Decimal(10, 3) @map("shipping_cost")
+  scrapedAt    DateTime    @map("scraped_at")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  vendor       Vendor         @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  priceHistory PriceHistory[]
+
+  @@unique([productId, vendorId])
+  @@index([productId])
+  @@index([vendorId])
+  @@map("offers")
+}
+
+model PriceHistory {
+  id         String   @id @default(cuid())
+  offerId    String   @map("offer_id")
+  price      Decimal  @db.Decimal(10, 3)
+  recordedAt DateTime @default(now()) @map("recorded_at")
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@index([offerId, recordedAt])
+  @@map("price_history")
+}
+
+model Favorite {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  productId     String   @map("product_id")
+  priceTracking Boolean  @default(false) @map("price_tracking")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}

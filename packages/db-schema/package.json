@@ -1,0 +1,24 @@
+{
+  "name": "@topsoum/db-schema",
+  "private": true,
+  "version": "0.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "generate": "dotenv -e ../../.env -- prisma generate",
+    "migrate:dev": "dotenv -e ../../.env -- prisma migrate dev",
+    "migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
+    "studio": "dotenv -e ../../.env -- prisma studio",
+    "build": "tsc --noEmit",
+    "test": "echo \"no tests yet\""
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.0",
+    "prisma": "^5.22.0",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
+}

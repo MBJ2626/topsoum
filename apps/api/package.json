@@ -1,0 +1,10 @@
+{
+  "name": "@topsoum/api",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "uv run uvicorn app.main:app --reload --port ${API_PORT:-8000}",
+    "build": "uv sync --frozen",
+    "test": "uv run pytest || [ $? -eq 5 ]"
+  }
+}

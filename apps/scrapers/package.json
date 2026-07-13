@@ -1,0 +1,10 @@
+{
+  "name": "@topsoum/scrapers",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "uv run python -m core",
+    "build": "uv sync --frozen",
+    "test": "uv run pytest || [ $? -eq 5 ]"
+  }
+}
