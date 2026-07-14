@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "load": "dotenv -e ../../.env -- tsx src/index.ts",
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "echo \"no tests yet\""
@@ -17,6 +18,7 @@
   "devDependencies": {
     "typescript": "^5.6.0",
     "tsx": "^4.19.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "dotenv-cli": "^7.4.0"
   }
 }
