@@ -10,6 +10,7 @@
     "migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
     "studio": "dotenv -e ../../.env -- prisma studio",
     "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "test": "echo \"no tests yet\""
   },
   "dependencies": {

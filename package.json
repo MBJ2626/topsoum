@@ -10,6 +10,7 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
     "db:generate": "pnpm --filter @topsoum/db-schema generate",
     "db:migrate": "pnpm --filter @topsoum/db-schema migrate:dev",
     "docker:up": "docker compose up -d",
