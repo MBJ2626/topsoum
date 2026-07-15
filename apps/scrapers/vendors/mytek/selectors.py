@@ -11,9 +11,18 @@ ne peut donc recolter que la 1ere page de resultats (~48 produits pour
 smartphones) tant que ce robots.txt n'evolue pas.
 """
 
-# Chemin des categories (relatif a la base_url du vendeur)
+# Chemin des categories (relatif a la base_url du vendeur), utilise pour
+# scrape_category (URL de listing)
 CATEGORY_SLUGS: dict[str, str] = {
     "smartphones": "smartphone.html",
+}
+
+# Alias de fil d'ariane vus sur des fiches produit qui ne remontent jamais a
+# CATEGORY_SLUGS (ex: les iPhone sont ranges sous /telephonie-tunisie/
+# smartphone-mobile-tunisie/iphone.html, jamais sous smartphone.html) mais
+# partagent une categorie parente commune avec les autres smartphones.
+CATEGORY_BREADCRUMB_ALIASES: dict[str, str] = {
+    "smartphone-mobile-tunisie.html": "smartphones",
 }
 
 # -- Page de listing (categorie) -----------------------------------------

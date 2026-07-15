@@ -123,10 +123,14 @@ class SpacenetScraper(BaseScraper):
         return None
 
     def _resolve_category(self, page: Page) -> str:
-        """Deduit la categorie a partir du fil d'ariane, via CATEGORY_SLUGS."""
+        """Deduit la categorie a partir du fil d'ariane, via CATEGORY_SLUGS puis,
+        a defaut, CATEGORY_BREADCRUMB_ALIASES (cf. selectors.py)."""
         for link in page.query_selector_all(selectors.PRODUCT_BREADCRUMB_LINKS):
             href = (link.get_attribute("href") or "").rstrip("/")
             for category, slug in selectors.CATEGORY_SLUGS.items():
+                if href.endswith(slug.rstrip("/")):
+                    return category
+            for slug, category in selectors.CATEGORY_BREADCRUMB_ALIASES.items():
                 if href.endswith(slug.rstrip("/")):
                     return category
         return "unknown"

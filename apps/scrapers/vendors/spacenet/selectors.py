@@ -11,9 +11,18 @@ cette classe, toggle via CSS). LISTING_PRODUCT_CARD cible uniquement la
 variante grille (".item-inner") pour eviter les doublons.
 """
 
-# Chemin des categories (relatif a la base_url du vendeur)
+# Chemin des categories (relatif a la base_url du vendeur), utilise pour
+# scrape_category (URL de listing)
 CATEGORY_SLUGS: dict[str, str] = {
     "smartphones": "130-smartphone-tunisie",
+}
+
+# Alias de fil d'ariane vus sur des fiches produit qui ne remontent jamais a
+# CATEGORY_SLUGS (ex: les iPhone sont ranges sous /211-iphone-tunisie, jamais
+# sous /130-smartphone-tunisie) mais partagent une categorie parente commune
+# ("13-smartphone-mobile-tunisie") avec les autres smartphones.
+CATEGORY_BREADCRUMB_ALIASES: dict[str, str] = {
+    "13-smartphone-mobile-tunisie": "smartphones",
 }
 
 # -- Page de listing (categorie) ---------------------------------------

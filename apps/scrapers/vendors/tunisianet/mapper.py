@@ -21,12 +21,15 @@ _STOCK_OUT = {"out-of-stock", "out-of-stock-webonly"}
 
 
 def parse_price(raw_text: str | None) -> Decimal | None:
-    """"169,000 DT" / "1 299,000 DT" -> Decimal("169.000") / Decimal("1299.000")."""
+    """"169,000 DT" / "1 299,000 DT" / "3 249,000 DT" -> Decimal("169.000") /
+    Decimal("1299.000") / Decimal("3249.000"). Le theme Tunisianet utilise
+    l'espace fine insecable (U+202F) comme separateur de milliers sur les prix
+    a 4 chiffres et plus - on retire tout caractere hors chiffres/virgule/point
+    en un seul passage plutot que de lister les variantes d'espaces Unicode."""
     if not raw_text:
         return None
-    cleaned = raw_text.replace("\xa0", " ").strip()
-    cleaned = re.sub(r"[^\d,.\s]", "", cleaned)
-    cleaned = cleaned.replace(" ", "").replace(",", ".")
+    cleaned = re.sub(r"[^\d,.]", "", raw_text)
+    cleaned = cleaned.replace(",", ".")
     if not cleaned:
         return None
     try:

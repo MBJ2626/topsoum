@@ -21,12 +21,14 @@ _STOCK_OUT_KEYWORDS = ("puis", "rupture")
 
 
 def parse_price(raw_text: str | None) -> Decimal | None:
-    """"399,000 DT" / "1199" -> Decimal("399.000") / Decimal("1199")."""
+    """"399,000 DT" / "1199" -> Decimal("399.000") / Decimal("1199"). Retire
+    tout caractere hors chiffres/virgule/point en un seul passage (couvre aussi
+    l'espace fine insecable U+202F vue sur d'autres vendeurs pour les prix a 4
+    chiffres)."""
     if not raw_text:
         return None
-    cleaned = raw_text.replace("\xa0", " ").strip()
-    cleaned = re.sub(r"[^\d,.\s]", "", cleaned)
-    cleaned = cleaned.replace(" ", "").replace(",", ".")
+    cleaned = re.sub(r"[^\d,.]", "", raw_text)
+    cleaned = cleaned.replace(",", ".")
     if not cleaned:
         return None
     try:
