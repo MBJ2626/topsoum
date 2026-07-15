@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import logging
 import time
+import urllib.error
+import urllib.request
 import urllib.robotparser
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -147,14 +149,32 @@ class BaseScraper(ABC):
         return self._robot_parser.can_fetch(self.config.user_agent, url)
 
     def _load_robots_txt(self) -> urllib.robotparser.RobotFileParser | None:
+        """Recupere et parse robots.txt en presentant le meme User-Agent que le
+        navigateur (RobotFileParser.read() n'envoie aucun header par defaut ;
+        certains sites renvoient 403 a un urllib "nu", ce que RobotFileParser
+        interprete alors a tort comme un blocage total du site)."""
         parser = urllib.robotparser.RobotFileParser()
         robots_url = urlparse(self.base_url)._replace(path="/robots.txt", query="", fragment="").geturl()
         parser.set_url(robots_url)
+        request = urllib.request.Request(robots_url, headers={"User-Agent": self.config.user_agent})
         try:
-            parser.read()
+            with urllib.request.urlopen(request, timeout=10) as response:
+                content = response.read().decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as exc:
+            if exc.code in (401, 403):
+                parser.disallow_all = True
+                return parser
+            if 400 <= exc.code < 500:
+                parser.allow_all = True
+                return parser
+            logger.warning(
+                "Impossible de lire robots.txt (%s): HTTP %s - acces autorise par defaut", robots_url, exc.code
+            )
+            return None
         except OSError as exc:
             logger.warning("Impossible de lire robots.txt (%s): %s - acces autorise par defaut", robots_url, exc)
             return None
+        parser.parse(content.splitlines())
         return parser
 
     def _record_failure(self, url: str, reason: str) -> None:
