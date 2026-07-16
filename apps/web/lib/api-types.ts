@@ -60,3 +60,8 @@ export interface FavoriteOut {
   best_offer_price: number | null;
   best_offer_vendor: string | null;
 }
+
+export interface FavoriteListResponse {
+  count: number;
+  results: FavoriteOut[];
+}
