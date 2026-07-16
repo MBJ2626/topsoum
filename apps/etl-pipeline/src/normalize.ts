@@ -10,7 +10,7 @@ export const VENDOR_DISPLAY_NAMES: Record<string, string> = {
   spacenet: "Spacenet",
 };
 
-/** Nettoyage basique : espaces, casse. La deduplication/matching cross-vendeur est l'Etape 4 (matching engine). */
+/** Nettoyage basique : espaces, casse. Le matching cross-vendeur est fait par matching/matchingEngine.ts, cable dans load.ts. */
 export function normalizeOffer(raw: RawScrapedOffer): ScrapedOffer {
   const vendor = raw.vendor.trim().toLowerCase();
   if (!VENDORS.includes(vendor as (typeof VENDORS)[number])) {
@@ -58,12 +58,13 @@ export function slugify(value: string): string {
 }
 
 /**
- * Cle de matching provisoire (pas de matching cross-vendeur avant l'Etape 4) :
- * une offre est rattachee a un Product par marque + reference/nom, distinct par vendeur
- * pour eviter les faux positifs tant que le matching engine n'existe pas.
+ * Cle de creation d'un nouveau Product (branche "aucun match" du matching
+ * engine, cf. matching/matchingEngine.ts). Agnostique du vendeur : le
+ * regroupement cross-vendeur passe desormais par le matching engine, pas
+ * par l'egalite de ce nom.
  */
 export function canonicalNameFor(offer: ScrapedOffer): string {
   const brandPart = offer.brand ?? "generic";
   const identityPart = offer.reference ?? offer.productName;
-  return slugify(`${brandPart}-${identityPart}-${offer.vendor}`);
+  return slugify(`${brandPart}-${identityPart}`);
 }

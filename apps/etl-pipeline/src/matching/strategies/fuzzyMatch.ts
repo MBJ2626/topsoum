@@ -182,11 +182,16 @@ export const fuzzyMatchStrategy: MatchStrategy = {
         brandScore = isTokenSubset(candidateBrandTokens, parsed.modelTokens) ? 1 : "unknown";
       }
 
-      // Modele : tokens de l'offre debarrasses des tokens de marque.
+      // Modele : tokens de l'offre debarrasses des tokens de marque. Le
+      // candidat passe par le meme parseSpecs (pas un tokenizeText brut) :
+      // candidate.model peut porter le libelle scrape complet (load.ts cree
+      // les nouveaux produits ainsi), donc capacites/couleur/stopwords
+      // doivent en etre retires symetriquement, sinon ce bruit dilue
+      // artificiellement la similarite face a des offres pourtant identiques.
       const offerModelTokens = parsed.modelTokens.filter(
         (t) => !offerBrandTokens.includes(t) && !candidateBrandTokens.includes(t),
       );
-      const candidateModelTokens = tokenizeText(candidate.model).filter(
+      const candidateModelTokens = parseSpecs(candidate.model).modelTokens.filter(
         (t) => !candidateBrandTokens.includes(t),
       );
       if (!numericSetsEqual(offerModelTokens, candidateModelTokens)) continue;

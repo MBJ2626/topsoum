@@ -2,8 +2,29 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app.schemas import OfferOut, ProductSearchResponse
-from app.services.products_service import search_products
+from app.repositories.models import Offer
+from app.schemas import (
+    OfferSummary,
+    PricePoint,
+    ProductDetailResponse,
+    ProductSearchResponse,
+    ProductSearchResult,
+)
+from app.services.products_service import get_product_detail, search_products
+
+
+def _offer_summary(offer: Offer) -> OfferSummary:
+    return OfferSummary(
+        id=offer.id,
+        vendor_id=offer.vendor_id,
+        vendor_name=offer.vendor.name,
+        price=offer.price,
+        currency="TND",
+        stock_status=offer.stock_status,
+        url=offer.url,
+        shipping_cost=offer.shipping_cost,
+        scraped_at=offer.scraped_at.isoformat(),
+    )
 
 
 def search_products_controller(
@@ -15,5 +36,38 @@ def search_products_controller(
     offset: int,
 ) -> ProductSearchResponse:
     results = search_products(session, query=query, category=category, limit=limit, offset=offset)
-    offers_out = [OfferOut(**result.__dict__) for result in results]
-    return ProductSearchResponse(count=len(offers_out), results=offers_out)
+
+    out = [
+        ProductSearchResult(
+            id=result.product.id,
+            canonical_name=result.product.canonical_name,
+            brand=result.product.brand,
+            model=result.product.model,
+            category=result.product.category,
+            image_url=result.product.image_url,
+            best_deal=_offer_summary(result.best_deal),
+            offers_count=result.offers_count,
+        )
+        for result in results
+    ]
+    return ProductSearchResponse(count=len(out), results=out)
+
+
+def get_product_detail_controller(session: Session, product_id: str) -> ProductDetailResponse:
+    detail = get_product_detail(session, product_id)
+
+    return ProductDetailResponse(
+        id=detail.product.id,
+        canonical_name=detail.product.canonical_name,
+        brand=detail.product.brand,
+        model=detail.product.model,
+        category=detail.product.category,
+        specs=detail.product.specs,
+        image_url=detail.product.image_url,
+        best_deal=_offer_summary(detail.best_deal),
+        offers=[_offer_summary(offer) for offer in detail.offers],
+        price_history=[
+            PricePoint(offer_id=point.offer_id, price=point.price, recorded_at=point.recorded_at.isoformat())
+            for point in detail.price_history
+        ],
+    )

@@ -104,7 +104,8 @@ model Vendor {
   avgDeliveryTime Int?     @map("avg_delivery_time")
   createdAt       DateTime @default(now()) @map("created_at")
 
-  offers Offer[]
+  offers      Offer[]
+  scraperRuns ScraperRun[]
 
   @@map("vendors")
 }
@@ -154,4 +155,20 @@ model Favorite {
 
   @@unique([userId, productId])
   @@map("favorites")
+}
+
+model ScraperRun {
+  id                String    @id @default(cuid())
+  vendorId          String    @map("vendor_id")
+  startedAt         DateTime  @default(now()) @map("started_at")
+  finishedAt        DateTime? @map("finished_at")
+  productsCollected Int       @default(0) @map("products_collected")
+  successCount      Int       @default(0) @map("success_count")
+  errorCount        Int       @default(0) @map("error_count")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId, startedAt])
+  @@map("scraper_runs")
 }

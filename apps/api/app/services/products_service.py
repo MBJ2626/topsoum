@@ -1,28 +1,31 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy.orm import Session
 
-from app.repositories.offers_repository import search_offers
+from app.errors import ProductNotFoundError
+from app.repositories import products_repository
+from app.repositories.models import Offer, PriceHistory, Product
+from app.services.scoring import best_offer, score_offer
+
+PRICE_HISTORY_LOOKBACK_DAYS = 90
 
 
 @dataclass
-class OfferResult:
-    id: str
-    product_id: str
-    product_name: str
-    brand: str
-    category: str
-    vendor_name: str
-    price: Decimal
-    currency: str
-    stock_status: str
-    url: str
-    image_url: str | None
-    shipping_cost: Decimal | None
-    scraped_at: str
+class ProductSearchResultData:
+    product: Product
+    best_deal: Offer
+    offers_count: int
+
+
+@dataclass
+class ProductDetailData:
+    product: Product
+    best_deal: Offer
+    offers: list[Offer]
+    price_history: list[PriceHistory]
 
 
 def search_products(
@@ -32,24 +35,41 @@ def search_products(
     category: str | None,
     limit: int,
     offset: int,
-) -> list[OfferResult]:
-    offers = search_offers(session, query=query, category=category, limit=limit, offset=offset)
+) -> list[ProductSearchResultData]:
+    # search_products_candidates ne pagine pas en SQL (jusqu'a 500 candidats) :
+    # le tri par "meilleur deal" est une regle metier qui doit vivre ici, pas
+    # en SQL dans repositories/, et la pagination doit s'appliquer APRES ce
+    # tri pour etre correcte globalement. Au-dela de 500 produits candidats
+    # pour une recherche donnee, le tri devient partiel - largement
+    # suffisant pour le catalogue V1 (4 vendeurs, marche tunisien).
+    products = products_repository.search_products_candidates(session, query=query, category=category)
+
+    ranked = sorted(products, key=lambda product: score_offer(best_offer(product.offers)))
+    page = ranked[offset : offset + limit]
 
     return [
-        OfferResult(
-            id=offer.id,
-            product_id=offer.product_id,
-            product_name=offer.product.model,
-            brand=offer.product.brand,
-            category=offer.product.category,
-            vendor_name=offer.vendor.name,
-            price=offer.price,
-            currency="TND",
-            stock_status=offer.stock_status,
-            url=offer.url,
-            image_url=offer.product.image_url,
-            shipping_cost=offer.shipping_cost,
-            scraped_at=offer.scraped_at.isoformat(),
+        ProductSearchResultData(
+            product=product,
+            best_deal=best_offer(product.offers),
+            offers_count=len(product.offers),
         )
-        for offer in offers
+        for product in page
     ]
+
+
+def get_product_detail(session: Session, product_id: str) -> ProductDetailData:
+    product = products_repository.get_product_by_id(session, product_id)
+    if product is None:
+        raise ProductNotFoundError(product_id)
+
+    since = datetime.now(UTC) - timedelta(days=PRICE_HISTORY_LOOKBACK_DAYS)
+    history = products_repository.get_price_history_for_product(session, product_id, since=since)
+
+    offers_sorted = sorted(product.offers, key=score_offer)
+
+    return ProductDetailData(
+        product=product,
+        best_deal=offers_sorted[0],
+        offers=offers_sorted,
+        price_history=history,
+    )

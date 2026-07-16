@@ -4,6 +4,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
   API_BASE_URL: z.string().url(),
+  API_AUTH_SECRET: z.string().min(32),
   AUTH_SECRET: z.string().min(32),
   AUTH_URL: z.string().url().optional(),
   AUTH_GOOGLE_ID: z.string().optional(),

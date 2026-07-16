@@ -7,9 +7,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.controllers.products_controller import search_products_controller
+from app.controllers.products_controller import get_product_detail_controller, search_products_controller
 from app.repositories.database import get_session
-from app.schemas import ProductSearchResponse
+from app.schemas import ProductDetailResponse, ProductSearchResponse
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -23,3 +23,11 @@ def search(
     session: Session = Depends(get_session),
 ) -> ProductSearchResponse:
     return search_products_controller(session, query=q, category=category, limit=limit, offset=offset)
+
+
+@router.get("/{product_id}", response_model=ProductDetailResponse)
+def get_detail(
+    product_id: str,
+    session: Session = Depends(get_session),
+) -> ProductDetailResponse:
+    return get_product_detail_controller(session, product_id)
