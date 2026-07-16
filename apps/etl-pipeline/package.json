@@ -8,17 +8,20 @@
     "load": "dotenv -e ../../.env -- tsx src/index.ts",
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"no tests yet\""
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@topsoum/shared-types": "workspace:*",
     "@topsoum/db-schema": "workspace:*",
-    "@topsoum/config": "workspace:*"
+    "@topsoum/config": "workspace:*",
+    "fastest-levenshtein": "^1.0.16"
   },
   "devDependencies": {
     "typescript": "^5.6.0",
     "tsx": "^4.19.0",
     "@types/node": "^22.0.0",
-    "dotenv-cli": "^7.4.0"
+    "dotenv-cli": "^7.4.0",
+    "vitest": "^3.2.0"
   }
 }
