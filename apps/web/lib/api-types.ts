@@ -65,3 +65,64 @@ export interface FavoriteListResponse {
   count: number;
   results: FavoriteOut[];
 }
+
+export type ScraperRunStatus = "success" | "partial" | "failed" | "running";
+
+export interface ScraperVendorStatus {
+  vendor_name: string;
+  last_run_started_at: string | null;
+  last_run_finished_at: string | null;
+  last_run_status: ScraperRunStatus | null;
+  products_collected: number | null;
+  success_count: number | null;
+  error_count: number | null;
+  failure_rate: number | null;
+}
+
+export interface ScrapersStatusResponse {
+  vendors: ScraperVendorStatus[];
+}
+
+export interface AdminStatsResponse {
+  total_products: number;
+  total_offers: number;
+  last_updated_at: string | null;
+}
+
+export interface PendingMatchProductSummary {
+  id: string;
+  canonical_name: string;
+  brand: string;
+  model: string;
+  image_url: string | null;
+}
+
+export interface PendingMatchOut {
+  id: string;
+  vendor_slug: string;
+  external_id: string | null;
+  reference: string | null;
+  offer_product_name: string;
+  category: string;
+  confidence: number;
+  strategy: string;
+  created_at: string;
+  created_product: PendingMatchProductSummary;
+  candidate_product: PendingMatchProductSummary;
+}
+
+export interface PendingMatchListResponse {
+  count: number;
+  results: PendingMatchOut[];
+}
+
+export type MatchActionStatus = "approved" | "rejected" | "merged";
+
+export interface MatchActionResponse {
+  id: string;
+  status: MatchActionStatus;
+}
+
+export interface MergeMatchRequest {
+  target_product_id: string;
+}

@@ -6,9 +6,26 @@ import {
   createDefaultMatchingEngine,
   parseSpecs,
   type CandidateSpecs,
+  type ManualOverrideEntry,
   type MatchCandidate,
   type MatchingEngine,
 } from "./matching";
+
+/**
+ * Table des correspondances validees par l'admin (dashboard, Etape 7),
+ * chargee depuis la DB avant chaque run pour alimenter la strategie
+ * manualOverride. Sans cet appel, les approve/merge de l'admin resteraient
+ * sans effet sur les prochains runs ETL.
+ */
+export async function loadManualOverrideTable(): Promise<ManualOverrideEntry[]> {
+  const overrides = await prisma.manualOverride.findMany();
+  return overrides.map((override) => ({
+    vendor: override.vendorSlug,
+    externalId: override.externalId ?? undefined,
+    reference: override.reference ?? undefined,
+    productId: override.productId,
+  }));
+}
 
 export interface LoadSummary {
   vendorsUpserted: number;
@@ -147,6 +164,25 @@ export async function loadOffers(offers: ScrapedOffer[], deps: Partial<LoadDeps>
         });
         productId = created.id;
         summary.productsCreated += 1;
+
+        if (matchResult.candidate && matchResult.needsReview) {
+          // Persiste la file de validation admin (Etape 7) : sans ca, le
+          // console.warn ci-dessus est la seule trace, invisible pour
+          // quiconque n'a pas les logs du run sous les yeux.
+          await prisma.pendingMatch.create({
+            data: {
+              vendorSlug: offer.vendor,
+              externalId: offer.externalId,
+              reference: offer.reference,
+              offerProductName: offer.productName,
+              category: offer.category,
+              createdProductId: created.id,
+              candidateProductId: matchResult.candidate.id,
+              confidence: matchResult.confidence,
+              strategy: matchResult.strategy ?? "fuzzy",
+            },
+          });
+        }
 
         // Garde le cache in-run coherent : les offres suivantes de cette
         // categorie doivent pouvoir matcher ce produit qu'on vient de creer.

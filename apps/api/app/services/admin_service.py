@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import datetime
 from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
-from app.repositories import scraper_runs_repository
+from app.repositories import scraper_runs_repository, stats_repository
 from app.repositories.models import ScraperRun, Vendor
 
 
@@ -14,6 +15,21 @@ class VendorStatusData:
     run: ScraperRun | None
     status: str | None
     failure_rate: float | None
+
+
+@dataclass
+class AdminStatsData:
+    total_products: int
+    total_offers: int
+    last_updated_at: datetime.datetime | None
+
+
+def get_admin_stats(session: Session) -> AdminStatsData:
+    return AdminStatsData(
+        total_products=stats_repository.count_products(session),
+        total_offers=stats_repository.count_offers(session),
+        last_updated_at=stats_repository.last_updated_at(session),
+    )
 
 
 def get_scrapers_status(session: Session) -> list[VendorStatusData]:

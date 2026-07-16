@@ -11,6 +11,8 @@ from app.errors import (
     FavoriteAlreadyExistsError,
     FavoriteNotFoundError,
     OfferNotFoundError,
+    PendingMatchAlreadyResolvedError,
+    PendingMatchNotFoundError,
     ProductNotFoundError,
 )
 
@@ -31,3 +33,11 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(FavoriteAlreadyExistsError)
     def _favorite_already_exists(request: Request, exc: FavoriteAlreadyExistsError) -> JSONResponse:
         return JSONResponse(status_code=409, content={"detail": f"Favori deja existant: {exc}"})
+
+    @app.exception_handler(PendingMatchNotFoundError)
+    def _pending_match_not_found(request: Request, exc: PendingMatchNotFoundError) -> JSONResponse:
+        return JSONResponse(status_code=404, content={"detail": f"Match introuvable: {exc}"})
+
+    @app.exception_handler(PendingMatchAlreadyResolvedError)
+    def _pending_match_already_resolved(request: Request, exc: PendingMatchAlreadyResolvedError) -> JSONResponse:
+        return JSONResponse(status_code=409, content={"detail": f"Match deja resolu: {exc}"})

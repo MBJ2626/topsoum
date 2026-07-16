@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app.schemas import ScraperVendorStatus, ScrapersStatusResponse
-from app.services.admin_service import get_scrapers_status
+from app.schemas import AdminStatsResponse, ScraperVendorStatus, ScrapersStatusResponse
+from app.services.admin_service import get_admin_stats, get_scrapers_status
 
 
 def get_scrapers_status_controller(session: Session) -> ScrapersStatusResponse:
@@ -23,3 +23,12 @@ def get_scrapers_status_controller(session: Session) -> ScrapersStatusResponse:
         for item in statuses
     ]
     return ScrapersStatusResponse(vendors=vendors)
+
+
+def get_admin_stats_controller(session: Session) -> AdminStatsResponse:
+    stats = get_admin_stats(session)
+    return AdminStatsResponse(
+        total_products=stats.total_products,
+        total_offers=stats.total_offers,
+        last_updated_at=stats.last_updated_at.isoformat() if stats.last_updated_at else None,
+    )

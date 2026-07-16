@@ -4,7 +4,8 @@ import { readFileSync } from "node:fs";
 import { prisma } from "@topsoum/db-schema";
 import type { ScrapedOffer } from "@topsoum/shared-types";
 
-import { loadOffers, resolveVendor } from "./load";
+import { loadManualOverrideTable, loadOffers, resolveVendor } from "./load";
+import { createDefaultMatchingEngine } from "./matching";
 import { normalizeOffer } from "./normalize";
 import type { RawScrapedOffer } from "./types";
 
@@ -33,7 +34,8 @@ async function main(): Promise<void> {
       }
     }
 
-    const summary = await loadOffers(normalized);
+    const overrideTable = await loadManualOverrideTable();
+    const summary = await loadOffers(normalized, { matchingEngine: createDefaultMatchingEngine(overrideTable) });
 
     await prisma.scraperRun.update({
       where: { id: run.id },

@@ -19,6 +19,13 @@ enum StockStatus {
   unknown
 }
 
+enum PendingMatchStatus {
+  pending
+  approved
+  rejected
+  merged
+}
+
 model User {
   id            String       @id @default(cuid())
   email         String       @unique
@@ -90,6 +97,10 @@ model Product {
 
   offers    Offer[]
   favorites Favorite[]
+
+  pendingMatchesAsCreated   PendingMatch[]   @relation("PendingMatchCreatedProduct")
+  pendingMatchesAsCandidate PendingMatch[]   @relation("PendingMatchCandidateProduct")
+  manualOverrides           ManualOverride[]
 
   @@index([category])
   @@index([brand, model])
@@ -171,4 +182,40 @@ model ScraperRun {
 
   @@index([vendorId, startedAt])
   @@map("scraper_runs")
+}
+
+model PendingMatch {
+  id                 String             @id @default(cuid())
+  vendorSlug         String             @map("vendor_slug")
+  externalId         String?            @map("external_id")
+  reference          String?
+  offerProductName   String             @map("offer_product_name")
+  category           String
+  createdProductId   String             @map("created_product_id")
+  candidateProductId String             @map("candidate_product_id")
+  confidence         Float
+  strategy           String
+  status             PendingMatchStatus @default(pending)
+  resolvedProductId  String?            @map("resolved_product_id")
+  resolvedAt         DateTime?          @map("resolved_at")
+  createdAt          DateTime           @default(now()) @map("created_at")
+
+  createdProduct   Product @relation("PendingMatchCreatedProduct", fields: [createdProductId], references: [id], onDelete: Cascade)
+  candidateProduct Product @relation("PendingMatchCandidateProduct", fields: [candidateProductId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("pending_matches")
+}
+
+model ManualOverride {
+  id         String   @id @default(cuid())
+  vendorSlug String   @map("vendor_slug")
+  externalId String?  @map("external_id")
+  reference  String?
+  productId  String   @map("product_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("manual_overrides")
 }

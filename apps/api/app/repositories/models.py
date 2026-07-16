@@ -9,13 +9,21 @@ from __future__ import annotations
 import datetime
 import decimal
 
-from sqlalchemy import ForeignKey, Numeric, func
+from sqlalchemy import Enum, ForeignKey, Numeric, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
     pass
+
+
+# Type Postgres deja cree par la migration Prisma (create_type=False) : ne
+# jamais laisser SQLAlchemy tenter un CREATE TYPE, Prisma reste la source de
+# verite du schema.
+pending_match_status_enum = Enum(
+    "pending", "approved", "rejected", "merged", name="PendingMatchStatus", create_type=False
+)
 
 
 class Vendor(Base):
@@ -108,3 +116,38 @@ class ScraperRun(Base):
     error_count: Mapped[int]
 
     vendor: Mapped[Vendor] = relationship()
+
+
+class PendingMatch(Base):
+    __tablename__ = "pending_matches"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    vendor_slug: Mapped[str]
+    external_id: Mapped[str | None]
+    reference: Mapped[str | None]
+    offer_product_name: Mapped[str]
+    category: Mapped[str]
+    created_product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    candidate_product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    confidence: Mapped[float]
+    strategy: Mapped[str]
+    status: Mapped[str] = mapped_column(pending_match_status_enum)
+    resolved_product_id: Mapped[str | None]
+    resolved_at: Mapped[datetime.datetime | None]
+    created_at: Mapped[datetime.datetime]
+
+    created_product: Mapped[Product] = relationship(foreign_keys=[created_product_id])
+    candidate_product: Mapped[Product] = relationship(foreign_keys=[candidate_product_id])
+
+
+class ManualOverride(Base):
+    __tablename__ = "manual_overrides"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    vendor_slug: Mapped[str]
+    external_id: Mapped[str | None]
+    reference: Mapped[str | None]
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    created_at: Mapped[datetime.datetime] = mapped_column(server_default=func.now())
+
+    product: Mapped[Product] = relationship()

@@ -20,3 +20,11 @@ class FavoriteNotFoundError(Exception):
 
 class FavoriteAlreadyExistsError(Exception):
     pass
+
+
+class PendingMatchNotFoundError(Exception):
+    pass
+
+
+class PendingMatchAlreadyResolvedError(Exception):
+    pass

@@ -20,3 +20,9 @@ class ScraperVendorStatus(BaseModel):
 
 class ScrapersStatusResponse(BaseModel):
     vendors: list[ScraperVendorStatus]
+
+
+class AdminStatsResponse(BaseModel):
+    total_products: int
+    total_offers: int
+    last_updated_at: str | None

@@ -7,10 +7,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.controllers.admin_controller import get_scrapers_status_controller
+from app.controllers.admin_controller import get_admin_stats_controller, get_scrapers_status_controller
 from app.middlewares.auth import CurrentUser, require_admin
 from app.repositories.database import get_session
-from app.schemas import ScrapersStatusResponse
+from app.schemas import AdminStatsResponse, ScrapersStatusResponse
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -21,3 +21,11 @@ def get_scrapers_status(
     session: Session = Depends(get_session),
 ) -> ScrapersStatusResponse:
     return get_scrapers_status_controller(session)
+
+
+@router.get("/stats", response_model=AdminStatsResponse)
+def get_admin_stats(
+    current_user: Annotated[CurrentUser, Depends(require_admin)],
+    session: Session = Depends(get_session),
+) -> AdminStatsResponse:
+    return get_admin_stats_controller(session)

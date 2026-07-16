@@ -4,13 +4,16 @@ import type { MatchCandidate, MatchResult, MatchingEngine } from "./matching";
 import { makeOffer } from "./matching/__fixtures__/realOffers";
 import { loadOffers } from "./load";
 
-const { vendorUpsert, productUpsert, productUpdate, offerUpsert, priceHistoryCreate } = vi.hoisted(() => ({
-  vendorUpsert: vi.fn(),
-  productUpsert: vi.fn(),
-  productUpdate: vi.fn(),
-  offerUpsert: vi.fn(),
-  priceHistoryCreate: vi.fn(),
-}));
+const { vendorUpsert, productUpsert, productUpdate, offerUpsert, priceHistoryCreate, pendingMatchCreate } = vi.hoisted(
+  () => ({
+    vendorUpsert: vi.fn(),
+    productUpsert: vi.fn(),
+    productUpdate: vi.fn(),
+    offerUpsert: vi.fn(),
+    priceHistoryCreate: vi.fn(),
+    pendingMatchCreate: vi.fn(),
+  }),
+);
 
 vi.mock("@topsoum/db-schema", () => ({
   prisma: {
@@ -18,6 +21,7 @@ vi.mock("@topsoum/db-schema", () => ({
     product: { upsert: productUpsert, update: productUpdate },
     offer: { upsert: offerUpsert },
     priceHistory: { create: priceHistoryCreate },
+    pendingMatch: { create: pendingMatchCreate },
   },
 }));
 
@@ -47,6 +51,7 @@ beforeEach(() => {
   productUpdate.mockReset().mockResolvedValue({ id: CANDIDATE.id });
   offerUpsert.mockReset().mockResolvedValue({ id: "offer-1" });
   priceHistoryCreate.mockReset().mockResolvedValue({ id: "history-1" });
+  pendingMatchCreate.mockReset().mockResolvedValue({ id: "pending-match-1" });
 });
 
 describe("loadOffers", () => {
@@ -87,6 +92,17 @@ describe("loadOffers", () => {
     expect(summary.productsPendingReview).toBe(1);
     expect(summary.productsCreated).toBe(1);
     expect(summary.productsMatched).toBe(0);
+    expect(summary.offersRejected).toBe(0);
+    expect(pendingMatchCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        vendorSlug: offer.vendor,
+        externalId: offer.externalId,
+        createdProductId: "prod-new",
+        candidateProductId: CANDIDATE.id,
+        confidence: 0.7,
+        strategy: "fuzzy",
+      }),
+    });
 
     warnSpy.mockRestore();
   });
@@ -105,6 +121,7 @@ describe("loadOffers", () => {
     expect(summary.productsCreated).toBe(1);
     expect(summary.productsMatched).toBe(0);
     expect(summary.productsPendingReview).toBe(0);
+    expect(pendingMatchCreate).not.toHaveBeenCalled();
   });
 
   it("une offre qui echoue au chargement ne bloque pas le run : les suivantes sont traitees", async () => {
