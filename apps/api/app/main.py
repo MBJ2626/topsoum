@@ -7,11 +7,14 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from app.middlewares.errors import register_exception_handlers
 from app.middlewares.rate_limit import limiter
+from app.observability import init_sentry
 from app.routes.admin import router as admin_router
 from app.routes.favorites import router as favorites_router
 from app.routes.matching import router as matching_router
 from app.routes.offers import router as offers_router
 from app.routes.products import router as products_router
+
+init_sentry()
 
 app = FastAPI(title="TopSoum API")
 

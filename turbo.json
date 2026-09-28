@@ -2,12 +2,17 @@
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
     "DATABASE_URL",
+    "API_AUTH_SECRET",
     "AUTH_SECRET",
     "AUTH_URL",
     "AUTH_GOOGLE_ID",
     "AUTH_GOOGLE_SECRET",
     "AUTH_FACEBOOK_ID",
-    "AUTH_FACEBOOK_SECRET"
+    "AUTH_FACEBOOK_SECRET",
+    "SENTRY_DSN",
+    "NEXT_PUBLIC_SENTRY_DSN",
+    "SENTRY_ENVIRONMENT",
+    "SENTRY_AUTH_TOKEN"
   ],
   "tasks": {
     "build": {
@@ -23,6 +28,10 @@
       "outputs": []
     },
     "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "lint": {
       "dependsOn": ["^build"],
       "outputs": []
     }

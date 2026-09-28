@@ -67,15 +67,71 @@ describe("fuzzyMatchStrategy — matchs positifs cross-vendeur", () => {
   });
 });
 
+describe("fuzzyMatchStrategy — resolveCandidateSpecs (repli canonicalName)", () => {
+  it("utilise les specs propres du candidat quand seule la couleur est renseignee, sans repli sur canonicalName", () => {
+    // canonicalName parserait "bleu" (blue) si le repli se declenchait a tort :
+    // specs.color="black" doit l'emporter des lors qu'UN SEUL champ specs est connu.
+    const candidate = makeCandidate({
+      id: "prod-partial-specs",
+      brand: "Apple",
+      model: "iPhone 15",
+      canonicalName: "apple-iphone-15-128go-bleu",
+      specs: { color: "black" },
+    });
+    const result = fuzzyMatchStrategy.match(iphone15NoirFr, [candidate]);
+    // Si le repli canonicalName s'appliquait a tort, la couleur "blue" du
+    // candidat s'opposerait au "black" de l'offre : veto -> null.
+    expect(result).not.toBeNull();
+    expect(result?.candidate.id).toBe("prod-partial-specs");
+    // brand 0.15 + modele 0.45 + stockage inconnu 0.075 + RAM inconnue 0.0625 + couleur 0.125.
+    expect(result?.confidence).toBeCloseTo(0.8625, 6);
+  });
+});
+
+describe("fuzzyMatchStrategy — AMBIGUITY_MARGIN (bande 'a valider')", () => {
+  const ambiguityOffer = makeOffer({ productName: "X1 4Go 64Go Noir", brand: "Zeta" });
+
+  it("plafonne a 0.75 quand le deuxieme candidat est exactement a la marge (0.05)", () => {
+    const best = makeCandidate({
+      id: "prod-ambiguity-best",
+      brand: "Zeta",
+      model: "X1",
+      specs: { ramGb: 4, extendedRamGb: 2, storageGb: 64, color: "black" },
+    });
+    const atMargin = makeCandidate({
+      id: "prod-ambiguity-at-margin",
+      brand: "Zeta",
+      model: "X1",
+      specs: { ramGb: 2, extendedRamGb: 2, color: "black" },
+    });
+    const result = fuzzyMatchStrategy.match(ambiguityOffer, [best, atMargin]);
+    expect(result?.candidate.id).toBe("prod-ambiguity-best");
+    expect(result?.confidence).toBeCloseTo(0.75, 6);
+  });
+
+  it("ne plafonne pas quand l'ecart avec le deuxieme candidat depasse la marge", () => {
+    const best = makeCandidate({
+      id: "prod-ambiguity-best-2",
+      brand: "Zeta",
+      model: "X1",
+      specs: { ramGb: 4, storageGb: 64, color: "black" },
+    });
+    const farBehind = makeCandidate({
+      id: "prod-ambiguity-far",
+      brand: "Zeta",
+      model: "X1",
+      specs: { color: "black" },
+    });
+    const result = fuzzyMatchStrategy.match(ambiguityOffer, [best, farBehind]);
+    expect(result?.candidate.id).toBe("prod-ambiguity-best-2");
+    expect(result?.confidence).toBeCloseTo(1, 6);
+  });
+});
+
 describe("fuzzyMatchStrategy — vetos (contraintes dures)", () => {
   it("ne matche pas Bleu contre les variantes Bleu Fonce ou Bleu Ciel", () => {
     expect(fuzzyMatchStrategy.match(tunisianetYoung1Bleu, [candidateYoung1DarkBlue])).toBeNull();
     expect(fuzzyMatchStrategy.match(tunisianetYoung1Bleu, [candidateYoung1SkyBlue])).toBeNull();
-  });
-
-  it("ne matche pas deux variantes RAM incompatibles (2Go vs 4Go)", () => {
-    // Spacenet vend le Young 6 en 2Go, Tunisianet en 4Go : produits distincts.
-    expect(fuzzyMatchStrategy.match(spacenetYoung6Noir, [candidateYoung6Black4])).toBeNull();
   });
 
   it("ne matche jamais deux numeros de modele differents (Young 1 vs Young 6)", () => {
@@ -126,6 +182,25 @@ describe("fuzzyMatchStrategy — vetos (contraintes dures)", () => {
 });
 
 describe("fuzzyMatchStrategy — bande 'a valider manuellement' (plafonds)", () => {
+  it("envoie en validation (0.65) une RAM contradictoire, tout le reste identique (2Go vs 4Go)", () => {
+    // Meme Young 6 Noir : Spacenet annonce 2Go (RAM physique), Tunisianet 4Go
+    // (physique + virtuelle). Ni fusion automatique, ni doublon silencieux.
+    const result = fuzzyMatchStrategy.match(spacenetYoung6Noir, [candidateYoung6Black4]);
+    expect(result?.candidate.id).toBe(candidateYoung6Black4.id);
+    expect(result?.confidence).toBeCloseTo(0.65, 6);
+  });
+
+  it("prefere la variante RAM exacte a une variante RAM contradictoire", () => {
+    const young6Black2 = makeCandidate({
+      id: "prod-young6-black-2",
+      model: "Young 6",
+      specs: { ramGb: 2, storageGb: 16, color: "black" },
+    });
+    const result = fuzzyMatchStrategy.match(spacenetYoung6Noir, [candidateYoung6Black4, young6Black2]);
+    expect(result?.candidate.id).toBe("prod-young6-black-2");
+    expect(result?.confidence).toBeCloseTo(1, 6);
+  });
+
   it("plafonne a 0.80 une RAM compatible mais non identique (2+2Go vs 4Go)", () => {
     const result = fuzzyMatchStrategy.match(mytekYoung6Silver, [candidateYoung6Silver4]);
     expect(result?.candidate.id).toBe(candidateYoung6Silver4.id);

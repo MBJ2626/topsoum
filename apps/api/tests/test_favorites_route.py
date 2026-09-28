@@ -1,6 +1,6 @@
-"""Integration contre la DB de dev. Utilise un utilisateur et un produit
-deja en base (seedes par le pipeline ETL) plutot que d'en creer, pour rester
-coherent avec la convention d'integration de test_products_route.py.
+"""Integration contre la DB de dev. Utilise l'utilisateur deja en base
+(seed-ci-user.ts en CI) et un produit de la fixture seeded_catalog : aucune
+dependance aux donnees chargees par l'ETL.
 """
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from sqlalchemy import text
 
 from app.main import app
 from app.repositories.database import SessionLocal
-from tests.conftest import auth_headers
+from tests.conftest import SeededCatalog, auth_headers
 
 from fastapi.testclient import TestClient
 
@@ -20,14 +20,6 @@ def _existing_user_id() -> str:
     session = SessionLocal()
     try:
         return session.execute(text("select id from users limit 1")).scalar_one()
-    finally:
-        session.close()
-
-
-def _existing_product_id() -> str:
-    session = SessionLocal()
-    try:
-        return session.execute(text("select id from products limit 1")).scalar_one()
     finally:
         session.close()
 
@@ -49,9 +41,9 @@ def test_list_favorites_requires_auth() -> None:
     assert response.status_code == 401
 
 
-def test_favorite_lifecycle() -> None:
+def test_favorite_lifecycle(seeded_catalog: SeededCatalog) -> None:
     user_id = _existing_user_id()
-    product_id = _existing_product_id()
+    product_id = seeded_catalog.product_ids[0]
     _cleanup_favorite(user_id, product_id)
     headers = auth_headers(user_id)
 
@@ -86,7 +78,6 @@ def test_favorite_lifecycle() -> None:
 def test_delete_favorite_of_another_user_returns_404_not_403() -> None:
     """Ne doit jamais reveler l'existence du favori d'autrui : meme 404
     qu'un id totalement inconnu."""
-    user_id = _existing_user_id()
     other_user_headers = auth_headers("some-other-user-id")
 
     response = client.delete("/favorites/does-not-matter", headers=other_user_headers)

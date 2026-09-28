@@ -1,4 +1,5 @@
 import type { ProductDetailResponse } from "@/lib/api-types";
+import { productDisplayName } from "@/lib/product-name";
 
 import type { OfferRow } from "../components/OfferList";
 import type { PricePoint } from "../components/PriceHistoryChart";
@@ -21,7 +22,7 @@ export function toBestDealCardData(detail: ProductDetailResponse) {
   const averagePrice = prices.length > 0 ? prices.reduce((sum, price) => sum + price, 0) / prices.length : null;
 
   return {
-    productName: detail.canonical_name,
+    productName: productDisplayName(detail),
     imageUrl: detail.image_url,
     vendorName: detail.best_deal.vendor_name,
     offerId: detail.best_deal.id,

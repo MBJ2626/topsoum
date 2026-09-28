@@ -48,7 +48,7 @@ export function BestDealCard({ state, onRetry, onViewOffer, favoriteSlot }: Best
   const discount = computeDiscountPercent(data.price, data.averagePrice);
 
   return (
-    <div className="relative rounded-card border-2 border-accent p-4">
+    <div data-testid="best-deal-card" className="relative rounded-card border-2 border-accent p-4">
       <span className="absolute -top-3 left-4 rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
         Meilleur prix
       </span>
@@ -75,6 +75,7 @@ export function BestDealCard({ state, onRetry, onViewOffer, favoriteSlot }: Best
       {discount !== null ? <p className="mt-1 text-sm font-medium text-green-600">-{discount}% vs moyenne</p> : null}
 
       <Button
+        data-testid="best-deal-view-offer"
         className="mt-4 w-full"
         onClick={() => {
           onViewOffer?.(data.offerId);

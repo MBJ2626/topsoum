@@ -1,6 +1,7 @@
-"""Integration contre la DB de dev, meme convention que test_favorites_route.py :
-utilise des produits deja en base (seedes par l'ETL) et nettoie les
-PendingMatch/ManualOverride/reassignations qu'elle cree elle-meme."""
+"""Integration contre la DB de dev. Les produits viennent de la fixture
+seeded_catalog (catalogue isole, supprime apres chaque test) : ces tests
+fusionnent et reassignent des offres, ils ne doivent jamais toucher aux
+produits reels charges par l'ETL."""
 
 from __future__ import annotations
 
@@ -11,17 +12,9 @@ from sqlalchemy import text
 
 from app.main import app
 from app.repositories.database import SessionLocal
-from tests.conftest import auth_headers
+from tests.conftest import SeededCatalog, auth_headers
 
 client = TestClient(app)
-
-
-def _existing_product_ids(limit: int = 3) -> list[str]:
-    session = SessionLocal()
-    try:
-        return list(session.execute(text("select id from products limit :limit"), {"limit": limit}).scalars())
-    finally:
-        session.close()
 
 
 def _create_pending_match(*, created_product_id: str, candidate_product_id: str) -> str:
@@ -67,8 +60,8 @@ def test_pending_matches_requires_auth() -> None:
     assert response.status_code == 401
 
 
-def test_pending_matches_lists_created_row() -> None:
-    created_id, candidate_id, *_ = _existing_product_ids()
+def test_pending_matches_lists_created_row(seeded_catalog: SeededCatalog) -> None:
+    created_id, candidate_id, *_ = seeded_catalog.product_ids
     match_id = _create_pending_match(created_product_id=created_id, candidate_product_id=candidate_id)
 
     try:
@@ -80,8 +73,8 @@ def test_pending_matches_lists_created_row() -> None:
         _cleanup(match_id)
 
 
-def test_reject_match_marks_resolved_without_reassigning() -> None:
-    created_id, candidate_id, *_ = _existing_product_ids()
+def test_reject_match_marks_resolved_without_reassigning(seeded_catalog: SeededCatalog) -> None:
+    created_id, candidate_id, *_ = seeded_catalog.product_ids
     match_id = _create_pending_match(created_product_id=created_id, candidate_product_id=candidate_id)
 
     try:
@@ -100,8 +93,8 @@ def test_approve_unknown_match_returns_404() -> None:
     assert response.status_code == 404
 
 
-def test_merge_match_reassigns_offers_and_records_override() -> None:
-    created_id, candidate_id, target_id = _existing_product_ids(3)
+def test_merge_match_reassigns_offers_and_records_override(seeded_catalog: SeededCatalog) -> None:
+    created_id, candidate_id, target_id = seeded_catalog.product_ids
     match_id = _create_pending_match(created_product_id=created_id, candidate_product_id=candidate_id)
 
     try:
@@ -119,6 +112,16 @@ def test_merge_match_reassigns_offers_and_records_override() -> None:
                 text("select count(*) from manual_overrides where vendor_slug = 'tunisianet' and external_id = 'ext-1'")
             ).scalar_one()
             assert override_count == 1
+            # Meme vendeur des deux cotes : l'offre du doublon est fusionnee dans
+            # l'offre existante de la cible (contrainte unique produit+vendeur).
+            left_on_duplicate = session.execute(
+                text("select count(*) from offers where product_id = :id"), {"id": created_id}
+            ).scalar_one()
+            assert left_on_duplicate == 0
+            target_offer_ids = list(
+                session.execute(text("select id from offers where product_id = :id"), {"id": target_id}).scalars()
+            )
+            assert target_offer_ids == [seeded_catalog.offer_ids[2]]
         finally:
             session.close()
     finally:
@@ -130,7 +133,7 @@ def test_admin_stats_requires_admin() -> None:
     assert response.status_code == 403
 
 
-def test_admin_stats_returns_structure() -> None:
+def test_admin_stats_returns_structure(seeded_catalog: SeededCatalog) -> None:
     response = client.get("/admin/stats", headers=auth_headers("admin-1", is_admin=True))
     assert response.status_code == 200
     body = response.json()

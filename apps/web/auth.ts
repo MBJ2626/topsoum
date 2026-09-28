@@ -51,19 +51,7 @@ export const {
       },
     }),
   ],
-  callbacks: {
-    ...authConfig.callbacks,
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id as string;
-        token.isAdmin = (user as { isAdmin: boolean }).isAdmin;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.isAdmin = token.isAdmin;
-      return session;
-    },
-  },
+  // jwt/session vivent dans auth.config.ts : le middleware (Edge) doit aussi
+  // voir session.user.isAdmin, sinon /admin redirige meme l'administrateur.
+  callbacks: authConfig.callbacks,
 });

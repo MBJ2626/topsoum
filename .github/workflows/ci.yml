@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  DATABASE_URL: postgresql://topsoum:topsoum_dev_password@localhost:5432/topsoum?schema=public
+  API_AUTH_SECRET: ci-test-secret-for-jwt-signing-only-32chars
+
+jobs:
+  lint-typecheck-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: topsoum
+          POSTGRES_PASSWORD: topsoum_dev_password
+          POSTGRES_DB: topsoum
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U topsoum"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Historique complet requis par le filtering Turborepo (`--filter=...[ref]`),
+          # qui diffe contre un commit/branche de base.
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Installer les dependances
+        run: pnpm install --frozen-lockfile
+
+      - name: Determiner le filtre Turborepo (apps modifiees uniquement)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "TURBO_FILTER=...[origin/${{ github.event.pull_request.base.ref }}...HEAD]" >> "$GITHUB_ENV"
+          else
+            echo "TURBO_FILTER=...[HEAD^1]" >> "$GITHUB_ENV"
+          fi
+
+      - name: Generer le client Prisma
+        run: pnpm --filter @topsoum/db-schema exec prisma generate
+
+      - name: Appliquer les migrations Prisma
+        run: pnpm --filter @topsoum/db-schema exec prisma migrate deploy
+
+      # Seul l'utilisateur de test est seede : les tests d'integration de l'API
+      # creent leur propre catalogue (fixture seeded_catalog). apps/scrapers/output/
+      # est gitignore, donc absent en CI.
+      - name: Seeder l'utilisateur de test
+        working-directory: apps/etl-pipeline
+        run: pnpm exec tsx src/scripts/seed-ci-user.ts
+
+      - name: Lint (apps modifiees)
+        run: pnpm turbo run lint --filter="${{ env.TURBO_FILTER }}"
+
+      - name: Typecheck (apps modifiees)
+        run: pnpm turbo run typecheck --filter="${{ env.TURBO_FILTER }}"
+
+      - name: Tests (apps modifiees)
+        run: pnpm turbo run test --filter="${{ env.TURBO_FILTER }}"
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: lint-typecheck-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Installer les dependances
+        run: pnpm install --frozen-lockfile
+
+      - name: Generer le client Prisma
+        run: pnpm --filter @topsoum/db-schema exec prisma generate
+
+      - name: Installer Chromium (Playwright)
+        working-directory: apps/web
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Parcours e2e (recherche -> produit -> clic offre)
+        working-directory: apps/web
+        run: pnpm run test:e2e

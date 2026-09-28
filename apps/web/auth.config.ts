@@ -30,5 +30,19 @@ export const authConfig: NextAuthConfig = {
     authorized({ auth }) {
       return !!auth?.user;
     },
+    // Ici et non dans auth.ts : middleware.ts n'utilise que cette config. Sans
+    // ces callbacks, sa session n'a pas isAdmin et /admin est inaccessible a tous.
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id as string;
+        token.isAdmin = (user as { isAdmin: boolean }).isAdmin;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.id = token.id;
+      session.user.isAdmin = token.isAdmin;
+      return session;
+    },
   },
 };

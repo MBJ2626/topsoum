@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "uv run python -m core",
     "build": "uv sync --frozen",
+    "lint": "uv run ruff check .",
     "test": "uv run pytest || [ $? -eq 5 ]"
   }
 }

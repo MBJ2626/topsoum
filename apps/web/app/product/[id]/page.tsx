@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { apiFetch } from "@/lib/api-client";
 import type { FavoriteListResponse, ProductDetailResponse } from "@/lib/api-types";
 import { getQueryClient } from "@/lib/get-query-client";
+import { productDisplayName } from "@/lib/product-name";
 
 import { ProductPageClient } from "./product-page-client";
 
@@ -54,7 +55,7 @@ async function loadFavoriteContext(productId: string): Promise<FavoriteContext> 
 export async function generateMetadata({ params }: ProductPageParams): Promise<Metadata> {
   const { id } = await params;
   const detail = await fetchProductDetailServer(id);
-  return { title: `${detail.brand} ${detail.model} au meilleur prix — TopSoum` };
+  return { title: `${productDisplayName(detail)} au meilleur prix — TopSoum` };
 }
 
 export default async function ProductPage({ params }: ProductPageParams) {

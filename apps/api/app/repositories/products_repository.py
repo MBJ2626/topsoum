@@ -3,9 +3,15 @@ from __future__ import annotations
 from datetime import datetime
 
 from sqlalchemy import or_, select
-from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy.orm import Session, selectinload
 
 from app.repositories.models import Offer, PriceHistory, Product
+
+
+
+def _escape_like(term: str) -> str:
+    """Un "%" ou "_" tape par l'utilisateur doit etre cherche tel quel, pas servir de joker."""
+    return term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 def search_products_candidates(
@@ -26,9 +32,19 @@ def search_products_candidates(
         .options(selectinload(Product.offers).joinedload(Offer.vendor))
     )
 
-    if query:
-        pattern = f"%{query}%"
-        stmt = stmt.where(or_(Product.model.ilike(pattern), Product.brand.ilike(pattern)))
+    # Chaque mot doit apparaitre (dans le modele ou la marque), dans n'importe
+    # quel ordre : "young 6 noir" doit trouver "Smartphone Lesia Young 6 2Go 16Go Noir".
+    for term in (query or "").split():
+        if term.isdigit():
+            # Nombre entier en debut de mot : "6" trouve "Young 6" mais pas "16Go",
+            # "128" trouve "128Go". Chiffres seuls : aucun echappement regex requis.
+            pattern = rf"\m{term}(?![0-9])"
+            stmt = stmt.where(or_(Product.model.op("~*")(pattern), Product.brand.op("~*")(pattern)))
+            continue
+        pattern = f"%{_escape_like(term)}%"
+        stmt = stmt.where(
+            or_(Product.model.ilike(pattern, escape="\\"), Product.brand.ilike(pattern, escape="\\"))
+        )
 
     if category:
         stmt = stmt.where(Product.category == category)
