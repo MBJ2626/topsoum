@@ -9,7 +9,9 @@ import { useProductDetail } from "@/features/product-comparison/hooks/useProduct
 import { toBestDealCardData, toOfferRows } from "@/features/product-comparison/lib/map-product-detail";
 import { BestDealCard } from "@/features/product-listing/components/BestDealCard";
 import { FilterPanel, type FilterValues } from "@/features/product-listing/components/FilterPanel";
+import { ResultList } from "@/features/product-listing/components/ResultList";
 import { useProductSearch } from "@/features/product-listing/hooks/useProductSearch";
+import { productDisplayName } from "@/lib/product-name";
 import { useOfferClick } from "@/lib/use-offer-click";
 
 interface SearchPageClientProps {
@@ -23,7 +25,10 @@ export function SearchPageClient({ query }: SearchPageClientProps) {
   const offerClick = useOfferClick();
   const [filterValues, setFilterValues] = useState<FilterValues>(EMPTY_FILTERS);
 
-  const results = searchQuery.status === "success" ? searchQuery.data.results : [];
+  const results = useMemo(
+    () => (searchQuery.status === "success" ? searchQuery.data.results : []),
+    [searchQuery.status, searchQuery.data],
+  );
 
   // Filtrage 100% client-side (limitation documentee : /products/search ne
   // supporte que q/category/limit/offset cote API - pas de brand/ram/budget).
@@ -42,6 +47,20 @@ export function SearchPageClient({ query }: SearchPageClientProps) {
   const productDetailQuery = useProductDetail(dominant?.id ?? "");
 
   const bestDealState = fromQuery(productDetailQuery, toBestDealCardData);
+
+  // Les autres produits trouves, sous la reponse dominante : sans cette liste,
+  // une recherche large ("iphone") ne montrerait que le moins cher de tous.
+  const otherResultsState = fromQuery(searchQuery, () =>
+    filteredResults.slice(1).map((result) => ({
+      id: result.id,
+      productName: productDisplayName(result),
+      imageUrl: result.image_url,
+      price: Number(result.best_deal.price),
+      currency: result.best_deal.currency,
+      vendorName: result.best_deal.vendor_name,
+      offersCount: result.offers_count,
+    })),
+  );
   const offersState = fromQuery(productDetailQuery, toOfferRows);
 
   const budgetRange = useMemo(() => {
@@ -112,6 +131,15 @@ export function SearchPageClient({ query }: SearchPageClientProps) {
               onViewOffer={(offerId) => offerClick.mutate(offerId)}
             />
           </section>
+
+          {filteredResults.length > 1 ? (
+            <section>
+              <h2 className="mb-2 text-sm font-medium text-gray-900">
+                Autres resultats ({filteredResults.length - 1})
+              </h2>
+              <ResultList state={otherResultsState} onRetry={() => searchQuery.refetch()} />
+            </section>
+          ) : null}
         </>
       )}
     </main>
