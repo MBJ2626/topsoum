@@ -56,16 +56,18 @@ jobs:
             echo "TURBO_FILTER=...[HEAD^1]" >> "$GITHUB_ENV"
           fi
 
+      - name: Generer le client Prisma
+        run: pnpm --filter @topsoum/db-schema exec prisma generate
+
       - name: Appliquer les migrations Prisma
         run: pnpm --filter @topsoum/db-schema exec prisma migrate deploy
 
-      - name: Seeder les donnees de test (vendeurs/produits + 1 utilisateur)
+      # Seul l'utilisateur de test est seede : les tests d'integration de l'API
+      # creent leur propre catalogue (fixture seeded_catalog). apps/scrapers/output/
+      # est gitignore, donc absent en CI.
+      - name: Seeder l'utilisateur de test
         working-directory: apps/etl-pipeline
-        run: |
-          pnpm exec tsx src/index.ts ../scrapers/output/tunisianet-smartphones.json
-          pnpm exec tsx src/index.ts ../scrapers/output/mytek-smartphones.json
-          pnpm exec tsx src/index.ts ../scrapers/output/spacenet-smartphones.json
-          pnpm exec tsx src/scripts/seed-ci-user.ts
+        run: pnpm exec tsx src/scripts/seed-ci-user.ts
 
       - name: Lint (apps modifiees)
         run: pnpm turbo run lint --filter="${{ env.TURBO_FILTER }}"
@@ -93,6 +95,9 @@ jobs:
 
       - name: Installer les dependances
         run: pnpm install --frozen-lockfile
+
+      - name: Generer le client Prisma
+        run: pnpm --filter @topsoum/db-schema exec prisma generate
 
       - name: Installer Chromium (Playwright)
         working-directory: apps/web
