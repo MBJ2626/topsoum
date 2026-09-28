@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.repositories.models import Offer, PriceHistory, Product
@@ -81,3 +81,15 @@ def get_price_history_for_product(
 def product_exists(session: Session, product_id: str) -> bool:
     stmt = select(Product.id).where(Product.id == product_id)
     return session.execute(stmt).scalar_one_or_none() is not None
+
+
+def list_sitemap_entries(session: Session) -> list[tuple[str, datetime]]:
+    """(id, date de la derniere collecte) de chaque produit ayant au moins une
+    offre. Les fiches fusionnees par l'admin n'ont plus d'offre : exclues."""
+    stmt = (
+        select(Product.id, func.max(Offer.scraped_at))
+        .join(Offer, Offer.product_id == Product.id)
+        .group_by(Product.id)
+        .order_by(Product.id)
+    )
+    return [(product_id, last_scraped_at) for product_id, last_scraped_at in session.execute(stmt).all()]

@@ -21,7 +21,13 @@ async function fetchProductSearchServer(query: string): Promise<ProductSearchRes
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const { q } = await searchParams;
-  return { title: q ? `${q} au meilleur prix — TopSoum` : "Recherche — TopSoum" };
+  return {
+    title: q ? `« ${q} » au meilleur prix` : "Recherche",
+    // Pages de resultats de recherche interne : non indexees (contenu mince et
+    // quasi duplique, URLs infinies). Liens suivis pour decouvrir les fiches
+    // produit. Les requetes populaires ont leurs propres landing pages.
+    robots: { index: false, follow: true },
+  };
 }
 
 // SSR : la recherche (et le detail du resultat dominant) sont fetches ici

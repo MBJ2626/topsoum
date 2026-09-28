@@ -8,7 +8,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 
 import { FavoritesPageClient } from "./favorites-page-client";
 
-export const metadata: Metadata = { title: "Mes favoris — TopSoum" };
+export const metadata: Metadata = { title: "Mes favoris", robots: { index: false, follow: false } };
 
 // Protection isolee a cette page (pas d'extension de middleware.ts) : le
 // middleware existant applique la logique mono-admin (isAdmin !== true ->

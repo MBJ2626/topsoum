@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from sqlalchemy.orm import Session
 
 from app.repositories.models import Offer
@@ -9,8 +11,10 @@ from app.schemas import (
     ProductDetailResponse,
     ProductSearchResponse,
     ProductSearchResult,
+    ProductSitemapEntry,
+    ProductSitemapResponse,
 )
-from app.services.products_service import get_product_detail, search_products
+from app.services.products_service import get_product_detail, list_sitemap_entries, search_products
 
 
 def _offer_summary(offer: Offer) -> OfferSummary:
@@ -71,3 +75,17 @@ def get_product_detail_controller(session: Session, product_id: str) -> ProductD
             for point in detail.price_history
         ],
     )
+
+
+def _utc_iso(value: datetime) -> str:
+    """Les colonnes timestamp de Prisma stockent de l'UTC sans fuseau : sans le
+    "+00:00", un client JavaScript lirait l'heure comme locale (decalage)."""
+    return (value if value.tzinfo else value.replace(tzinfo=UTC)).isoformat()
+
+
+def list_sitemap_entries_controller(session: Session) -> ProductSitemapResponse:
+    entries = [
+        ProductSitemapEntry(id=entry.product_id, last_modified=_utc_iso(entry.last_modified))
+        for entry in list_sitemap_entries(session)
+    ]
+    return ProductSitemapResponse(count=len(entries), results=entries)

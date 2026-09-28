@@ -4,7 +4,10 @@ Suppose que le scraper Tunisianet + le pipeline ETL ont deja charge des offres.
 
 from fastapi.testclient import TestClient
 
+from sqlalchemy import text
+
 from app.main import app
+from app.repositories.database import SessionLocal
 from tests.conftest import SeededCatalog
 
 client = TestClient(app)
@@ -85,3 +88,30 @@ def test_search_numbers_match_whole_numbers_only(seeded_catalog: SeededCatalog) 
     assert [r["id"] for r in client.get("/products/search", params={"q": f"{tag} 16"}).json()["results"]] == [alpha]
     assert [r["id"] for r in client.get("/products/search", params={"q": f"{tag} 4"}).json()["results"]] == [beta]
     assert client.get("/products/search", params={"q": f"{tag} 6"}).json()["count"] == 0
+
+
+def test_sitemap_lists_products_with_offers(seeded_catalog: SeededCatalog) -> None:
+    response = client.get("/products/sitemap")
+    assert response.status_code == 200
+
+    body = response.json()
+    assert body["count"] == len(body["results"])
+    entries = {entry["id"]: entry for entry in body["results"]}
+    for product_id in seeded_catalog.product_ids:
+        assert product_id in entries
+        # Fuseau explicite : sinon un client JS lirait l'heure UTC comme locale.
+        assert entries[product_id]["last_modified"].endswith("+00:00")
+
+
+def test_sitemap_excludes_products_without_offers(seeded_catalog: SeededCatalog) -> None:
+    # Cas d'une fiche fusionnee par l'admin : ses offres ont ete deplacees.
+    session = SessionLocal()
+    try:
+        session.execute(text("delete from offers where id = :id"), {"id": seeded_catalog.offer_ids[0]})
+        session.commit()
+    finally:
+        session.close()
+
+    ids = {entry["id"] for entry in client.get("/products/sitemap").json()["results"]}
+    assert seeded_catalog.product_ids[0] not in ids
+    assert seeded_catalog.product_ids[1] in ids

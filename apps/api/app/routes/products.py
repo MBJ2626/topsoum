@@ -7,9 +7,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.controllers.products_controller import get_product_detail_controller, search_products_controller
+from app.controllers.products_controller import (
+    get_product_detail_controller,
+    list_sitemap_entries_controller,
+    search_products_controller,
+)
 from app.repositories.database import get_session
-from app.schemas import ProductDetailResponse, ProductSearchResponse
+from app.schemas import ProductDetailResponse, ProductSearchResponse, ProductSitemapResponse
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -23,6 +27,12 @@ def search(
     session: Session = Depends(get_session),
 ) -> ProductSearchResponse:
     return search_products_controller(session, query=q, category=category, limit=limit, offset=offset)
+
+
+# Declaree AVANT /{product_id} : sinon "sitemap" serait pris pour un id produit.
+@router.get("/sitemap", response_model=ProductSitemapResponse)
+def sitemap(session: Session = Depends(get_session)) -> ProductSitemapResponse:
+    return list_sitemap_entries_controller(session)
 
 
 @router.get("/{product_id}", response_model=ProductDetailResponse)

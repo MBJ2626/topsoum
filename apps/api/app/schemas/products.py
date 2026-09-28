@@ -50,3 +50,13 @@ class ProductDetailResponse(BaseModel):
     best_deal: OfferSummary
     offers: list[OfferSummary]
     price_history: list[PricePoint]
+
+
+class ProductSitemapEntry(BaseModel):
+    id: str
+    last_modified: str
+
+
+class ProductSitemapResponse(BaseModel):
+    count: int
+    results: list[ProductSitemapEntry]

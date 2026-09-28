@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import type { AsyncState } from "@/components/ui/async-state";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
 import { formatPrice } from "@/lib/format";
 
@@ -48,10 +49,9 @@ export function SimilarProducts({ state, onRetry }: SimilarProductsProps) {
       {data.map((item) => (
         <li key={item.id} className="w-28 flex-none">
           <Link href={`/product/${item.id}`} className="flex flex-col gap-1 rounded-card border border-gray-100 p-2">
-            <div className="h-20 w-full overflow-hidden rounded-lg bg-gray-50">
+            <div className="relative h-20 w-full overflow-hidden rounded-lg bg-gray-50">
               {item.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- domaines vendeurs multiples et dynamiques
-                <img src={item.imageUrl} alt={item.productName} loading="lazy" className="h-full w-full object-contain" />
+                <ProductImage src={item.imageUrl} alt={item.productName} sizes="112px" />
               ) : null}
             </div>
             <p className="truncate text-xs text-gray-700">{item.productName}</p>

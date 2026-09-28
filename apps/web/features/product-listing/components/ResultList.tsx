@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { AsyncState } from "@/components/ui/async-state";
 import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock, SkeletonLine } from "@/components/ui/Skeleton";
 import { formatPrice } from "@/lib/format";
 
@@ -21,7 +22,13 @@ export interface ResultListItem {
 
 interface ResultListProps {
   state: AsyncState<ResultListItem[]>;
-  onRetry: () => void;
+  /** Requis des que l'etat peut etre "error" (hooks React Query). */
+  onRetry?: () => void;
+  /**
+   * Nombre de lignes visibles d'emblee. Les landing pages SEO affichent tout :
+   * Google ne lit que le HTML initial, pas ce qui est derriere "Afficher plus".
+   */
+  initialVisibleCount?: number;
 }
 
 /** Pagination par batches (docs/PROJET.md 5.4 : 10-15 produits). */
@@ -29,8 +36,8 @@ const BATCH_SIZE = 10;
 
 // Autres produits de la recherche, sous la reponse dominante. Discret par
 // design (pas d'accent) : seul le BestDealCard porte l'accent "meilleur prix".
-export function ResultList({ state, onRetry }: ResultListProps) {
-  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }: ResultListProps) {
+  const [visibleCount, setVisibleCount] = useState(initialVisibleCount);
 
   if (state.status === "loading") {
     return (
@@ -49,7 +56,12 @@ export function ResultList({ state, onRetry }: ResultListProps) {
   }
 
   if (state.status === "error") {
-    return <ErrorState message="Impossible de charger les autres resultats." onRetry={onRetry} />;
+    return (
+      <ErrorState
+        message="Impossible de charger les autres resultats."
+        onRetry={onRetry ?? (() => window.location.reload())}
+      />
+    );
   }
 
   const { data } = state;
@@ -64,10 +76,9 @@ export function ResultList({ state, onRetry }: ResultListProps) {
         {data.slice(0, visibleCount).map((item) => (
           <li key={item.id} data-testid="result-row">
             <Link href={`/product/${item.id}`} className="flex min-h-[44px] items-center gap-3 py-3">
-              <div className="h-12 w-12 flex-none overflow-hidden rounded-lg bg-gray-50">
+              <div className="relative h-12 w-12 flex-none overflow-hidden rounded-lg bg-gray-50">
                 {item.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- domaines vendeurs multiples et dynamiques
-                  <img src={item.imageUrl} alt={item.productName} loading="lazy" className="h-full w-full object-contain" />
+                  <ProductImage src={item.imageUrl} alt={item.productName} sizes="48px" />
                 ) : null}
               </div>
               <div className="min-w-0 flex-1">

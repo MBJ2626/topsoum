@@ -21,6 +21,8 @@ from app.schemas.products import (
     ProductDetailResponse,
     ProductSearchResponse,
     ProductSearchResult,
+    ProductSitemapEntry,
+    ProductSitemapResponse,
 )
 
 __all__ = [
@@ -40,6 +42,8 @@ __all__ = [
     "ProductDetailResponse",
     "ProductSearchResponse",
     "ProductSearchResult",
+    "ProductSitemapEntry",
+    "ProductSitemapResponse",
     "ScraperRunStatus",
     "ScraperVendorStatus",
     "ScrapersStatusResponse",

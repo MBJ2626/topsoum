@@ -6,7 +6,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 
 import { AdminPageClient } from "./admin-page-client";
 
-export const metadata: Metadata = { title: "Dashboard admin — TopSoum" };
+export const metadata: Metadata = { title: "Dashboard admin", robots: { index: false, follow: false } };
 
 // Protection deja geree par middleware.ts (matcher "/admin/:path*",
 // isAdmin !== true -> redirect "/") : pas de check supplementaire ici.

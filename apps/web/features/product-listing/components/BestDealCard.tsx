@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import type { AsyncState } from "@/components/ui/async-state";
 import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock, SkeletonLine } from "@/components/ui/Skeleton";
 import { computeDiscountPercent, formatPrice } from "@/lib/format";
 
@@ -53,10 +54,12 @@ export function BestDealCard({ state, onRetry, onViewOffer, favoriteSlot }: Best
         Meilleur prix
       </span>
 
-      <div className="mb-4 h-40 w-full overflow-hidden rounded-lg bg-gray-50">
+      <div className="relative mb-4 h-40 w-full overflow-hidden rounded-lg bg-gray-50">
         {data.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- domaines vendeurs multiples et dynamiques, non listables dans next.config
-          <img src={data.imageUrl} alt={data.productName} loading="lazy" className="h-full w-full object-contain" />
+          // Plus grand element visible au chargement (LCP) : priorite, jamais lazy.
+          // Cadre de 160 px de haut et photos carrees : affichee en ~160 px de
+          // large, pas en pleine largeur (sinon image ~5x trop lourde).
+          <ProductImage src={data.imageUrl} alt={data.productName} sizes="160px" priority />
         ) : null}
       </div>
 
@@ -72,7 +75,7 @@ export function BestDealCard({ state, onRetry, onViewOffer, favoriteSlot }: Best
         <span className="text-2xl font-medium text-gray-900">{formatPrice(data.price, data.currency)}</span>
       </div>
 
-      {discount !== null ? <p className="mt-1 text-sm font-medium text-green-600">-{discount}% vs moyenne</p> : null}
+      {discount !== null ? <p className="mt-1 text-sm font-medium text-green-700">-{discount}% vs moyenne</p> : null}
 
       <Button
         data-testid="best-deal-view-offer"

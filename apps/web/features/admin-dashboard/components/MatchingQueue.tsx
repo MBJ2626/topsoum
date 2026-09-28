@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { AsyncState } from "@/components/ui/async-state";
 import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
 import { useApproveMatch, useMergeMatch, useRejectMatch } from "@/features/admin-dashboard/hooks/useMatchActions";
 import { useProductPicker } from "@/features/admin-dashboard/hooks/useProductPicker";
@@ -19,10 +20,9 @@ interface MatchingQueueProps {
 function ProductSummaryCard({ label, product }: { label: string; product: PendingMatchProductSummary }) {
   return (
     <div className="flex flex-1 items-center gap-2">
-      <div className="h-12 w-12 flex-none overflow-hidden rounded-lg bg-gray-50">
+      <div className="relative h-12 w-12 flex-none overflow-hidden rounded-lg bg-gray-50">
         {product.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element -- domaines vendeurs multiples et dynamiques
-          <img src={product.image_url} alt={product.model} loading="lazy" className="h-full w-full object-contain" />
+          <ProductImage src={product.image_url} alt={product.model} sizes="48px" />
         ) : null}
       </div>
       <div>
