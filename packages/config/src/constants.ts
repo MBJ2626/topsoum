@@ -1,6 +1,6 @@
 export const CURRENCY = "TND" as const;
 
-export const VENDORS = ["tunisianet", "mytek", "jumia", "spacenet"] as const;
+export const VENDORS = ["tunisianet", "mytek", "spacenet"] as const;
 
 export const CATEGORIES = [
   "smartphones",

@@ -31,13 +31,13 @@ Aucun acteur local sérieux n'existe en Tunisie (contrairement à idealo/Google 
 ### 1.4 Sites cibles (Phase 1 — MVP : 4-5 sites max)
 | Catégorie | Sites à scraper |
 |---|---|
-| Smartphones | Tunisianet, MyTek, Jumia TN, Spacenet, Wiki |
+| Smartphones | Tunisianet, MyTek, Spacenet, Wiki |
 | PC Portables | Tunisianet, MyTek, Spacenet, Technopro |
 | PC Bureautique / Composants | Tunisianet, MyTek, Zoomici |
-| TV / Récepteurs | Tunisianet, MyTek, Jumia TN, Electrotunisie |
+| TV / Récepteurs | Tunisianet, MyTek, Electrotunisie |
 | Électroménager | (extension future) |
 
-**Priorité MVP** : Tunisianet, MyTek, Jumia TN, Spacenet.
+**Priorité MVP** : Tunisianet, MyTek, Spacenet. (Jumia TN retiré : plus actif en Tunisie.)
 
 ### 1.5 Modèle économique (ordre d'activation)
 1. **Affiliation** — commission avec les revendeurs sur clics/conversions (deals directs à négocier avec Tunisianet/MyTek au début)
@@ -93,15 +93,14 @@ Les mockups mobile et web interactifs ont été **validés** ("j'aime bien les m
 
 ## 3. ARCHITECTURE DU PROJET
 
-### 3.1 Découpage : 5 compartiments / 23 modules
+### 3.1 Découpage : 5 compartiments / 22 modules
 
-**Compartiment 1 — Collecte de données (6 modules)**
+**Compartiment 1 — Collecte de données (5 modules)**
 - 1.1 Scraper Tunisianet
 - 1.2 Scraper MyTek
-- 1.3 Scraper Jumia TN
-- 1.4 Scraper Spacenet
-- 1.5 Scheduler/Orchestrateur (cron, retry)
-- 1.6 Proxy/Anti-blocage (rotation IP, user-agents, rate limiting)
+- 1.3 Scraper Spacenet
+- 1.4 Scheduler/Orchestrateur (cron, retry)
+- 1.5 Proxy/Anti-blocage (rotation IP, user-agents, rate limiting)
 
 **Compartiment 2 — Pipeline ETL (4 modules)**
 - 2.1 Parser/Nettoyage (formats bruts, prix, devises)
@@ -128,7 +127,7 @@ Les mockups mobile et web interactifs ont été **validés** ("j'aime bien les m
 - 5.4 SEO/Landing pages
 - 5.5 Dashboard admin (mono-admin)
 
-**MVP réduit** : ~12-14 modules actifs (4 scrapers, matching basique, PostgreSQL seul, API minimale, 2 pages frontend), le reste en V2.
+**MVP réduit** : ~12-14 modules actifs (3 scrapers, matching basique, PostgreSQL seul, API minimale, 2 pages frontend), le reste en V2.
 
 ### 3.2 Flux technique global
 ```
@@ -172,7 +171,7 @@ Vendor
 ### 3.4 Stack technique validée
 | Composant | Choix | Justification |
 |---|---|---|
-| Scraping | Python + Playwright + Scrapy | Sites TN avec JS-rendering (Jumia, MyTek) |
+| Scraping | Python + Playwright + Scrapy | Sites TN avec JS-rendering (MyTek) |
 | Backend/API | FastAPI (Python) | Cohérent avec le scraping |
 | Frontend | Next.js (App Router, SSR/SSG) | SEO critique + performance réseau mobile TN |
 | Auth | NextAuth.js | Email + OAuth Google/Facebook natif |
@@ -204,7 +203,6 @@ prixtn/
 │   │       │   ├── selectors.ts       # CSS/XPath isolés ici
 │   │       │   └── mapper.ts          # HTML brut → format standard
 │   │       ├── mytek/    (même structure)
-│   │       ├── jumia/    (même structure)
 │   │       └── spacenet/ (même structure)
 │   ├── etl-pipeline/
 │   │   └── matching/
@@ -349,7 +347,7 @@ Un seul vendeur (Tunisianet) à travers TOUTE la chaîne :
 > Valide le pipeline complet avant de scaler. Corriger l'architecture maintenant coûte 10x moins cher.
 
 ### Étape 3 — Scaling horizontal des scrapers (semaines 5-6)
-Ajouter MyTek, Jumia TN, Spacenet via le template `BaseScraper` + structure `vendors/{nom}/`.
+Ajouter MyTek, Spacenet via le template `BaseScraper` + structure `vendors/{nom}/`.
 
 ### Étape 4 — Product Matching Engine (semaines 7-8)
 Module isolé, pattern Strategy : eanMatch → fuzzyMatch → manualOverride.
@@ -415,7 +413,7 @@ Cible : catégorie smartphones. Code production-ready, commenté.
 ### Prompt 4 — Scrapers restants
 ```
 En te basant sur mon BaseScraper existant [coller le code], crée le scraper
-pour [MyTek / Jumia TN / Spacenet] avec la même structure vendors/{nom}/
+pour [MyTek / Spacenet] avec la même structure vendors/{nom}/
 (scraper + selectors + mapper). Le site utilise du JS-rendering,
 utilise Playwright en mode headless.
 ```
@@ -480,7 +478,7 @@ Config PWA (manifest + service worker basique).
 ### Prompt 9 — Dashboard admin
 ```
 Crée la page /admin (protégée is_admin, mono-admin) avec :
-- Statut des 4 scrapers : dernier run, nb produits collectés, taux d'échec
+- Statut des 3 scrapers : dernier run, nb produits collectés, taux d'échec
 - File des matchings à valider (score de confiance bas) : interface
   approuver/rejeter/fusionner
 - Stats globales : nb produits, nb offres, dernière mise à jour
@@ -519,7 +517,7 @@ Optimise mon app Next.js (site TopSoum, domaine topsoum.com) pour le SEO tunisie
 |---|---|
 | 1-2 | Fondations : DB, monorepo, Docker, NextAuth |
 | 3-4 | Pipeline complet avec 1 scraper (Tunisianet) |
-| 5-6 | 4 scrapers opérationnels |
+| 5-6 | 3 scrapers opérationnels |
 | 7-8 | Matching engine |
 | 9-10 | API complète (produits, favoris, admin) |
 | 11-13 | Frontend (mockups validés) + PWA + états/erreurs |

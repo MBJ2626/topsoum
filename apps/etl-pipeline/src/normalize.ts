@@ -6,7 +6,6 @@ import type { RawScrapedOffer } from "./types";
 export const VENDOR_DISPLAY_NAMES: Record<string, string> = {
   tunisianet: "Tunisianet",
   mytek: "MyTek",
-  jumia: "Jumia TN",
   spacenet: "Spacenet",
 };
 
