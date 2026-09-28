@@ -21,7 +21,13 @@ export interface ResultListItem {
 
 interface ResultListProps {
   state: AsyncState<ResultListItem[]>;
-  onRetry: () => void;
+  /** Requis des que l'etat peut etre "error" (hooks React Query). */
+  onRetry?: () => void;
+  /**
+   * Nombre de lignes visibles d'emblee. Les landing pages SEO affichent tout :
+   * Google ne lit que le HTML initial, pas ce qui est derriere "Afficher plus".
+   */
+  initialVisibleCount?: number;
 }
 
 /** Pagination par batches (docs/PROJET.md 5.4 : 10-15 produits). */
@@ -29,8 +35,8 @@ const BATCH_SIZE = 10;
 
 // Autres produits de la recherche, sous la reponse dominante. Discret par
 // design (pas d'accent) : seul le BestDealCard porte l'accent "meilleur prix".
-export function ResultList({ state, onRetry }: ResultListProps) {
-  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }: ResultListProps) {
+  const [visibleCount, setVisibleCount] = useState(initialVisibleCount);
 
   if (state.status === "loading") {
     return (
@@ -49,7 +55,12 @@ export function ResultList({ state, onRetry }: ResultListProps) {
   }
 
   if (state.status === "error") {
-    return <ErrorState message="Impossible de charger les autres resultats." onRetry={onRetry} />;
+    return (
+      <ErrorState
+        message="Impossible de charger les autres resultats."
+        onRetry={onRetry ?? (() => window.location.reload())}
+      />
+    );
   }
 
   const { data } = state;
