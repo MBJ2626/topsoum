@@ -9,6 +9,35 @@ export const VENDOR_DISPLAY_NAMES: Record<string, string> = {
   spacenet: "Spacenet",
 };
 
+/**
+ * Graphies officielles des marques qui ne suivent pas la regle par defaut
+ * (premiere lettre de chaque mot en majuscule). Cle = marque en minuscules.
+ */
+const BRAND_SPELLINGS: Record<string, string> = {
+  hp: "HP",
+  lg: "LG",
+  tcl: "TCL",
+  zte: "ZTE",
+  msi: "MSI",
+  oneplus: "OnePlus",
+  itel: "itel",
+  realme: "realme",
+};
+
+/**
+ * Une marque = une seule graphie, quel que soit le vendeur ("LESIA" chez MyTek,
+ * "Lesia" ailleurs) : sinon le filtre Marque du frontend la propose en double.
+ * Ne depend que de la marque en minuscules, jamais de la graphie du vendeur.
+ */
+export function normalizeBrand(brand: string | null | undefined): string | null {
+  const key = brand?.trim().replace(/\s+/g, " ").toLowerCase();
+  if (!key) return null;
+  return (
+    BRAND_SPELLINGS[key] ??
+    key.replace(/(^|[\s-])(\p{L})/gu, (_, separator: string, letter: string) => separator + letter.toUpperCase())
+  );
+}
+
 /** Nettoyage basique : espaces, casse. Le matching cross-vendeur est fait par matching/matchingEngine.ts, cable dans load.ts. */
 export function normalizeOffer(raw: RawScrapedOffer): ScrapedOffer {
   const vendor = raw.vendor.trim().toLowerCase();
@@ -33,7 +62,7 @@ export function normalizeOffer(raw: RawScrapedOffer): ScrapedOffer {
     vendor,
     externalId: String(raw.external_id).trim(),
     productName: raw.product_name.trim().replace(/\s+/g, " "),
-    brand: raw.brand?.trim() || null,
+    brand: normalizeBrand(raw.brand),
     category,
     reference: raw.reference?.trim() || null,
     price: Math.round(raw.price * 1000) / 1000,
