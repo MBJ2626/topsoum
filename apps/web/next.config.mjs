@@ -7,6 +7,16 @@ const nextConfig = {
     // ne pas le dupliquer/faire echouer le build ici.
     ignoreDuringBuilds: true,
   },
+  async headers() {
+    return [
+      {
+        // Le navigateur doit toujours revalider sw.js, sinon une nouvelle
+        // version du service worker peut mettre longtemps a etre prise.
+        source: "/sw.js",
+        headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }],
+      },
+    ];
+  },
 };
 
 export default withSentryConfig(nextConfig, {

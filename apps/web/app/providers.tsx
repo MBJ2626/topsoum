@@ -5,6 +5,8 @@ import { useState } from "react";
 
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 
+import { ServiceWorkerRegistration } from "./service-worker-registration";
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -20,6 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ServiceWorkerRegistration />
       <OfflineBanner />
       {children}
     </QueryClientProvider>
