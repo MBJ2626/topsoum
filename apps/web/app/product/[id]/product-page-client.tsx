@@ -17,6 +17,7 @@ import { BestDealCard } from "@/features/product-listing/components/BestDealCard
 import { SimilarProducts } from "@/features/product-listing/components/SimilarProducts";
 import { useSimilarProducts } from "@/features/product-listing/hooks/useSimilarProducts";
 import { pushRecentlyViewed } from "@/lib/recently-viewed";
+import { productDisplayName } from "@/lib/product-name";
 import { useOfferClick } from "@/lib/use-offer-click";
 
 interface ProductPageClientProps {
@@ -36,7 +37,7 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
     const detail = productQuery.data;
     pushRecentlyViewed(queryClient, {
       id: detail.id,
-      name: detail.canonical_name,
+      name: productDisplayName(detail),
       imageUrl: detail.image_url,
       price: detail.best_deal.price,
       currency: detail.best_deal.currency,
@@ -54,7 +55,7 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
       .filter((result) => result.id !== productId)
       .map((result) => ({
         id: result.id,
-        productName: `${result.brand} ${result.model}`,
+        productName: productDisplayName(result),
         imageUrl: result.image_url,
         price: result.best_deal.price,
         currency: result.best_deal.currency,

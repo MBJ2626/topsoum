@@ -9,6 +9,7 @@ import { SkeletonBlock } from "@/components/ui/Skeleton";
 import { useApproveMatch, useMergeMatch, useRejectMatch } from "@/features/admin-dashboard/hooks/useMatchActions";
 import { useProductPicker } from "@/features/admin-dashboard/hooks/useProductPicker";
 import type { PendingMatchOut, PendingMatchProductSummary } from "@/lib/api-types";
+import { productDisplayName } from "@/lib/product-name";
 
 interface MatchingQueueProps {
   state: AsyncState<PendingMatchOut[]>;
@@ -27,7 +28,7 @@ function ProductSummaryCard({ label, product }: { label: string; product: Pendin
       <div>
         <p className="text-xs text-gray-400">{label}</p>
         <p className="text-sm text-gray-900">
-          {product.brand} {product.model}
+          {productDisplayName(product)}
         </p>
       </div>
     </div>
@@ -68,7 +69,7 @@ function MergePicker({ matchId, onDone }: { matchId: string; onDone: () => void 
                   onClick={() => mergeMatch.mutate({ matchId, targetProductId: result.id }, { onSuccess: onDone })}
                   className="min-h-[44px] w-full rounded-lg px-2 text-left text-sm text-gray-900 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  {result.brand} {result.model}
+                  {productDisplayName(result)}
                 </button>
               </li>
             ))

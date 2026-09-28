@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 
 import { useSearchSuggestions } from "../hooks/useSearchSuggestions";
+import { productDisplayName } from "@/lib/product-name";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -74,7 +75,7 @@ export function SearchBar({
                     className="flex min-h-[44px] w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left hover:bg-gray-50"
                   >
                     <span className="text-sm text-gray-900">
-                      {result.brand} {result.model}
+                      {productDisplayName(result)}
                     </span>
                     <span className="text-sm font-medium text-gray-900">
                       {formatPrice(result.best_deal.price, result.best_deal.currency)}
