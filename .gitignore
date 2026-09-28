@@ -16,3 +16,6 @@ __pycache__/
 .ruff_cache/
 .mypy_cache/
 apps/scrapers/output/
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/blob-report/

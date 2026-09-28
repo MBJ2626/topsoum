@@ -2,26 +2,8 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
-
-from app.repositories.models import Offer, Vendor
 from app.services.scoring import best_offer, score_offer
-
-
-def _make_offer(*, price: str, shipping_cost: str | None, trust_score: float | None, stock_status: str) -> Offer:
-    vendor = Vendor(id="v1", name="Test Vendor", logo=None, trust_score=trust_score, avg_delivery_time=None)
-    offer = Offer(
-        id="o1",
-        product_id="p1",
-        vendor_id="v1",
-        price=Decimal(price),
-        stock_status=stock_status,
-        url="https://example.tn/produit",
-        shipping_cost=Decimal(shipping_cost) if shipping_cost is not None else None,
-        scraped_at=None,
-    )
-    offer.vendor = vendor
-    return offer
+from tests.factories import make_offer as _make_offer
 
 
 def test_lower_price_wins_when_trust_and_stock_equal() -> None:

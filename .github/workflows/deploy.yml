@@ -1,0 +1,53 @@
+# Deploiement independant par app, uniquement depuis `main`. Chaque job est
+# gate par la presence de ses propres secrets (`if: secrets.X != ''`) :
+# tant qu'un secret n'est pas configure dans les settings du repo, le job
+# correspondant est SKIPPED (jamais en echec) et le workflow reste vert.
+#
+# Secrets a creer plus tard (Settings > Secrets and variables > Actions) :
+#   - deploy-web (Vercel)      : VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+#   - deploy-api (Render/...)  : RENDER_DEPLOY_HOOK_URL
+#   - deploy-scrapers (VPS)    : SCRAPERS_SSH_HOST, SCRAPERS_SSH_USER, SCRAPERS_SSH_KEY
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-web:
+    runs-on: ubuntu-latest
+    if: ${{ vars.VERCEL_PROJECT_ID != '' && secrets.VERCEL_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deployer apps/web sur Vercel
+        run: npx vercel deploy --prod --token="$VERCEL_TOKEN" --yes
+        working-directory: apps/web
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+
+  deploy-api:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.RENDER_DEPLOY_HOOK_URL != '' }}
+    steps:
+      - name: Declencher le deploiement apps/api (webhook Render/Railway)
+        run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
+  deploy-scrapers:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.SCRAPERS_SSH_HOST != '' && secrets.SCRAPERS_SSH_KEY != '' }}
+    steps:
+      - name: Deployer apps/scrapers sur le VPS (pull + redemarrage cron)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SCRAPERS_SSH_HOST }}
+          username: ${{ secrets.SCRAPERS_SSH_USER }}
+          key: ${{ secrets.SCRAPERS_SSH_KEY }}
+          script: |
+            cd /opt/topsoum
+            git pull origin main
+            cd apps/scrapers
+            uv sync --frozen

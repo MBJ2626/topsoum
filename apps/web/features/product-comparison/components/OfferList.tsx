@@ -49,7 +49,11 @@ export function OfferList({ state, onRetry, onViewOffer }: OfferListProps) {
   return (
     <ul className="divide-y divide-gray-100 border-t border-gray-100">
       {data.map((offer) => (
-        <li key={offer.offerId} className="flex min-h-[44px] items-center justify-between gap-4 py-3">
+        <li
+          key={offer.offerId}
+          data-testid="offer-row"
+          className="flex min-h-[44px] items-center justify-between gap-4 py-3"
+        >
           <div>
             <p className="text-sm font-medium text-gray-900">{offer.vendorName}</p>
             {offer.stockStatus === "out_of_stock" ? (
@@ -64,6 +68,7 @@ export function OfferList({ state, onRetry, onViewOffer }: OfferListProps) {
               {offer.price > 0 ? formatPrice(offer.price, offer.currency) : "Prix en cours de mise a jour"}
             </span>
             <Button
+              data-testid="offer-row-view-offer"
               variant="secondary"
               className="px-4 text-xs"
               onClick={() => {

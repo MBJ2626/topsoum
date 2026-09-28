@@ -35,6 +35,7 @@ export function SearchBar({
       </label>
       <input
         id={inputId}
+        data-testid="search-input"
         type="search"
         inputMode="search"
         autoComplete="off"

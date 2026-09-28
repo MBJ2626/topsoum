@@ -35,6 +35,14 @@ describe("eanMatchStrategy", () => {
     expect(eanMatchStrategy.match(offer, [candidate])).toBeNull();
   });
 
+  it("accepte une reference normalisee de longueur exactement MIN_REFERENCE_LENGTH (4)", () => {
+    const offer = makeOffer({ reference: "AB12" });
+    const candidate = makeCandidate({ id: "prod-ref4", references: ["AB12"] });
+    const result = eanMatchStrategy.match(offer, [candidate]);
+    expect(result?.candidate.id).toBe("prod-ref4");
+    expect(result?.confidence).toBe(1);
+  });
+
   it("retourne null si la categorie differe", () => {
     const candidate = makeCandidate({
       id: "prod-pc",

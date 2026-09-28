@@ -86,7 +86,6 @@ def test_favorite_lifecycle() -> None:
 def test_delete_favorite_of_another_user_returns_404_not_403() -> None:
     """Ne doit jamais reveler l'existence du favori d'autrui : meme 404
     qu'un id totalement inconnu."""
-    user_id = _existing_user_id()
     other_user_headers = auth_headers("some-other-user-id")
 
     response = client.delete("/favorites/does-not-matter", headers=other_user_headers)

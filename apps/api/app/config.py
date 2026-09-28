@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     database_url: str
     api_port: int = 8000
     api_auth_secret: str
+    sentry_dsn: str | None = None
+    sentry_environment: str = "development"
 
     model_config = SettingsConfigDict(env_file=_ROOT_ENV_FILE, env_file_encoding="utf-8", extra="ignore")
 

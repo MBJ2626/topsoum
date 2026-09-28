@@ -93,6 +93,21 @@ describe("createMatchingEngine — orchestration", () => {
     expect(engine.matchOffer(makeOffer(), [])).toEqual(NO_MATCH);
   });
 
+  it("en cas d'egalite de confiance (bande review) entre deux strategies, la premiere de l'ordre l'emporte", () => {
+    const candidateA = candidateYoung1Blue;
+    const candidateB = candidateYoung1Purple;
+    // 0.7 est entre reviewThreshold (0.6) et autoAcceptThreshold (0.85) : ni
+    // early-exit, ni rejet — les deux resultats entrent en concurrence pour "best".
+    const ean = spyStrategy("ean", { candidate: candidateA, confidence: 0.7 });
+    const fuzzy = spyStrategy("fuzzy", { candidate: candidateB, confidence: 0.7 });
+    const engine = createMatchingEngine({ strategies: [ean.strategy, fuzzy.strategy] });
+
+    const result = engine.matchOffer(makeOffer(), [candidateA, candidateB]);
+    expect(result.strategy).toBe("ean");
+    expect(result.candidate?.id).toBe(candidateA.id);
+    expect(result.needsReview).toBe(true);
+  });
+
   it("respecte des seuils personnalises", () => {
     const engine = createMatchingEngine({
       strategies: [fuzzyMatchStrategy],

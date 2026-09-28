@@ -11,6 +11,7 @@
     "studio": "dotenv -e ../../.env -- prisma studio",
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
+    "lint": "echo \"no lint yet\"",
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
