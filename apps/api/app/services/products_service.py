@@ -73,3 +73,16 @@ def get_product_detail(session: Session, product_id: str) -> ProductDetailData:
         offers=offers_sorted,
         price_history=history,
     )
+
+
+@dataclass
+class SitemapEntryData:
+    product_id: str
+    last_modified: datetime
+
+
+def list_sitemap_entries(session: Session) -> list[SitemapEntryData]:
+    return [
+        SitemapEntryData(product_id=product_id, last_modified=last_modified)
+        for product_id, last_modified in products_repository.list_sitemap_entries(session)
+    ]

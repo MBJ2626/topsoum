@@ -126,3 +126,13 @@ export interface MatchActionResponse {
 export interface MergeMatchRequest {
   target_product_id: string;
 }
+
+export interface ProductSitemapEntry {
+  id: string;
+  last_modified: string;
+}
+
+export interface ProductSitemapResponse {
+  count: number;
+  results: ProductSitemapEntry[];
+}
