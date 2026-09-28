@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   description: DEFAULT_DESCRIPTION,
   applicationName: SITE_NAME,
   manifest: "/manifest.json",
+  // Declare l'icone : sans <link rel="icon">, le navigateur demande
+  // /favicon.ico, inexistant (404 dans la console).
+  icons: { icon: { url: "/icon.svg", type: "image/svg+xml" } },
   openGraph: {
     ...BASE_OPEN_GRAPH,
     title: DEFAULT_TITLE,
