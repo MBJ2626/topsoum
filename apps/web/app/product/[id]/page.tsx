@@ -8,6 +8,7 @@ import { apiFetch } from "@/lib/api-client";
 import type { FavoriteListResponse, ProductDetailResponse } from "@/lib/api-types";
 import { formatPrice } from "@/lib/format";
 import { getQueryClient } from "@/lib/get-query-client";
+import { JsonLd, productJsonLd } from "@/lib/json-ld";
 import { productDisplayName } from "@/lib/product-name";
 import { BASE_OPEN_GRAPH } from "@/lib/site";
 
@@ -95,9 +96,11 @@ export default async function ProductPage({ params }: ProductPageParams) {
 
   const queryClient = getQueryClient();
   queryClient.setQueryData(["product", id], detail);
+  const structuredData = productJsonLd(detail);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
+      {structuredData ? <JsonLd data={structuredData} /> : null}
       <ProductPageClient
         productId={id}
         isAuthenticated={favoriteContext.isAuthenticated}
