@@ -2,6 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
     "DATABASE_URL",
+    "API_AUTH_SECRET",
     "AUTH_SECRET",
     "AUTH_URL",
     "AUTH_GOOGLE_ID",
