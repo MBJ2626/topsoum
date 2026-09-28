@@ -1,7 +1,11 @@
 # Deploiement independant par app, uniquement depuis `main`. Chaque job est
-# gate par la presence de ses propres secrets (`if: secrets.X != ''`) :
-# tant qu'un secret n'est pas configure dans les settings du repo, le job
-# correspondant est SKIPPED (jamais en echec) et le workflow reste vert.
+# gate par la presence de ses propres secrets : tant qu'un secret n'est pas
+# configure dans les settings du repo, le job correspondant est SKIPPED
+# (jamais en echec) et le workflow reste vert.
+#
+# GitHub interdit le contexte `secrets` dans le `if:` d'un job (workflow
+# invalide) : le job secrets-check teste leur presence au niveau step et
+# expose le resultat en outputs, lus par les jobs de deploiement.
 #
 # Secrets a creer plus tard (Settings > Secrets and variables > Actions) :
 #   - deploy-web (Vercel)      : VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
@@ -14,9 +18,31 @@ on:
     branches: [main]
 
 jobs:
+  secrets-check:
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.check.outputs.web }}
+      api: ${{ steps.check.outputs.api }}
+      scrapers: ${{ steps.check.outputs.scrapers }}
+    steps:
+      - id: check
+        env:
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          SCRAPERS_SSH_HOST: ${{ secrets.SCRAPERS_SSH_HOST }}
+          SCRAPERS_SSH_KEY: ${{ secrets.SCRAPERS_SSH_KEY }}
+        run: |
+          {
+            echo "web=$([ -n "$VERCEL_PROJECT_ID" ] && [ -n "$VERCEL_TOKEN" ] && echo true || echo false)"
+            echo "api=$([ -n "$RENDER_DEPLOY_HOOK_URL" ] && echo true || echo false)"
+            echo "scrapers=$([ -n "$SCRAPERS_SSH_HOST" ] && [ -n "$SCRAPERS_SSH_KEY" ] && echo true || echo false)"
+          } >> "$GITHUB_OUTPUT"
+
   deploy-web:
     runs-on: ubuntu-latest
-    if: ${{ vars.VERCEL_PROJECT_ID != '' && secrets.VERCEL_TOKEN != '' }}
+    needs: secrets-check
+    if: ${{ needs.secrets-check.outputs.web == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Deployer apps/web sur Vercel
@@ -29,7 +55,8 @@ jobs:
 
   deploy-api:
     runs-on: ubuntu-latest
-    if: ${{ secrets.RENDER_DEPLOY_HOOK_URL != '' }}
+    needs: secrets-check
+    if: ${{ needs.secrets-check.outputs.api == 'true' }}
     steps:
       - name: Declencher le deploiement apps/api (webhook Render/Railway)
         run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"
@@ -38,7 +65,8 @@ jobs:
 
   deploy-scrapers:
     runs-on: ubuntu-latest
-    if: ${{ secrets.SCRAPERS_SSH_HOST != '' && secrets.SCRAPERS_SSH_KEY != '' }}
+    needs: secrets-check
+    if: ${{ needs.secrets-check.outputs.scrapers == 'true' }}
     steps:
       - name: Deployer apps/scrapers sur le VPS (pull + redemarrage cron)
         uses: appleboy/ssh-action@v1
