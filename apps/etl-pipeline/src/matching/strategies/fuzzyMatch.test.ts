@@ -134,11 +134,6 @@ describe("fuzzyMatchStrategy — vetos (contraintes dures)", () => {
     expect(fuzzyMatchStrategy.match(tunisianetYoung1Bleu, [candidateYoung1SkyBlue])).toBeNull();
   });
 
-  it("ne matche pas deux variantes RAM incompatibles (2Go vs 4Go)", () => {
-    // Spacenet vend le Young 6 en 2Go, Tunisianet en 4Go : produits distincts.
-    expect(fuzzyMatchStrategy.match(spacenetYoung6Noir, [candidateYoung6Black4])).toBeNull();
-  });
-
   it("ne matche jamais deux numeros de modele differents (Young 1 vs Young 6)", () => {
     const young6Blue = makeCandidate({
       id: "prod-young6-blue",
@@ -187,6 +182,25 @@ describe("fuzzyMatchStrategy — vetos (contraintes dures)", () => {
 });
 
 describe("fuzzyMatchStrategy — bande 'a valider manuellement' (plafonds)", () => {
+  it("envoie en validation (0.65) une RAM contradictoire, tout le reste identique (2Go vs 4Go)", () => {
+    // Meme Young 6 Noir : Spacenet annonce 2Go (RAM physique), Tunisianet 4Go
+    // (physique + virtuelle). Ni fusion automatique, ni doublon silencieux.
+    const result = fuzzyMatchStrategy.match(spacenetYoung6Noir, [candidateYoung6Black4]);
+    expect(result?.candidate.id).toBe(candidateYoung6Black4.id);
+    expect(result?.confidence).toBeCloseTo(0.65, 6);
+  });
+
+  it("prefere la variante RAM exacte a une variante RAM contradictoire", () => {
+    const young6Black2 = makeCandidate({
+      id: "prod-young6-black-2",
+      model: "Young 6",
+      specs: { ramGb: 2, storageGb: 16, color: "black" },
+    });
+    const result = fuzzyMatchStrategy.match(spacenetYoung6Noir, [candidateYoung6Black4, young6Black2]);
+    expect(result?.candidate.id).toBe("prod-young6-black-2");
+    expect(result?.confidence).toBeCloseTo(1, 6);
+  });
+
   it("plafonne a 0.80 une RAM compatible mais non identique (2+2Go vs 4Go)", () => {
     const result = fuzzyMatchStrategy.match(mytekYoung6Silver, [candidateYoung6Silver4]);
     expect(result?.candidate.id).toBe(candidateYoung6Silver4.id);

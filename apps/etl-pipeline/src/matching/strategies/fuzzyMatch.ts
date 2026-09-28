@@ -30,6 +30,13 @@ const MODEL_MIN_SIMILARITY = 0.5;
 // Plafonds : poussent les cas douteux dans la bande "a valider manuellement".
 /** RAM compatible mais non identique (2+2Go vs 4Go) : variante possible. */
 const CAP_INEXACT_RAM = 0.8;
+/**
+ * RAM contradictoire (2Go vs 4Go), tout le reste identique : jamais de fusion
+ * automatique, mais pas de veto non plus. Les vendeurs annoncent le meme
+ * telephone differemment (RAM physique seule vs physique + virtuelle) ; un veto
+ * creerait un doublon silencieux, invisible dans la file de validation admin.
+ */
+const CAP_RAM_CONFLICT = 0.65;
 /** Tokens modele en inclusion stricte pour un token supplementaire non distinctif. */
 const CAP_MODEL_SUBSET = 0.8;
 
@@ -64,6 +71,7 @@ interface CandidateScore {
   candidate: MatchCandidate;
   score: number;
   inexactRam: boolean;
+  ramConflict: boolean;
   modelSubset: boolean;
 }
 
@@ -133,10 +141,10 @@ function resolveCandidateSpecs(candidate: MatchCandidate): ResolvedSpecs {
 }
 
 /**
- * null = incompatibles (veto) ; 1 = identiques (base + extension) ;
- * 0.7 = totaux egaux (2+2Go vs 4Go) ; 0.5 = base egale, extension d'un seul cote.
+ * 1 = identiques (base + extension) ; 0.7 = totaux egaux (2+2Go vs 4Go) ;
+ * 0.5 = base egale, extension d'un seul cote ; 0 = contradictoires (cf. CAP_RAM_CONFLICT).
  */
-function scoreRam(offer: ResolvedSpecs, candidate: ResolvedSpecs): ComponentScore | null {
+function scoreRam(offer: ResolvedSpecs, candidate: ResolvedSpecs): ComponentScore {
   if (offer.ramGb == null || candidate.ramGb == null) return "unknown";
   const offerTotal = offer.ramGb + (offer.extendedRamGb ?? 0);
   const candidateTotal = candidate.ramGb + (candidate.extendedRamGb ?? 0);
@@ -147,7 +155,7 @@ function scoreRam(offer: ResolvedSpecs, candidate: ResolvedSpecs): ComponentScor
   if (offer.ramGb === candidate.ramGb && (offer.extendedRamGb == null) !== (candidate.extendedRamGb == null)) {
     return 0.5;
   }
-  return null;
+  return 0;
 }
 
 function applyWeight(score: ComponentScore, weight: number): number {
@@ -223,8 +231,8 @@ export const fuzzyMatchStrategy: MatchStrategy = {
       }
 
       const ramScore = scoreRam(offerSpecs, candidateSpecs);
-      if (ramScore === null) continue;
-      const inexactRam = typeof ramScore === "number" && ramScore < 1;
+      const ramConflict = ramScore === 0;
+      const inexactRam = typeof ramScore === "number" && ramScore > 0 && ramScore < 1;
 
       // Couleur : deux couleurs canoniques connues et differentes = veto
       // (Bleu, Bleu Fonce et Bleu Ciel sont des produits distincts).
@@ -242,7 +250,7 @@ export const fuzzyMatchStrategy: MatchStrategy = {
         applyWeight(storageScore, WEIGHTS.storage) +
         applyWeight(ramScore, WEIGHTS.ram) +
         applyWeight(colorScore, WEIGHTS.color);
-      scored.push({ candidate, score, inexactRam, modelSubset });
+      scored.push({ candidate, score, inexactRam, ramConflict, modelSubset });
     }
 
     if (scored.length === 0) return null;
@@ -251,6 +259,7 @@ export const fuzzyMatchStrategy: MatchStrategy = {
 
     let confidence = best.score;
     if (best.inexactRam) confidence = Math.min(confidence, CAP_INEXACT_RAM);
+    if (best.ramConflict) confidence = Math.min(confidence, CAP_RAM_CONFLICT);
     if (best.modelSubset) confidence = Math.min(confidence, CAP_MODEL_SUBSET);
     if (scored.length > 1 && scored[1].score >= best.score - AMBIGUITY_MARGIN) {
       confidence = Math.min(confidence, CAP_AMBIGUOUS);
