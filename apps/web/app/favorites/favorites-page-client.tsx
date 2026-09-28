@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { ErrorState } from "@/components/ui/ErrorState";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
 import { FavoriteToggle } from "@/features/favorites/components/FavoriteToggle";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
@@ -45,15 +46,9 @@ export function FavoritesPageClient() {
             className="flex items-center justify-between gap-3 rounded-card border border-gray-100 p-3"
           >
             <Link href={`/product/${favorite.product_id}`} className="flex flex-1 items-center gap-3">
-              <div className="h-14 w-14 flex-none overflow-hidden rounded-lg bg-gray-50">
+              <div className="relative h-14 w-14 flex-none overflow-hidden rounded-lg bg-gray-50">
                 {favorite.product_image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- domaines vendeurs multiples et dynamiques
-                  <img
-                    src={favorite.product_image_url}
-                    alt={favorite.product_name}
-                    loading="lazy"
-                    className="h-full w-full object-contain"
-                  />
+                  <ProductImage src={favorite.product_image_url} alt={favorite.product_name} sizes="56px" />
                 ) : null}
               </div>
               <div>

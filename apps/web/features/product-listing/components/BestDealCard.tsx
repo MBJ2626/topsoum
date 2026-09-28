@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import type { AsyncState } from "@/components/ui/async-state";
 import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock, SkeletonLine } from "@/components/ui/Skeleton";
 import { computeDiscountPercent, formatPrice } from "@/lib/format";
 
@@ -53,10 +54,10 @@ export function BestDealCard({ state, onRetry, onViewOffer, favoriteSlot }: Best
         Meilleur prix
       </span>
 
-      <div className="mb-4 h-40 w-full overflow-hidden rounded-lg bg-gray-50">
+      <div className="relative mb-4 h-40 w-full overflow-hidden rounded-lg bg-gray-50">
         {data.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- domaines vendeurs multiples et dynamiques, non listables dans next.config
-          <img src={data.imageUrl} alt={data.productName} loading="lazy" className="h-full w-full object-contain" />
+          // Plus grand element visible au chargement (LCP) : priorite, jamais lazy.
+          <ProductImage src={data.imageUrl} alt={data.productName} sizes="(max-width: 640px) 100vw, 576px" priority />
         ) : null}
       </div>
 

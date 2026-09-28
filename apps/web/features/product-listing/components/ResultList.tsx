@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { AsyncState } from "@/components/ui/async-state";
 import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock, SkeletonLine } from "@/components/ui/Skeleton";
 import { formatPrice } from "@/lib/format";
 
@@ -75,10 +76,9 @@ export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }:
         {data.slice(0, visibleCount).map((item) => (
           <li key={item.id} data-testid="result-row">
             <Link href={`/product/${item.id}`} className="flex min-h-[44px] items-center gap-3 py-3">
-              <div className="h-12 w-12 flex-none overflow-hidden rounded-lg bg-gray-50">
+              <div className="relative h-12 w-12 flex-none overflow-hidden rounded-lg bg-gray-50">
                 {item.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- domaines vendeurs multiples et dynamiques
-                  <img src={item.imageUrl} alt={item.productName} loading="lazy" className="h-full w-full object-contain" />
+                  <ProductImage src={item.imageUrl} alt={item.productName} sizes="48px" />
                 ) : null}
               </div>
               <div className="min-w-0 flex-1">
