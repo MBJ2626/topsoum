@@ -1,0 +1,65 @@
+<!doctype html>
+<!--
+  Page de secours servie par sw.js quand une page n'a jamais ete visitee
+  (absente du cache) et que le reseau est coupe. HTML statique sans JS :
+  les chunks JS d'une page Next ont des noms hashes par build, impossibles
+  a pre-cacher, et une page Next sans ses chunks plante (ChunkLoadError).
+-->
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2563eb" />
+    <title>Hors ligne — TopSoum</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: #ffffff;
+        color: #111827;
+      }
+      main {
+        box-sizing: border-box;
+        max-width: 36rem;
+        min-height: 60vh;
+        margin: 0 auto;
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        text-align: center;
+      }
+      h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 500;
+      }
+      p {
+        margin: 0;
+        font-size: 14px;
+        color: #6b7280;
+      }
+      a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 20px;
+        border: 1px solid #d1d5db;
+        border-radius: 9999px;
+        color: #111827;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Connexion perdue</h1>
+      <p>Cette page n'est pas disponible hors ligne. Les produits deja consultes restent accessibles.</p>
+      <a href="/">Retour a l'accueil</a>
+    </main>
+  </body>
+</html>

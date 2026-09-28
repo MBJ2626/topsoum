@@ -8,7 +8,11 @@ const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   if (!req.auth?.user) {
-    return Response.redirect(new URL("/api/auth/signin", req.nextUrl.origin));
+    // callbackUrl : ramene sur la page demandee (/admin...) apres connexion,
+    // sinon NextAuth renvoie sur "/". Chemin relatif : pas de redirection ouverte.
+    const signInUrl = new URL("/api/auth/signin", req.nextUrl.origin);
+    signInUrl.searchParams.set("callbackUrl", `${req.nextUrl.pathname}${req.nextUrl.search}`);
+    return Response.redirect(signInUrl);
   }
 
   if (req.auth.user.isAdmin !== true) {
