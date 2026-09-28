@@ -6,6 +6,7 @@ import {
   candidateYoung1Blue,
   candidateYoung1Purple,
   candidateYoung6Silver4,
+  makeCandidate,
 } from "./__fixtures__/candidates";
 import {
   iphone15BlackEn,
@@ -15,6 +16,7 @@ import {
   mytekYoung1Violet,
   mytekYoung6Silver,
   spacenetYoung1Violet,
+  spacenetYoung6Noir,
   tunisianetYoung1Bleu,
   tunisianetYoung1Violet,
 } from "./__fixtures__/realOffers";
@@ -161,5 +163,36 @@ describe("createDefaultMatchingEngine — cas reels iPhone 15 (docs/PROJET.md)",
     const candidates = [candidateIphone15Black, candidateIphone15ProBlack];
     const result = engine.matchOffer(iphone15NoirFr, candidates);
     expect(result.candidate?.id).toBe(candidateIphone15Black.id);
+  });
+});
+
+
+describe("matchingEngine — fusion admin respectee aux runs suivants", () => {
+  // Cas reel : l'admin a fusionne le Young 6 Noir Spacenet (2Go) dans la fiche
+  // Tunisianet/MyTek (4Go). La fiche Spacenet en double reste en base.
+  const tunisianetNoir = makeCandidate({
+    id: "prod-tunisianet-young6-noir",
+    model: "Smartphone Lesia Young 6 4Go /16Go / Noir",
+    specs: { ramGb: 4, storageGb: 16, color: "black" },
+  });
+  const spacenetDuplicate = makeCandidate({
+    id: "prod-spacenet-young6-noir-doublon",
+    model: "Smartphone Lesia Young 6 2Go 16Go Noir",
+    specs: { ramGb: 2, storageGb: 16, color: "black" },
+  });
+  const engine = createDefaultMatchingEngine([
+    { vendor: "spacenet", externalId: spacenetYoung6Noir.externalId, productId: tunisianetNoir.id },
+  ]);
+
+  it("rematche le doublon si on le laisse parmi les candidats (d'ou son exclusion dans load.ts)", () => {
+    const result = engine.matchOffer(spacenetYoung6Noir, [tunisianetNoir, spacenetDuplicate]);
+    expect(result.candidate?.id).toBe(spacenetDuplicate.id);
+  });
+
+  it("applique la decision de l'admin une fois le doublon exclu des candidats", () => {
+    const result = engine.matchOffer(spacenetYoung6Noir, [tunisianetNoir]);
+    expect(result.candidate?.id).toBe(tunisianetNoir.id);
+    expect(result.strategy).toBe("manual_override");
+    expect(result.needsReview).toBe(false);
   });
 });

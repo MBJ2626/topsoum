@@ -65,9 +65,38 @@ export async function resolveVendor(vendorSlug: string, cache: Map<string, strin
   return vendor.id;
 }
 
+/**
+ * Fiche fusionnee par l'admin dans un autre produit (match approuve ou fusionne
+ * vers une autre cible). Elle n'est jamais supprimee (cf. reassign_offers cote
+ * API) mais ne doit plus servir de candidat : sinon elle rematche parfaitement
+ * l'offre au run suivant (confiance 1.0, early-exit du moteur avant
+ * manualOverride), recree un doublon et fige l'ancienne offre sur la fiche fusionnee.
+ */
+export function isMergedAway(
+  productId: string,
+  resolutions: readonly { status: string; resolvedProductId: string | null }[],
+): boolean {
+  return resolutions.some(
+    (resolution) =>
+      (resolution.status === "approved" || resolution.status === "merged") &&
+      resolution.resolvedProductId !== null &&
+      resolution.resolvedProductId !== productId,
+  );
+}
+
 async function getCandidatesForCategoryFromDb(category: string): Promise<MatchCandidate[]> {
-  const products = await prisma.product.findMany({ where: { category } });
-  return products.map((product) => ({
+  const products = await prisma.product.findMany({
+    where: { category },
+    include: {
+      pendingMatchesAsCreated: {
+        where: { status: { in: ["approved", "merged"] } },
+        select: { status: true, resolvedProductId: true },
+      },
+    },
+  });
+  return products
+    .filter((product) => !isMergedAway(product.id, product.pendingMatchesAsCreated))
+    .map((product) => ({
     id: product.id,
     brand: product.brand,
     model: product.model,

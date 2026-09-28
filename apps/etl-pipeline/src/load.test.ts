@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { MatchCandidate, MatchResult, MatchingEngine } from "./matching";
 import { makeOffer } from "./matching/__fixtures__/realOffers";
-import { loadOffers } from "./load";
+import { isMergedAway, loadOffers } from "./load";
 
 const { vendorUpsert, productUpsert, productUpdate, offerUpsert, priceHistoryCreate, pendingMatchCreate } = vi.hoisted(
   () => ({
@@ -140,5 +140,23 @@ describe("loadOffers", () => {
     expect(summary.offersUpserted).toBe(1);
     expect(summary.productsCreated).toBe(2);
     expect(priceHistoryCreate).toHaveBeenCalledTimes(1);
+  });
+});
+
+
+describe("isMergedAway (candidats exclus du matching)", () => {
+  it("exclut une fiche approuvee ou fusionnee vers un autre produit", () => {
+    expect(isMergedAway("dup", [{ status: "approved", resolvedProductId: "cible" }])).toBe(true);
+    expect(isMergedAway("dup", [{ status: "merged", resolvedProductId: "cible" }])).toBe(true);
+  });
+
+  it("garde une fiche rejetee, en attente ou sans decision", () => {
+    expect(isMergedAway("p", [{ status: "rejected", resolvedProductId: null }])).toBe(false);
+    expect(isMergedAway("p", [{ status: "pending", resolvedProductId: null }])).toBe(false);
+    expect(isMergedAway("p", [])).toBe(false);
+  });
+
+  it("garde une fiche dont la resolution pointe sur elle-meme", () => {
+    expect(isMergedAway("p", [{ status: "merged", resolvedProductId: "p" }])).toBe(false);
   });
 });
