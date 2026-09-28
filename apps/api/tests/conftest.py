@@ -51,7 +51,9 @@ def seeded_catalog() -> Iterator[SeededCatalog]:
     reels charges par l'ETL : sinon chaque run de pytest corrompt la DB de dev
     (offres rattachees au mauvais produit).
     """
-    tag = uuid.uuid4().hex[:8]
+    # Lettres uniquement : un tag commencant par un chiffre ("4ab1...") ferait
+    # matcher les recherches numeriques des tests ("4", "16") sur le nom du produit.
+    tag = "".join(chr(ord("a") + int(digit, 16)) for digit in uuid.uuid4().hex[:8])
     vendor_id = f"test-vendor-{tag}"
     models = [f"Testphone {tag} Alpha 2Go 16Go Noir", f"Testphone {tag} Beta 4Go 64Go Bleu", f"Testphone {tag} Gamma"]
     product_ids = [f"test-product-{tag}-{i}" for i in range(len(models))]

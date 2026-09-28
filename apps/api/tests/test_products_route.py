@@ -41,9 +41,8 @@ def test_search_limit_is_enforced() -> None:
     assert len(response.json()["results"]) <= 1
 
 
-def test_get_product_detail_returns_offers_and_history() -> None:
-    search_response = client.get("/products/search", params={"limit": 1})
-    product_id = search_response.json()["results"][0]["id"]
+def test_get_product_detail_returns_offers_and_history(seeded_catalog: SeededCatalog) -> None:
+    product_id = seeded_catalog.product_ids[0]
 
     response = client.get(f"/products/{product_id}")
     assert response.status_code == 200

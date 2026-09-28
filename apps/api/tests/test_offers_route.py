@@ -1,25 +1,15 @@
 from __future__ import annotations
 
-from sqlalchemy import text
-
 from app.main import app
-from app.repositories.database import SessionLocal
+from tests.conftest import SeededCatalog
 
 from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
 
-def _existing_offer_id() -> str:
-    session = SessionLocal()
-    try:
-        return session.execute(text("select id from offers limit 1")).scalar_one()
-    finally:
-        session.close()
-
-
-def test_record_click_returns_redirect_url() -> None:
-    offer_id = _existing_offer_id()
+def test_record_click_returns_redirect_url(seeded_catalog: SeededCatalog) -> None:
+    offer_id = seeded_catalog.offer_ids[0]
     response = client.post(f"/offers/{offer_id}/click")
     assert response.status_code == 200
 

@@ -133,7 +133,7 @@ def test_admin_stats_requires_admin() -> None:
     assert response.status_code == 403
 
 
-def test_admin_stats_returns_structure() -> None:
+def test_admin_stats_returns_structure(seeded_catalog: SeededCatalog) -> None:
     response = client.get("/admin/stats", headers=auth_headers("admin-1", is_admin=True))
     assert response.status_code == 200
     body = response.json()
