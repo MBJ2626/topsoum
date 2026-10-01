@@ -1,5 +1,5 @@
 import { slugify } from "../../normalize";
-import { parseSpecs } from "../specsParser";
+import { colorParts, parseSpecs } from "../specsParser";
 import { tokenSetSimilarity, tokensMatch } from "../similarity";
 import { DEFAULT_REVIEW_THRESHOLD } from "../thresholds";
 import type { CandidateSpecs, MatchCandidate, MatchStrategy } from "../types";
@@ -31,10 +31,12 @@ const MODEL_MIN_SIMILARITY = 0.5;
 /** RAM compatible mais non identique (2+2Go vs 4Go) : variante possible. */
 const CAP_INEXACT_RAM = 0.8;
 /**
- * RAM contradictoire (2Go vs 4Go), tout le reste identique : jamais de fusion
- * automatique, mais pas de veto non plus. Les vendeurs annoncent le meme
- * telephone differemment (RAM physique seule vs physique + virtuelle) ; un veto
+ * RAM contradictoire mais dans un rapport de 1 a 2 (4Go vs 8Go), tout le reste
+ * identique : jamais de fusion automatique, mais pas de veto non plus. Un
+ * vendeur peut annoncer "8Go" pour 4Go physiques + 4Go virtuels ; un veto
  * creerait un doublon silencieux, invisible dans la file de validation admin.
+ * Tout autre ecart (8Go vs 12Go, 4Go vs 6Go) designe une autre version du
+ * telephone : veto (cf. isRamVariant).
  */
 const CAP_RAM_CONFLICT = 0.65;
 /** Tokens modele en inclusion stricte pour un token supplementaire non distinctif. */
@@ -61,6 +63,17 @@ const DISTINGUISHING_SUFFIXES = new Set([
   "air",
   "neo",
 ]);
+/** Couleur composee contenant l'autre ("blue+ultramarine" vs "ultramarine"). */
+const CAP_PARTIAL_COLOR = 0.8;
+
+/** Une couleur composee en contient strictement une autre. */
+function isColorRefinement(a: string, b: string): boolean {
+  const partsA = colorParts(a);
+  const partsB = colorParts(b);
+  const [small, large] = partsA.length < partsB.length ? [partsA, partsB] : [partsB, partsA];
+  return small.length < large.length && small.every((part) => large.includes(part));
+}
+
 /** Deux candidats trop proches : ambigu, l'admin doit trancher. */
 const CAP_AMBIGUOUS = 0.75;
 const AMBIGUITY_MARGIN = 0.05;
@@ -73,6 +86,7 @@ interface CandidateScore {
   inexactRam: boolean;
   ramConflict: boolean;
   modelSubset: boolean;
+  partialColor: boolean;
 }
 
 function tokenizeText(value: string): string[] {
@@ -118,25 +132,35 @@ interface ResolvedSpecs {
   color: string | null;
 }
 
-/** Specs du candidat, avec repli sur le parsing de son canonicalName si vides. */
+/**
+ * Specs du candidat, relues dans son libelle avec l'analyseur ACTUEL : les
+ * specs stockees a la creation du produit datent de l'analyseur de l'epoque
+ * (ex: "titanium" au lieu de "black-titanium") et feraient rejeter l'offre
+ * identique. Champ par champ, repli sur la base : specs stockees, ou parsing
+ * du canonicalName seulement si AUCUNE spec n'est stockee.
+ */
 function resolveCandidateSpecs(candidate: MatchCandidate): ResolvedSpecs {
   const specs: CandidateSpecs = candidate.specs;
   const empty =
     specs.ramGb == null && specs.extendedRamGb == null && specs.storageGb == null && specs.color == null;
-  if (!empty) {
-    return {
-      ramGb: specs.ramGb ?? null,
-      extendedRamGb: specs.extendedRamGb ?? null,
-      storageGb: specs.storageGb ?? null,
-      color: specs.color ?? null,
-    };
-  }
-  const parsed = parseSpecs(candidate.canonicalName);
+  const base: ResolvedSpecs = empty
+    ? (({ ramGb, extendedRamGb, storageGb, color }) => ({ ramGb, extendedRamGb, storageGb, color }))(
+        parseSpecs(candidate.canonicalName),
+      )
+    : {
+        ramGb: specs.ramGb ?? null,
+        extendedRamGb: specs.extendedRamGb ?? null,
+        storageGb: specs.storageGb ?? null,
+        color: specs.color ?? null,
+      };
+  const fromModel = parseSpecs(candidate.model);
+  const ramFromModel = fromModel.ramGb != null;
   return {
-    ramGb: parsed.ramGb,
-    extendedRamGb: parsed.extendedRamGb,
-    storageGb: parsed.storageGb,
-    color: parsed.color,
+    ramGb: ramFromModel ? fromModel.ramGb : base.ramGb,
+    // L'extension suit la RAM de base : jamais deux sources melangees.
+    extendedRamGb: ramFromModel ? fromModel.extendedRamGb : base.extendedRamGb,
+    storageGb: fromModel.storageGb ?? base.storageGb,
+    color: fromModel.color ?? base.color,
   };
 }
 
@@ -156,6 +180,45 @@ function scoreRam(offer: ResolvedSpecs, candidate: ResolvedSpecs): ComponentScor
     return 0.5;
   }
   return 0;
+}
+
+/** RAM physique seule d'un cote, physique + virtuelle (le double) de l'autre. */
+function isRamVariant(offer: ResolvedSpecs, candidate: ResolvedSpecs): boolean {
+  const offerTotal = (offer.ramGb ?? 0) + (offer.extendedRamGb ?? 0);
+  const candidateTotal = (candidate.ramGb ?? 0) + (candidate.extendedRamGb ?? 0);
+  return offerTotal === candidateTotal * 2 || candidateTotal === offerTotal * 2;
+}
+
+/** Reseau ("4g", "5g") : pas un code modele, un meme telephone l'omet souvent. */
+const NETWORK_TOKEN_RE = /^\d+g$/;
+
+/**
+ * Codes modele alphanumeriques ("a16", "a5x", "15c", "y05") : comme les
+ * nombres purs (cf. numericSetsEqual), un code different designe un autre
+ * telephone. "Galaxy A16" et "Galaxy A07" n'ont qu'un token d'ecart, assez
+ * pour depasser le seuil de similarite : il faut un veto explicite.
+ */
+function modelCodesEqual(a: readonly string[], b: readonly string[]): boolean {
+  const codes = (tokens: readonly string[]) =>
+    [...new Set(tokens.filter((t) => /\d/.test(t) && /[a-z]/.test(t) && !NETWORK_TOKEN_RE.test(t)))].sort().join("|");
+  return codes(a) === codes(b);
+}
+
+/**
+ * Reseau : un vendeur l'omet souvent ("Galaxy A17" vs "Galaxy A17 5G"), ce
+ * n'est pas une contradiction. Mais annonce des deux cotes et different
+ * ("Redmi Note 15 4G" vs "5G"), ce sont deux telephones.
+ */
+function networksCompatible(a: readonly string[], b: readonly string[]): boolean {
+  const networks = (tokens: readonly string[]) => [...new Set(tokens.filter((t) => NETWORK_TOKEN_RE.test(t)))].sort().join("|");
+  const na = networks(a);
+  const nb = networks(b);
+  return na === "" || nb === "" || na === nb;
+}
+
+/** Tokens de `own` sans equivalent dans `other` (hors reseau). */
+function unmatchedTokens(own: readonly string[], other: readonly string[]): string[] {
+  return extraTokens(other, own).filter((t) => !NETWORK_TOKEN_RE.test(t));
 }
 
 function applyWeight(score: ComponentScore, weight: number): number {
@@ -203,6 +266,8 @@ export const fuzzyMatchStrategy: MatchStrategy = {
         (t) => !candidateBrandTokens.includes(t),
       );
       if (!numericSetsEqual(offerModelTokens, candidateModelTokens)) continue;
+      if (!modelCodesEqual(offerModelTokens, candidateModelTokens)) continue;
+      if (!networksCompatible(offerModelTokens, candidateModelTokens)) continue;
       const modelSimilarity = tokenSetSimilarity(offerModelTokens, candidateModelTokens);
       if (modelSimilarity < MODEL_MIN_SIMILARITY) continue;
 
@@ -232,15 +297,33 @@ export const fuzzyMatchStrategy: MatchStrategy = {
 
       const ramScore = scoreRam(offerSpecs, candidateSpecs);
       const ramConflict = ramScore === 0;
+      if (ramConflict && !isRamVariant(offerSpecs, candidateSpecs)) continue;
       const inexactRam = typeof ramScore === "number" && ramScore > 0 && ramScore < 1;
 
       // Couleur : deux couleurs canoniques connues et differentes = veto
       // (Bleu, Bleu Fonce et Bleu Ciel sont des produits distincts).
       let colorScore: ComponentScore;
+      let partialColor = false;
       if (offerSpecs.color && candidateSpecs.color) {
-        if (offerSpecs.color !== candidateSpecs.color) continue;
-        colorScore = 1;
+        if (offerSpecs.color === candidateSpecs.color) {
+          colorScore = 1;
+        } else if (isColorRefinement(offerSpecs.color, candidateSpecs.color)) {
+          // "Bleu Ultramarine" vs "Ultramarine" : meme couleur, plus ou moins
+          // detaillee. Pas de veto, mais jamais de fusion automatique.
+          colorScore = 0.5;
+          partialColor = true;
+        } else {
+          continue;
+        }
       } else {
+        // Couleur reconnue d'un seul cote : si l'autre cote porte a la place un
+        // mot sans equivalent ("Starlight", "Plantuim"...), c'est presque
+        // toujours une couleur que l'analyseur ne connait pas -> veto.
+        if (offerSpecs.color && !candidateSpecs.color) {
+          if (unmatchedTokens(candidateModelTokens, offerModelTokens).length > 0) continue;
+        } else if (candidateSpecs.color && !offerSpecs.color) {
+          if (unmatchedTokens(offerModelTokens, candidateModelTokens).length > 0) continue;
+        }
         colorScore = "unknown";
       }
 
@@ -250,7 +333,7 @@ export const fuzzyMatchStrategy: MatchStrategy = {
         applyWeight(storageScore, WEIGHTS.storage) +
         applyWeight(ramScore, WEIGHTS.ram) +
         applyWeight(colorScore, WEIGHTS.color);
-      scored.push({ candidate, score, inexactRam, ramConflict, modelSubset });
+      scored.push({ candidate, score, inexactRam, ramConflict, modelSubset, partialColor });
     }
 
     if (scored.length === 0) return null;
@@ -261,6 +344,7 @@ export const fuzzyMatchStrategy: MatchStrategy = {
     if (best.inexactRam) confidence = Math.min(confidence, CAP_INEXACT_RAM);
     if (best.ramConflict) confidence = Math.min(confidence, CAP_RAM_CONFLICT);
     if (best.modelSubset) confidence = Math.min(confidence, CAP_MODEL_SUBSET);
+    if (best.partialColor) confidence = Math.min(confidence, CAP_PARTIAL_COLOR);
     if (scored.length > 1 && scored[1].score >= best.score - AMBIGUITY_MARGIN) {
       confidence = Math.min(confidence, CAP_AMBIGUOUS);
     }

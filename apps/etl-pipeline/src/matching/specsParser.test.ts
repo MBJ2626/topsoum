@@ -113,3 +113,31 @@ describe("canonicalizeColor", () => {
     expect(canonicalizeColor("Turquoise")).toBeNull();
   });
 });
+
+describe("parseSpecs — couleurs composees et noms marketing", () => {
+  it("lit la couleur entiere : 'Bleu Titanium' et 'Noir Titanium' ne sont pas la meme couleur", () => {
+    expect(parseSpecs("iPhone 15 Pro Max 256Go Bleu Titanium - APPLE").color).toBe("blue+titanium");
+    expect(parseSpecs("iPhone 15 Pro Max 256Go Noir Titanium - APPLE").color).toBe("black+titanium");
+  });
+
+  it("donne le meme canonique quel que soit l'ordre des mots", () => {
+    expect(parseSpecs("iPhone 15 Pro Max Titanium Bleu 256Go").color).toBe("blue+titanium");
+  });
+
+  it("absorbe les qualificatifs marketing et retire la couleur des tokens modele", () => {
+    const spec = parseSpecs("iPhone 16 Pro Max 512Go Desert Titanium");
+    expect(spec.color).toBe("desert+titanium");
+    expect(spec.modelTokens).toEqual(["iphone", "16", "pro", "max"]);
+    expect(parseSpecs("Smartphone XIAOMI Redmi 15 / 8GO / 256GO / SANDY GOLD").color).toBe("gold+sandy");
+  });
+
+  it("reconnait les noms marketing courants (FR et EN)", () => {
+    expect(parseSpecs("iPhone 13 128Go Starlight").color).toBe("starlight");
+    expect(parseSpecs("iPhone 13 128Go Minuit").color).toBe("midnight");
+    expect(parseSpecs("iPhone 16 128Go Outremer").color).toBe("ultramarine");
+  });
+
+  it("garde les couleurs de base composees atomiques ('Bleu Ciel' reste sky-blue)", () => {
+    expect(parseSpecs("Smartphone LESIA YOUNG 1 2Go 16Go - Bleu Ciel").color).toBe("sky-blue");
+  });
+});
