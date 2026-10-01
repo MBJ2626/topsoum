@@ -20,7 +20,7 @@ toute décision d'architecture.
 - Favoris : suivi de prix MANUEL par produit, jamais automatique
 - Dashboard admin : mono-admin, pas de système de rôles
 - Pas de placement sponsorisé, pas d'alertes en V1
-- Design : un seul accent bleu (CTA + badge "Meilleur prix"), filtres repliés par défaut
+- Design : un seul accent (CTA + badge "Meilleur prix"), une famille de police en deux graisses, filtres repliés par défaut ; valeurs actuelles dans @DESIGN.md
 
 ## Commandes
 - Dev : pnpm dev
