@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "uv run python -m core",
+    "scrape:tunisianet": "uv run python -m vendors.tunisianet",
+    "scrape:mytek": "uv run python -m vendors.mytek",
+    "scrape:spacenet": "uv run python -m vendors.spacenet",
     "build": "uv sync --frozen",
     "lint": "uv run ruff check .",
     "test": "uv run pytest || [ $? -eq 5 ]"

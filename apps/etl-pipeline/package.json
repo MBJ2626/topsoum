@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
     "load": "dotenv -e ../../.env -- tsx src/index.ts",
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
