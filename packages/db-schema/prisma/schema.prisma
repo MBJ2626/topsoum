@@ -150,7 +150,9 @@ model PriceHistory {
 
   offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
 
-  @@index([offerId, recordedAt])
+  // Un releve par offre et par horodatage de scraping : recharger le meme
+  // fichier scrape dans l'ETL ne doit pas dupliquer l'historique.
+  @@unique([offerId, recordedAt])
   @@map("price_history")
 }
 

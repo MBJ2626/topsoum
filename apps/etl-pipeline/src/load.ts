@@ -247,14 +247,19 @@ export async function loadOffers(offers: ScrapedOffer[], deps: Partial<LoadDeps>
       });
       summary.offersUpserted += 1;
 
-      await prisma.priceHistory.create({
-        data: {
-          offerId: savedOffer.id,
-          price: offer.price.toFixed(3),
-          recordedAt: new Date(offer.scrapedAt),
-        },
+      // Idempotent : recharger le meme fichier scrape ne duplique pas
+      // l'historique (contrainte unique offre + horodatage, cf. schema).
+      const history = await prisma.priceHistory.createMany({
+        data: [
+          {
+            offerId: savedOffer.id,
+            price: offer.price.toFixed(3),
+            recordedAt: new Date(offer.scrapedAt),
+          },
+        ],
+        skipDuplicates: true,
       });
-      summary.priceHistoryInserted += 1;
+      summary.priceHistoryInserted += history.count;
     } catch (error) {
       // Ne relance pas : necessaire pour que ScraperRun.errorCount reflete
       // la realite sans tuer tout le run pour une seule offre en echec.

@@ -1,6 +1,6 @@
 # PROJET : TOPSOUM — COMPARATEUR DE PRIX ÉLECTRONIQUE (MARCHÉ TUNISIEN)
 > Document de référence complet — Idée, architecture, design, développement, roadmap
-> Dernière mise à jour : 12 juillet 2026
+> Dernière mise à jour : 1er octobre 2026
 
 ---
 
@@ -79,7 +79,7 @@ Les mockups mobile et web interactifs ont été **validés** ("j'aime bien les m
 - Le meilleur deal en grand format (badge "Meilleur prix" + bordure accent), alternatives en liste secondaire discrète
 - Filtres masqués derrière un seul bouton (panneau repliable)
 - Un seul CTA dominant par écran
-- Palette neutre (blanc/gris) + un seul accent (bleu) réservé aux CTA et badge meilleur prix
+- Palette neutre + un seul accent réservé aux CTA et badge meilleur prix (couleur non figée depuis le 1er octobre 2026 : valeur actuelle dans DESIGN.md)
 - Une seule police, deux graisses max (regular/medium)
 - Iconographie outline cohérente
 - Mobile-first, même architecture visuelle cross-device
@@ -278,10 +278,10 @@ L'utilisateur ne compare pas, il cherche une réponse. Il tape "iPhone 15" et ve
   5. Produits similaires (discret)
 
 ### 5.3 Système visuel
-- Palette neutre + **un seul accent** (bleu) : CTA et badge meilleur prix uniquement
+- Palette neutre + **un seul accent** : CTA et badge meilleur prix uniquement (couleur actuelle dans DESIGN.md)
 - Une police, deux graisses (regular 400 / medium 500)
 - Icônes outline uniquement
-- Bordures fines, cards à coins arrondis (8-12px)
+- Bordures fines, cards à coins arrondis (valeurs actuelles dans DESIGN.md)
 - Indicateur "-X% vs moyenne" en vert sur le meilleur deal
 
 ### 5.4 Mobile — exigences fluidité (zéro bug perçu)
