@@ -59,3 +59,15 @@ def test_map_listing_item_builds_standard_offer():
 def test_map_listing_item_returns_none_without_price():
     raw = {"external_id": "1", "url": "https://x", "price_text": None}
     assert mapper.map_listing_item(raw, category="smartphones") is None
+
+
+def test_to_large_image_url_upgrades_listing_thumbnail():
+    thumb = "https://www.tunisianet.com.tn/455543-home_default/smartphone-lesia-young-1.jpg"
+    assert mapper.to_large_image_url(thumb) == "https://www.tunisianet.com.tn/455543-large_default/smartphone-lesia-young-1.jpg"
+
+
+def test_to_large_image_url_keeps_other_urls_and_none():
+    already_large = "https://www.tunisianet.com.tn/455543-large_default/x.jpg"
+    assert mapper.to_large_image_url(already_large) == already_large
+    assert mapper.to_large_image_url(None) is None
+    assert mapper.to_large_image_url("") is None

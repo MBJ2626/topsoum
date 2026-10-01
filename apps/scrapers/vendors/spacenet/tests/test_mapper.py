@@ -108,3 +108,15 @@ def test_map_product_page_in_stock_from_json_ld():
     assert offer is not None
     assert offer["price"] == 169.9
     assert offer["stock_status"] == "in_stock"
+
+
+def test_to_large_image_url_upgrades_listing_thumbnail():
+    thumb = "https://spacenet.tn/455543-home_default/smartphone-lesia-young-1.jpg"
+    assert mapper.to_large_image_url(thumb) == "https://spacenet.tn/455543-large_default/smartphone-lesia-young-1.jpg"
+
+
+def test_to_large_image_url_keeps_other_urls_and_none():
+    already_large = "https://spacenet.tn/455543-large_default/x.jpg"
+    assert mapper.to_large_image_url(already_large) == already_large
+    assert mapper.to_large_image_url(None) is None
+    assert mapper.to_large_image_url("") is None

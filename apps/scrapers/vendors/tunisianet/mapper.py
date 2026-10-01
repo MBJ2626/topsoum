@@ -59,6 +59,20 @@ def clean_reference(raw_reference: str | None) -> str | None:
     return raw_reference.strip().strip("[]").strip() or None
 
 
+# Formats d'image PrestaShop, choisis dans l'URL : la vignette de listing
+# "home_default" ne fait que 250x250 px (pixelisee des qu'on l'agrandit),
+# "large_default" fait 1000x1000 (verifie le 2026-10-01).
+_THUMBNAIL_FORMAT = "-home_default/"
+_LARGE_FORMAT = "-large_default/"
+
+
+def to_large_image_url(image_url: str | None) -> str | None:
+    """URL de la grande version de l'image produit (inchangee si autre format)."""
+    if not image_url:
+        return None
+    return image_url.replace(_THUMBNAIL_FORMAT, _LARGE_FORMAT, 1)
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -81,7 +95,7 @@ def map_listing_item(raw: dict[str, Any], *, category: str) -> dict[str, Any] | 
         "currency": CURRENCY,
         "stock_status": parse_stock_status(raw.get("stock_class")),
         "url": url,
-        "image_url": raw.get("image_url") or None,
+        "image_url": to_large_image_url(raw.get("image_url")),
         "shipping_cost": None,
         "scraped_at": _now_iso(),
     }
@@ -104,7 +118,7 @@ def map_product_page(raw: dict[str, Any], *, category: str, url: str) -> dict[st
         "currency": CURRENCY,
         "stock_status": parse_stock_status(raw.get("stock_class"), raw.get("availability_href")),
         "url": url,
-        "image_url": raw.get("image_url") or None,
+        "image_url": to_large_image_url(raw.get("image_url")),
         "shipping_cost": None,
         "scraped_at": _now_iso(),
     }
