@@ -238,3 +238,67 @@ describe("fuzzyMatchStrategy — bande 'a valider manuellement' (plafonds)", () 
     expect(result!.confidence).toBeGreaterThanOrEqual(0.6);
   });
 });
+
+describe("fuzzyMatchStrategy — vetos sur les variantes (cas reels de la file admin)", () => {
+  const samsung = (id: string, model: string) => makeCandidate({ id, brand: "Samsung", model });
+
+  it("veto : code modele alphanumerique different (Galaxy A16 vs A07)", () => {
+    const offer = makeOffer({ productName: "Smartphone Samsung Galaxy A16 / 12Go / 128 Go / Noir", brand: "Samsung" });
+    expect(fuzzyMatchStrategy.match(offer, [samsung("a07", "Samsung Galaxy A07 / 12 Go / 128 Go / Noir")])).toBeNull();
+  });
+
+  it("veto : 'A5' et 'A5x' sont deux telephones", () => {
+    const offer = makeOffer({ productName: "SMARTPHONE OPPO A5 4G 4Go/128Go / WHITE", brand: "Oppo" });
+    const candidate = makeCandidate({ id: "a5x", brand: "Oppo", model: "SMARTPHONE OPPO A5x 4G / 4Go/128Go / WHITE" });
+    expect(fuzzyMatchStrategy.match(offer, [candidate])).toBeNull();
+  });
+
+  it("le reseau (4G/5G) n'est pas un code modele : 'A17 5G' reste rapprochable de 'A17'", () => {
+    const offer = makeOffer({ productName: "Smartphone Samsung Galaxy A17 5G / 12Go / 128 Go / Noir", brand: "Samsung" });
+    const result = fuzzyMatchStrategy.match(offer, [samsung("a17", "Smartphone Samsung Galaxy A17 / 12Go / 128 Go / Noir")]);
+    expect(result?.candidate.id).toBe("a17");
+  });
+
+  it("veto : RAM differente hors rapport 1:2 (12 Go vs 8 Go)", () => {
+    const offer = makeOffer({ productName: "Samsung Galaxy A07 / 12 Go / 128 Go / Violet", brand: "Samsung" });
+    expect(fuzzyMatchStrategy.match(offer, [samsung("a07-8", "Samsung Galaxy A07 / 8 Go / 128 Go / Violet")])).toBeNull();
+  });
+
+  it("RAM du simple au double (4 Go vs 8 Go, RAM virtuelle possible) : a valider, pas de veto", () => {
+    const offer = makeOffer({ productName: "Samsung Galaxy A07 / 8 Go / 128 Go / Violet", brand: "Samsung" });
+    const result = fuzzyMatchStrategy.match(offer, [samsung("a07-4", "Samsung Galaxy A07 / 4 Go / 128 Go / Violet")]);
+    expect(result?.confidence).toBeCloseTo(0.65, 6);
+  });
+
+  it("veto : couleur composee differente (Bleu Titanium vs Noir Titanium)", () => {
+    const offer = makeOffer({ productName: "iPhone 15 Pro Max 256Go Bleu Titanium - APPLE", brand: "Apple" });
+    const candidate = makeCandidate({ id: "noir-ti", brand: "Apple", model: "iPhone 15 Pro Max 256Go Noir Titanium - APPLE" });
+    expect(fuzzyMatchStrategy.match(offer, [candidate])).toBeNull();
+  });
+
+  it("veto : couleur reconnue d'un cote, mot inconnu a la place de l'autre (Plantuim vs Noir)", () => {
+    const offer = makeOffer({ productName: "Smartphone VIVO Y05 8 Go / 64 Go / Plantuim", brand: "Vivo" });
+    const candidate = makeCandidate({ id: "y05-noir", brand: "Vivo", model: "Smartphone VIVO Y05 8 Go / 64 Go / Noir" });
+    expect(fuzzyMatchStrategy.match(offer, [candidate])).toBeNull();
+  });
+
+  it("couleur plus detaillee d'un cote (Bleu Ultramarine vs Ultramarine) : a valider, pas de veto", () => {
+    const offer = makeOffer({ productName: "iPhone 16 128Go 5G Bleu Ultramarine", brand: "Apple" });
+    const candidate = makeCandidate({ id: "ultra", brand: "Apple", model: "Apple iPhone 16 128 Go 5G / Ultramarine" });
+    const result = fuzzyMatchStrategy.match(offer, [candidate]);
+    expect(result?.candidate.id).toBe("ultra");
+    expect(result?.confidence).toBeLessThanOrEqual(0.8);
+  });
+
+  it("specs stockees perimees : le libelle du candidat est relu avec l'analyseur actuel", () => {
+    // Produit cree avant les couleurs composees : specs.color = "titanium".
+    const candidate = makeCandidate({
+      id: "stale",
+      brand: "Apple",
+      model: "iPhone 15 Pro Max 256Go Noir Titanium - APPLE",
+      specs: { storageGb: 256, color: "titanium" },
+    });
+    const offer = makeOffer({ productName: "iPhone 15 Pro Max 256Go Noir Titanium", brand: "Apple" });
+    expect(fuzzyMatchStrategy.match(offer, [candidate])?.candidate.id).toBe("stale");
+  });
+});

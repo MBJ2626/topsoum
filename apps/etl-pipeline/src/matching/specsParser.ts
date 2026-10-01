@@ -70,7 +70,37 @@ const COLOR_SEQUENCES: ReadonlyArray<{ tokens: string[]; canonical: string }> = 
   { tokens: ["brown"], canonical: "brown" },
   { tokens: ["titanium"], canonical: "titanium" },
   { tokens: ["titane"], canonical: "titanium" },
+  { tokens: ["titan"], canonical: "titanium" },
+  // Noms marketing vus chez les vendeurs (Apple, Samsung, Xiaomi...).
+  { tokens: ["midnight"], canonical: "midnight" },
+  { tokens: ["minuit"], canonical: "midnight" },
+  { tokens: ["starlight"], canonical: "starlight" },
+  { tokens: ["lavender"], canonical: "lavender" },
+  { tokens: ["lavande"], canonical: "lavender" },
+  { tokens: ["ultramarine"], canonical: "ultramarine" },
+  { tokens: ["outremer"], canonical: "ultramarine" },
+  { tokens: ["graphite"], canonical: "graphite" },
+  { tokens: ["platinum"], canonical: "platinum" },
+  { tokens: ["platine"], canonical: "platinum" },
+  { tokens: ["beige"], canonical: "beige" },
+  { tokens: ["ivoire"], canonical: "ivory" },
+  { tokens: ["ivory"], canonical: "ivory" },
+  { tokens: ["menthe"], canonical: "mint" },
+  { tokens: ["mint"], canonical: "mint" },
+  { tokens: ["teal"], canonical: "teal" },
 ];
+
+/**
+ * Qualificatifs marketing qui, places devant une couleur, en font une autre
+ * ("Desert Titanium" n'est pas "Natural Titanium"). Seulement des mots sans
+ * autre sens possible dans un nom de produit.
+ */
+const COLOR_QUALIFIERS: ReadonlyMap<string, string> = new Map([
+  ["desert", "desert"],
+  ["natural", "natural"],
+  ["naturel", "natural"],
+  ["sandy", "sandy"],
+]);
 
 const MAX_COLOR_SEQUENCE_LENGTH = Math.max(...COLOR_SEQUENCES.map((c) => c.tokens.length));
 
@@ -91,8 +121,56 @@ interface ColorHit {
   length: number;
 }
 
-/** Plus longue sequence d'abord ; a longueur egale, l'occurrence la plus proche de la fin gagne. */
+/**
+ * Separateur des couleurs composees ("blue+titanium"). Distinct du "-" des
+ * canoniques de base ("dark-blue") : une couleur composee peut en contenir une
+ * autre (cf. colorParts), une couleur de base jamais ("blue" n'est pas une
+ * partie de "dark-blue" : Bleu et Bleu Fonce sont deux produits).
+ */
+export const COLOR_PART_SEPARATOR = "+";
+
+/** Parties d'un canonique : ["blue", "titanium"] pour "blue+titanium". */
+export function colorParts(canonical: string): string[] {
+  return canonical.split(COLOR_PART_SEPARATOR);
+}
+
+/** Canonique d'un token isole s'il est une couleur ou un qualificatif de couleur. */
+function singleTokenColorPart(token: string): string | null {
+  const qualifier = COLOR_QUALIFIERS.get(token);
+  if (qualifier) return qualifier;
+  const entry = COLOR_SEQUENCES.find((c) => c.tokens.length === 1 && c.tokens[0] === token);
+  return entry ? entry.canonical : null;
+}
+
+/**
+ * Couleur complete : la sequence trouvee, etendue vers la gauche aux tokens qui
+ * sont eux-memes des couleurs ou des qualificatifs ("Bleu Titanium",
+ * "Desert Titanium", "Sandy Gold"). Sans ca, "Bleu Titanium" et "Noir
+ * Titanium" donnaient tous deux "titanium" : deux produits differents
+ * passaient pour la meme couleur. Parties triees : "Titanium Bleu" et
+ * "Bleu Titanium" donnent le meme canonique ("blue+titanium").
+ */
 function findColor(tokens: string[]): ColorHit | null {
+  const hit = findColorSequence(tokens);
+  if (!hit) return null;
+  const parts = [hit.canonical];
+  let start = hit.start;
+  while (start > 0) {
+    const part = singleTokenColorPart(tokens[start - 1]);
+    if (!part) break;
+    parts.push(part);
+    start -= 1;
+  }
+  if (parts.length === 1) return hit;
+  return {
+    canonical: [...new Set(parts)].sort().join(COLOR_PART_SEPARATOR),
+    start,
+    length: hit.length + (hit.start - start),
+  };
+}
+
+/** Plus longue sequence d'abord ; a longueur egale, l'occurrence la plus proche de la fin gagne. */
+function findColorSequence(tokens: string[]): ColorHit | null {
   for (let length = MAX_COLOR_SEQUENCE_LENGTH; length >= 1; length--) {
     let best: ColorHit | null = null;
     for (const entry of COLOR_SEQUENCES) {
