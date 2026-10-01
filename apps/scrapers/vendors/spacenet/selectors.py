@@ -11,10 +11,12 @@ cette classe, toggle via CSS). LISTING_PRODUCT_CARD cible uniquement la
 variante grille (".item-inner") pour eviter les doublons.
 """
 
-# Chemin des categories (relatif a la base_url du vendeur), utilise pour
-# scrape_category (URL de listing)
-CATEGORY_SLUGS: dict[str, str] = {
-    "smartphones": "130-smartphone-tunisie",
+# Pages de listing de chaque categorie (relatives a la base_url du vendeur),
+# parcourues dans l'ordre par scrape_category. Spacenet range les iPhone sous
+# /211-iphone-tunisie, jamais sous /130-smartphone-tunisie (verifie le
+# 2026-10-01, autorise par robots.txt) : les deux pages forment "smartphones".
+CATEGORY_SLUGS: dict[str, tuple[str, ...]] = {
+    "smartphones": ("130-smartphone-tunisie", "211-iphone-tunisie"),
 }
 
 # Alias de fil d'ariane vus sur des fiches produit qui ne remontent jamais a
