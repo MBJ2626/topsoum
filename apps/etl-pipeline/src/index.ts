@@ -12,7 +12,7 @@ import type { RawScrapedOffer } from "./types";
 async function main(): Promise<void> {
   const inputPath = process.argv[2];
   if (!inputPath) {
-    console.error("Usage: pnpm --filter @topsoum/etl-pipeline dev <chemin-du-json-scrape>");
+    console.error("Usage: pnpm --filter @topsoum/etl-pipeline load <chemin-du-json-scrape>");
     process.exitCode = 1;
     return;
   }
