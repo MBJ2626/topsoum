@@ -259,6 +259,12 @@ describe("fuzzyMatchStrategy — vetos sur les variantes (cas reels de la file a
     expect(result?.candidate.id).toBe("a17");
   });
 
+  it("veto : reseau annonce des deux cotes et different (Redmi Note 15 4G vs 5G)", () => {
+    const offer = makeOffer({ productName: "Smartphone Xiaomi Redmi Note 15 5G 8Go 256Go Bleu", brand: "Xiaomi" });
+    const candidate = makeCandidate({ id: "note15-4g", brand: "Xiaomi", model: "Smartphone Xiaomi Redmi Note 15 4G 8Go 256Go Bleu" });
+    expect(fuzzyMatchStrategy.match(offer, [candidate])).toBeNull();
+  });
+
   it("veto : RAM differente hors rapport 1:2 (12 Go vs 8 Go)", () => {
     const offer = makeOffer({ productName: "Samsung Galaxy A07 / 12 Go / 128 Go / Violet", brand: "Samsung" });
     expect(fuzzyMatchStrategy.match(offer, [samsung("a07-8", "Samsung Galaxy A07 / 8 Go / 128 Go / Violet")])).toBeNull();

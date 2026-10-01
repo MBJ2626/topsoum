@@ -204,6 +204,18 @@ function modelCodesEqual(a: readonly string[], b: readonly string[]): boolean {
   return codes(a) === codes(b);
 }
 
+/**
+ * Reseau : un vendeur l'omet souvent ("Galaxy A17" vs "Galaxy A17 5G"), ce
+ * n'est pas une contradiction. Mais annonce des deux cotes et different
+ * ("Redmi Note 15 4G" vs "5G"), ce sont deux telephones.
+ */
+function networksCompatible(a: readonly string[], b: readonly string[]): boolean {
+  const networks = (tokens: readonly string[]) => [...new Set(tokens.filter((t) => NETWORK_TOKEN_RE.test(t)))].sort().join("|");
+  const na = networks(a);
+  const nb = networks(b);
+  return na === "" || nb === "" || na === nb;
+}
+
 /** Tokens de `own` sans equivalent dans `other` (hors reseau). */
 function unmatchedTokens(own: readonly string[], other: readonly string[]): string[] {
   return extraTokens(other, own).filter((t) => !NETWORK_TOKEN_RE.test(t));
@@ -255,6 +267,7 @@ export const fuzzyMatchStrategy: MatchStrategy = {
       );
       if (!numericSetsEqual(offerModelTokens, candidateModelTokens)) continue;
       if (!modelCodesEqual(offerModelTokens, candidateModelTokens)) continue;
+      if (!networksCompatible(offerModelTokens, candidateModelTokens)) continue;
       const modelSimilarity = tokenSetSimilarity(offerModelTokens, candidateModelTokens);
       if (modelSimilarity < MODEL_MIN_SIMILARITY) continue;
 
