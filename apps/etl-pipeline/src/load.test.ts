@@ -4,13 +4,13 @@ import type { MatchCandidate, MatchResult, MatchingEngine } from "./matching";
 import { makeOffer } from "./matching/__fixtures__/realOffers";
 import { isMergedAway, loadOffers } from "./load";
 
-const { vendorUpsert, productUpsert, productUpdate, offerUpsert, priceHistoryCreate, pendingMatchCreate } = vi.hoisted(
+const { vendorUpsert, productUpsert, productUpdate, offerUpsert, priceHistoryCreateMany, pendingMatchCreate } = vi.hoisted(
   () => ({
     vendorUpsert: vi.fn(),
     productUpsert: vi.fn(),
     productUpdate: vi.fn(),
     offerUpsert: vi.fn(),
-    priceHistoryCreate: vi.fn(),
+    priceHistoryCreateMany: vi.fn(),
     pendingMatchCreate: vi.fn(),
   }),
 );
@@ -20,7 +20,7 @@ vi.mock("@topsoum/db-schema", () => ({
     vendor: { upsert: vendorUpsert },
     product: { upsert: productUpsert, update: productUpdate },
     offer: { upsert: offerUpsert },
-    priceHistory: { create: priceHistoryCreate },
+    priceHistory: { createMany: priceHistoryCreateMany },
     pendingMatch: { create: pendingMatchCreate },
   },
 }));
@@ -50,7 +50,7 @@ beforeEach(() => {
   });
   productUpdate.mockReset().mockResolvedValue({ id: CANDIDATE.id });
   offerUpsert.mockReset().mockResolvedValue({ id: "offer-1" });
-  priceHistoryCreate.mockReset().mockResolvedValue({ id: "history-1" });
+  priceHistoryCreateMany.mockReset().mockResolvedValue({ count: 1 });
   pendingMatchCreate.mockReset().mockResolvedValue({ id: "pending-match-1" });
 });
 
@@ -139,7 +139,21 @@ describe("loadOffers", () => {
     expect(summary.offersRejected).toBe(1);
     expect(summary.offersUpserted).toBe(1);
     expect(summary.productsCreated).toBe(2);
-    expect(priceHistoryCreate).toHaveBeenCalledTimes(1);
+    expect(priceHistoryCreateMany).toHaveBeenCalledTimes(1);
+  });
+
+  it("historique idempotent : un releve deja en base (meme offre, meme horodatage) n'est pas recompte", async () => {
+    const matchingEngine = fixedEngine({ candidate: null, confidence: 0, strategy: null, needsReview: false });
+    priceHistoryCreateMany.mockResolvedValueOnce({ count: 0 });
+
+    const summary = await loadOffers([makeOffer()], {
+      matchingEngine,
+      getCandidatesForCategory: async () => [],
+    });
+
+    expect(priceHistoryCreateMany).toHaveBeenCalledWith(expect.objectContaining({ skipDuplicates: true }));
+    expect(summary.offersUpserted).toBe(1);
+    expect(summary.priceHistoryInserted).toBe(0);
   });
 });
 
