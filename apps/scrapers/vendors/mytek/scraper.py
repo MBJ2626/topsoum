@@ -16,40 +16,59 @@ class MytekScraper(BaseScraper):
     base_url = "https://www.mytek.tn"
 
     def scrape_category(self, category: str, limit: int | None = None) -> list[dict[str, Any]]:
-        slug = selectors.CATEGORY_SLUGS.get(category)
-        if slug is None:
+        slugs = selectors.CATEGORY_SLUGS.get(category)
+        if not slugs:
             raise ValueError(f"Categorie inconnue pour mytek: {category!r}")
 
         offers: list[dict[str, Any]] = []
-        page = self.new_page()
-        try:
-            url: str | None = f"{self.base_url}/{slug}"
-            while url is not None and (limit is None or len(offers) < limit):
-                if not self.goto(page, url):
-                    break
-
-                items = page.query_selector_all(selectors.LISTING_PRODUCT_ITEM)
-                if not items:
-                    break
-
-                for item in items:
-                    raw = self._extract_listing_item(item)
-                    offer = mapper.map_listing_item(raw, category=category)
-                    if offer is not None:
-                        offers.append(offer)
-                    if limit is not None and len(offers) >= limit:
-                        break
-
-                if limit is not None and len(offers) >= limit:
-                    break
-
-                next_link = page.query_selector(selectors.LISTING_NEXT_PAGE_LINK)
-                next_href = next_link.get_attribute("href") if next_link else None
-                url = urljoin(self.base_url, next_href) if next_href else None
-        finally:
-            page.close()
+        # Un meme produit peut figurer sur deux pages de la categorie.
+        seen_ids: set[str] = set()
+        for slug in slugs:
+            if limit is not None and len(offers) >= limit:
+                break
+            # Un onglet (contexte, donc cookies) neuf par page de listing : apres
+            # smartphone.html, MyTek sert iphone.html SANS le bloc
+            # #seo-product-data dans le meme contexte (0 produit), alors qu'un
+            # contexte vierge le recoit (verifie le 2026-10-01).
+            page = self.new_page()
+            try:
+                self._scrape_listing(page, slug, category, offers, seen_ids, limit)
+            finally:
+                page.close()
 
         return offers
+
+    def _scrape_listing(
+        self,
+        page: Page,
+        slug: str,
+        category: str,
+        offers: list[dict[str, Any]],
+        seen_ids: set[str],
+        limit: int | None,
+    ) -> None:
+        """Parcourt une page de listing et ses pages suivantes (lien de pagination)."""
+        url: str | None = f"{self.base_url}/{slug}"
+        while url is not None and (limit is None or len(offers) < limit):
+            if not self.goto(page, url):
+                return
+
+            items = page.query_selector_all(selectors.LISTING_PRODUCT_ITEM)
+            if not items:
+                return
+
+            for item in items:
+                raw = self._extract_listing_item(item)
+                offer = mapper.map_listing_item(raw, category=category)
+                if offer is not None and offer["external_id"] not in seen_ids:
+                    seen_ids.add(offer["external_id"])
+                    offers.append(offer)
+                if limit is not None and len(offers) >= limit:
+                    return
+
+            next_link = page.query_selector(selectors.LISTING_NEXT_PAGE_LINK)
+            next_href = next_link.get_attribute("href") if next_link else None
+            url = urljoin(self.base_url, next_href) if next_href else None
 
     def scrape_product(self, url: str) -> dict[str, Any] | None:
         page = self.new_page()
@@ -102,8 +121,8 @@ class MytekScraper(BaseScraper):
         a defaut, CATEGORY_BREADCRUMB_ALIASES (cf. selectors.py)."""
         for link in page.query_selector_all(selectors.PRODUCT_BREADCRUMB_LINKS):
             href = (link.get_attribute("href") or "").rstrip("/")
-            for category, slug in selectors.CATEGORY_SLUGS.items():
-                if href.endswith(slug.rstrip("/")):
+            for category, slugs in selectors.CATEGORY_SLUGS.items():
+                if any(href.endswith(slug.rstrip("/")) for slug in slugs):
                     return category
             for slug, category in selectors.CATEGORY_BREADCRUMB_ALIASES.items():
                 if href.endswith(slug.rstrip("/")):

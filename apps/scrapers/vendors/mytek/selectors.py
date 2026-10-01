@@ -11,10 +11,13 @@ ne peut donc recolter que la 1ere page de resultats (~48 produits pour
 smartphones) tant que ce robots.txt n'evolue pas.
 """
 
-# Chemin des categories (relatif a la base_url du vendeur), utilise pour
-# scrape_category (URL de listing)
-CATEGORY_SLUGS: dict[str, str] = {
-    "smartphones": "smartphone.html",
+# Pages de listing de chaque categorie (relatives a la base_url du vendeur),
+# parcourues dans l'ordre par scrape_category. MyTek range les iPhone sous
+# telephonie-tunisie/smartphone-mobile-tunisie/iphone.html, jamais sous
+# smartphone.html (verifie le 2026-10-01, autorise par robots.txt) : les deux
+# pages forment "smartphones".
+CATEGORY_SLUGS: dict[str, tuple[str, ...]] = {
+    "smartphones": ("smartphone.html", "telephonie-tunisie/smartphone-mobile-tunisie/iphone.html"),
 }
 
 # Alias de fil d'ariane vus sur des fiches produit qui ne remontent jamais a
