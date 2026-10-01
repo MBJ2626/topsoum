@@ -4,14 +4,14 @@ import type { MatchCandidate, MatchResult, MatchingEngine } from "./matching";
 import { makeOffer } from "./matching/__fixtures__/realOffers";
 import { isMergedAway, loadOffers } from "./load";
 
-const { vendorUpsert, productUpsert, productUpdate, offerUpsert, priceHistoryCreateMany, pendingMatchCreate } = vi.hoisted(
+const { vendorUpsert, productUpsert, productUpdate, offerUpsert, priceHistoryCreateMany, pendingMatchCreateMany } = vi.hoisted(
   () => ({
     vendorUpsert: vi.fn(),
     productUpsert: vi.fn(),
     productUpdate: vi.fn(),
     offerUpsert: vi.fn(),
     priceHistoryCreateMany: vi.fn(),
-    pendingMatchCreate: vi.fn(),
+    pendingMatchCreateMany: vi.fn(),
   }),
 );
 
@@ -21,7 +21,7 @@ vi.mock("@topsoum/db-schema", () => ({
     product: { upsert: productUpsert, update: productUpdate },
     offer: { upsert: offerUpsert },
     priceHistory: { createMany: priceHistoryCreateMany },
-    pendingMatch: { create: pendingMatchCreate },
+    pendingMatch: { createMany: pendingMatchCreateMany },
   },
 }));
 
@@ -51,7 +51,7 @@ beforeEach(() => {
   productUpdate.mockReset().mockResolvedValue({ id: CANDIDATE.id });
   offerUpsert.mockReset().mockResolvedValue({ id: "offer-1" });
   priceHistoryCreateMany.mockReset().mockResolvedValue({ count: 1 });
-  pendingMatchCreate.mockReset().mockResolvedValue({ id: "pending-match-1" });
+  pendingMatchCreateMany.mockReset().mockResolvedValue({ count: 1 });
 });
 
 describe("loadOffers", () => {
@@ -93,16 +93,36 @@ describe("loadOffers", () => {
     expect(summary.productsCreated).toBe(1);
     expect(summary.productsMatched).toBe(0);
     expect(summary.offersRejected).toBe(0);
-    expect(pendingMatchCreate).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        vendorSlug: offer.vendor,
-        externalId: offer.externalId,
-        createdProductId: "prod-new",
-        candidateProductId: CANDIDATE.id,
-        confidence: 0.7,
-        strategy: "fuzzy",
-      }),
+    expect(pendingMatchCreateMany).toHaveBeenCalledWith({
+      data: [
+        expect.objectContaining({
+          vendorSlug: offer.vendor,
+          externalId: offer.externalId,
+          createdProductId: "prod-new",
+          candidateProductId: CANDIDATE.id,
+          confidence: 0.7,
+          strategy: "fuzzy",
+        }),
+      ],
+      skipDuplicates: true,
     });
+
+    warnSpy.mockRestore();
+  });
+
+  it("suggestion deja connue (rechargement, ou deja rejetee) : ni dupliquee ni recomptee", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const matchingEngine = fixedEngine({ candidate: CANDIDATE, confidence: 0.7, strategy: "fuzzy", needsReview: true });
+    pendingMatchCreateMany.mockResolvedValueOnce({ count: 0 });
+
+    const summary = await loadOffers([makeOffer()], {
+      matchingEngine,
+      getCandidatesForCategory: async () => [CANDIDATE],
+    });
+
+    expect(pendingMatchCreateMany).toHaveBeenCalledWith(expect.objectContaining({ skipDuplicates: true }));
+    expect(summary.productsPendingReview).toBe(0);
+    expect(summary.offersUpserted).toBe(1);
 
     warnSpy.mockRestore();
   });
@@ -121,7 +141,7 @@ describe("loadOffers", () => {
     expect(summary.productsCreated).toBe(1);
     expect(summary.productsMatched).toBe(0);
     expect(summary.productsPendingReview).toBe(0);
-    expect(pendingMatchCreate).not.toHaveBeenCalled();
+    expect(pendingMatchCreateMany).not.toHaveBeenCalled();
   });
 
   it("une offre qui echoue au chargement ne bloque pas le run : les suivantes sont traitees", async () => {
