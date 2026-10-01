@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Panel } from "@/components/ui/Panel";
 import { ResultList, type ResultListItem } from "@/features/product-listing/components/ResultList";
 import type { ProductSearchResult } from "@/lib/api-types";
 import { formatPrice } from "@/lib/format";
@@ -10,6 +11,8 @@ import { findLandingPage, type LandingPage } from "@/lib/landing-pages";
 import { fetchLandingResults } from "@/lib/landing-results";
 import { productDisplayName } from "@/lib/product-name";
 import { BASE_OPEN_GRAPH, SITE_URL } from "@/lib/site";
+
+import { LandingBestDeal } from "./landing-best-deal";
 
 interface LandingPageProps {
   params: Promise<{ slug: string }>;
@@ -71,17 +74,19 @@ export default async function LandingPageRoute({ params }: LandingPageProps) {
   const { page, results } = await loadLanding(slug);
   const items = results.map(toResultListItem);
   const prices = items.map((item) => item.price).filter((price) => price > 0);
-  const best = items.find((item) => item.price > 0);
+  const bestResult = results.find((result) => Number(result.best_deal.price) > 0);
 
   return (
-    <main className="mx-auto flex max-w-xl flex-col gap-6 p-4">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-xl font-medium text-gray-900">{page.h1}</h1>
-        <p className="text-sm text-gray-600">{page.intro}</p>
+    <main className="mx-auto flex max-w-3xl flex-col gap-4 px-4 pb-12 pt-4 sm:gap-5">
+      <header className="flex flex-col gap-3 rounded-card border border-gray-200 bg-white p-5 sm:p-8">
+        <h1 className="text-balance text-[1.75rem] font-medium leading-tight tracking-display text-gray-900 sm:text-4xl">
+          {page.h1}
+        </h1>
+        <p className="max-w-[60ch] text-base text-gray-600">{page.intro}</p>
       </header>
 
       {items.length === 0 ? (
-        <p className="text-sm text-gray-500">
+        <p className="rounded-card border border-gray-200 bg-white p-5 text-sm text-gray-500">
           Aucune offre n&apos;est suivie pour le moment.{" "}
           <Link href="/" className="font-medium text-gray-900 underline">
             Lancer une recherche
@@ -89,13 +94,28 @@ export default async function LandingPageRoute({ params }: LandingPageProps) {
         </p>
       ) : (
         <>
-          <p className="text-sm text-gray-600">
-            {items.length} produit{items.length > 1 ? "s" : ""} comparé{items.length > 1 ? "s" : ""}
-            {priceRange(prices)}
-            .{best ? ` Meilleur deal : ${best.productName}, ${formatPrice(best.price, best.currency)} chez ${best.vendorName}.` : ""}
-          </p>
+          {bestResult ? (
+            <LandingBestDeal
+              data={{
+                productName: productDisplayName(bestResult),
+                imageUrl: bestResult.image_url,
+                vendorName: bestResult.best_deal.vendor_name,
+                offerId: bestResult.best_deal.id,
+                price: Number(bestResult.best_deal.price),
+                currency: bestResult.best_deal.currency,
+                averagePrice: null,
+                offerUrl: bestResult.best_deal.url,
+              }}
+            />
+          ) : null}
 
-          <ResultList state={{ status: "success", data: items }} initialVisibleCount={items.length} />
+          <Panel title="Tous les produits">
+            <p className="tabular mb-3 text-sm text-gray-600">
+              {items.length} produit{items.length > 1 ? "s" : ""} comparé{items.length > 1 ? "s" : ""}
+              {priceRange(prices)}.
+            </p>
+            <ResultList state={{ status: "success", data: items }} initialVisibleCount={items.length} />
+          </Panel>
 
           <JsonLd
             data={{

@@ -23,12 +23,15 @@ interface SimilarProductsProps {
 
 // Discret par design (pas de bordure accent) : ne doit jamais concurrencer le
 // BestDealCard, seul detenteur de l'accent "meilleur prix" sur la page.
+/** Deux rangees sur ordinateur, quatre sur mobile : jamais de defilement coupe. */
+const MAX_ITEMS = 8;
+
 export function SimilarProducts({ state, onRetry }: SimilarProductsProps) {
   if (state.status === "loading") {
     return (
-      <div className="flex gap-3 overflow-x-auto">
-        {[0, 1, 2].map((item) => (
-          <SkeletonBlock key={item} className="h-32 w-28 flex-none" />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {[0, 1, 2, 3].map((item) => (
+          <SkeletonBlock key={item} className="h-40" />
         ))}
       </div>
     );
@@ -45,17 +48,17 @@ export function SimilarProducts({ state, onRetry }: SimilarProductsProps) {
   }
 
   return (
-    <ul className="flex gap-3 overflow-x-auto pb-2">
-      {data.map((item) => (
-        <li key={item.id} className="w-28 flex-none">
-          <Link href={`/product/${item.id}`} className="flex flex-col gap-1 rounded-card border border-gray-100 p-2">
-            <div className="relative h-20 w-full overflow-hidden rounded-lg bg-gray-50">
+    <ul className="grid grid-cols-2 gap-x-4 gap-y-2 border-t-2 border-gray-900 pt-3 sm:grid-cols-4">
+      {data.slice(0, MAX_ITEMS).map((item) => (
+        <li key={item.id}>
+          <Link href={`/product/${item.id}`} className="-mx-2 flex h-full flex-col gap-1.5 rounded-key p-2 transition-colors hover:bg-gray-50">
+            <div className="relative mb-1 h-24 w-full overflow-hidden">
               {item.imageUrl ? (
-                <ProductImage src={item.imageUrl} alt={item.productName} sizes="112px" />
+                <ProductImage src={item.imageUrl} alt={item.productName} sizes="120px" />
               ) : null}
             </div>
-            <p className="truncate text-xs text-gray-700">{item.productName}</p>
-            <p className="text-xs font-medium text-gray-900">{formatPrice(item.price, item.currency)}</p>
+            <p className="line-clamp-2 text-xs text-gray-700">{item.productName}</p>
+            <p className="tabular mt-auto text-sm font-medium text-gray-900">{formatPrice(item.price, item.currency)}</p>
           </Link>
         </li>
       ))}

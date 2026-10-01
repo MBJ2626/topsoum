@@ -4,8 +4,8 @@
   "description": "Comparateur de prix électronique en Tunisie",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "background_color": "#eef0f3",
+  "theme_color": "#eef0f3",
   "icons": [
     {
       "src": "/icon.svg",

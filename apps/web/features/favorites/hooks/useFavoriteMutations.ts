@@ -49,7 +49,7 @@ export function useToggleTracking() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ price_tracking: priceTracking }),
       });
-      return parseJsonOrThrow<FavoriteOut>(response, "Impossible de mettre a jour le suivi de prix.");
+      return parseJsonOrThrow<FavoriteOut>(response, "Impossible de mettre à jour le suivi de prix.");
     },
   });
 }

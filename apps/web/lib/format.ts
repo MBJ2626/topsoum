@@ -11,5 +11,7 @@ export function computeDiscountPercent(price: number, averagePrice: number | nul
   if (averagePrice == null || averagePrice <= 0 || price >= averagePrice) {
     return null;
   }
-  return Math.round(((averagePrice - price) / averagePrice) * 100);
+  const percent = Math.round(((averagePrice - price) / averagePrice) * 100);
+  // Un "-0%" n'apprend rien a l'utilisateur : pas d'indicateur sous 1 %.
+  return percent >= 1 ? percent : null;
 }

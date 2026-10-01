@@ -20,13 +20,13 @@ interface MatchingQueueProps {
 function ProductSummaryCard({ label, product }: { label: string; product: PendingMatchProductSummary }) {
   return (
     <div className="flex flex-1 items-center gap-2">
-      <div className="relative h-12 w-12 flex-none overflow-hidden rounded-lg bg-gray-50">
+      <div className="relative h-12 w-12 flex-none overflow-hidden rounded-key">
         {product.image_url ? (
           <ProductImage src={product.image_url} alt={product.model} sizes="48px" />
         ) : null}
       </div>
       <div>
-        <p className="text-xs text-gray-400">{label}</p>
+        <p className="text-xs text-gray-500">{label}</p>
         <p className="text-sm text-gray-900">
           {productDisplayName(product)}
         </p>
@@ -41,13 +41,13 @@ function MergePicker({ matchId, onDone }: { matchId: string; onDone: () => void 
   const mergeMatch = useMergeMatch();
 
   return (
-    <div className="flex flex-col gap-2 rounded-card border border-gray-200 p-3">
+    <div className="flex flex-col gap-2 rounded-card border border-gray-200 bg-white p-3">
       <input
         type="search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Chercher le produit cible..."
-        className="min-h-[44px] rounded-full border border-gray-300 px-4 text-sm"
+        className="min-h-[44px] rounded-key border border-gray-300 bg-white px-4 text-sm"
       />
 
       {pickerQuery.status === "pending" && query.trim().length > 1 ? (
@@ -59,7 +59,7 @@ function MergePicker({ matchId, onDone }: { matchId: string; onDone: () => void 
       {pickerQuery.status === "success" ? (
         <ul className="flex flex-col gap-1">
           {pickerQuery.data.results.length === 0 ? (
-            <li className="text-xs text-gray-500">Aucun produit trouve.</li>
+            <li className="text-xs text-gray-500">Aucun produit trouvé.</li>
           ) : (
             pickerQuery.data.results.map((result) => (
               <li key={result.id}>
@@ -67,7 +67,7 @@ function MergePicker({ matchId, onDone }: { matchId: string; onDone: () => void 
                   type="button"
                   disabled={mergeMatch.isPending}
                   onClick={() => mergeMatch.mutate({ matchId, targetProductId: result.id }, { onSuccess: onDone })}
-                  className="min-h-[44px] w-full rounded-lg px-2 text-left text-sm text-gray-900 hover:bg-gray-50 disabled:opacity-50"
+                  className="min-h-[44px] w-full rounded-key px-2 text-start text-sm text-gray-900 hover:bg-gray-50 disabled:opacity-50"
                 >
                   {productDisplayName(result)}
                 </button>
@@ -77,7 +77,7 @@ function MergePicker({ matchId, onDone }: { matchId: string; onDone: () => void 
         </ul>
       ) : null}
 
-      {mergeMatch.isError ? <p className="text-xs text-red-600">Echec de la fusion, reessaie.</p> : null}
+      {mergeMatch.isError ? <p className="text-xs text-red-600">Échec de la fusion, réessaie.</p> : null}
     </div>
   );
 }
@@ -90,12 +90,12 @@ function PendingMatchRow({ match }: { match: PendingMatchOut }) {
   return (
     <li className="flex flex-col gap-3 p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <ProductSummaryCard label="Produit cree par l'ETL" product={match.created_product} />
-        <ProductSummaryCard label="Candidat suggere" product={match.candidate_product} />
+        <ProductSummaryCard label="Produit créé par l'ETL" product={match.created_product} />
+        <ProductSummaryCard label="Candidat suggéré" product={match.candidate_product} />
       </div>
 
       <p className="text-xs text-gray-500">
-        Confiance {Math.round(match.confidence * 100)}% — strategie {match.strategy} — {match.vendor_slug}
+        Confiance {Math.round(match.confidence * 100)}% — stratégie {match.strategy} — {match.vendor_slug}
       </p>
 
       <div className="flex flex-wrap gap-2">
@@ -120,8 +120,8 @@ function PendingMatchRow({ match }: { match: PendingMatchOut }) {
         </Button>
       </div>
 
-      {approveMatch.isError ? <p className="text-xs text-red-600">Echec de l&apos;approbation, reessaie.</p> : null}
-      {rejectMatch.isError ? <p className="text-xs text-red-600">Echec du rejet, reessaie.</p> : null}
+      {approveMatch.isError ? <p className="text-xs text-red-600">Échec de l&apos;approbation, réessaie.</p> : null}
+      {rejectMatch.isError ? <p className="text-xs text-red-600">Échec du rejet, réessaie.</p> : null}
 
       {mergeOpen ? <MergePicker matchId={match.id} onDone={() => setMergeOpen(false)} /> : null}
     </li>
@@ -140,17 +140,17 @@ export function MatchingQueue({ state, onRetry }: MatchingQueueProps) {
   }
 
   if (state.status === "error") {
-    return <ErrorState message="Impossible de charger la file de matching a valider." onRetry={onRetry} />;
+    return <ErrorState message="Impossible de charger la file de matching à valider." onRetry={onRetry} />;
   }
 
   const { data } = state;
 
   if (data.length === 0) {
-    return <p className="text-sm text-gray-500">Aucun match a valider pour le moment.</p>;
+    return <p className="text-sm text-gray-500">Aucun match à valider pour le moment.</p>;
   }
 
   return (
-    <ul className="divide-y divide-gray-100 rounded-card border border-gray-100">
+    <ul className="divide-y divide-gray-200 rounded-card border border-gray-200 bg-white">
       {data.map((match) => (
         <PendingMatchRow key={match.id} match={match} />
       ))}

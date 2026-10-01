@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 async function recordOfferClick(offerId: string): Promise<void> {
   const response = await fetch(`/api/offers/${offerId}/click`, { method: "POST" });
   if (!response.ok) {
-    throw new Error("Le suivi du clic a echoue");
+    throw new Error("Le suivi du clic a échoué");
   }
 }
 

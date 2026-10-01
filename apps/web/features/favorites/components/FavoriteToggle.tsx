@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { StarIcon } from "@/components/ui/icons";
+
 import { useAddFavorite, useRemoveFavorite, useToggleTracking } from "../hooks/useFavoriteMutations";
 
 export interface FavoriteState {
@@ -67,14 +69,16 @@ export function FavoriteToggle({ productId, initialFavorite }: FavoriteTogglePro
         disabled={isFavoritePending}
         aria-pressed={favorite != null}
         aria-label={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
-        className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 text-xl disabled:opacity-50"
+        className={`flex h-11 w-11 items-center justify-center rounded-key border transition-[border-color,color,transform] duration-150 active:scale-95 disabled:opacity-50 ${
+          favorite ? "border-gray-900 text-gray-900" : "border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-900"
+        }`}
       >
-        {isFavoritePending ? "…" : favorite ? "★" : "☆"}
+        <StarIcon size={20} filled={favorite != null} className={isFavoritePending ? "animate-pulse" : undefined} />
       </button>
 
       {favoriteError ? (
         <button type="button" onClick={handleFavoriteClick} className="text-xs text-red-600 underline">
-          Echec, reessayer
+          Échec, réessayer
         </button>
       ) : null}
 
@@ -93,7 +97,7 @@ export function FavoriteToggle({ productId, initialFavorite }: FavoriteTogglePro
 
       {trackingError ? (
         <button type="button" onClick={handleTrackingChange} className="text-xs text-red-600 underline">
-          Echec du suivi, reessayer
+          Échec du suivi, réessayer
         </button>
       ) : null}
     </div>

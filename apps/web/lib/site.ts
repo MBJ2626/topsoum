@@ -16,3 +16,6 @@ export const BASE_OPEN_GRAPH = {
   siteName: SITE_NAME,
   locale: "fr_TN",
 } satisfies NonNullable<Metadata["openGraph"]>;
+
+/** Revendeurs actuellement compares (MVP), affiches sur l'accueil. */
+export const COMPARED_VENDORS = ["Tunisianet", "MyTek", "Spacenet"] as const;
