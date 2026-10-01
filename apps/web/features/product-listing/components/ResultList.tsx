@@ -41,10 +41,10 @@ export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }:
 
   if (state.status === "loading") {
     return (
-      <ul className="divide-y divide-gray-100 border-t border-gray-100">
+      <ul className="divide-y divide-gray-200">
         {[0, 1, 2].map((row) => (
           <li key={row} className="flex items-center gap-3 py-3">
-            <SkeletonBlock className="h-12 w-12 flex-none" />
+            <SkeletonBlock className="h-14 w-14 flex-none" />
             <div className="flex flex-1 flex-col gap-2">
               <SkeletonLine className="w-2/3" />
               <SkeletonLine className="w-1/3" />
@@ -58,7 +58,7 @@ export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }:
   if (state.status === "error") {
     return (
       <ErrorState
-        message="Impossible de charger les autres resultats."
+        message="Impossible de charger les autres résultats."
         onRetry={onRetry ?? (() => window.location.reload())}
       />
     );
@@ -72,13 +72,13 @@ export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }:
 
   return (
     <div className="flex flex-col gap-3">
-      <ul className="divide-y divide-gray-100 border-t border-gray-100">
+      <ul className="divide-y divide-gray-200">
         {data.slice(0, visibleCount).map((item) => (
           <li key={item.id} data-testid="result-row">
-            <Link href={`/product/${item.id}`} className="flex min-h-[44px] items-center gap-3 py-3">
-              <div className="relative h-12 w-12 flex-none overflow-hidden rounded-lg bg-gray-50">
+            <Link href={`/product/${item.id}`} className="-mx-2 flex min-h-[44px] items-center gap-3 rounded-key px-2 py-3 transition-colors hover:bg-gray-50">
+              <div className="relative h-14 w-14 flex-none overflow-hidden rounded-key">
                 {item.imageUrl ? (
-                  <ProductImage src={item.imageUrl} alt={item.productName} sizes="48px" />
+                  <ProductImage src={item.imageUrl} alt={item.productName} sizes="56px" />
                 ) : null}
               </div>
               <div className="min-w-0 flex-1">
@@ -87,8 +87,8 @@ export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }:
                   {item.offersCount > 1 ? `${item.offersCount} vendeurs` : item.vendorName}
                 </p>
               </div>
-              <span className="flex-none text-sm font-medium text-gray-900">
-                {item.price > 0 ? formatPrice(item.price, item.currency) : "Prix en cours de mise a jour"}
+              <span className="tabular flex-none text-end text-sm font-medium text-gray-900">
+                {item.price > 0 ? formatPrice(item.price, item.currency) : "Prix en cours de mise à jour"}
               </span>
             </Link>
           </li>
@@ -97,7 +97,7 @@ export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }:
 
       {data.length > visibleCount ? (
         <Button variant="secondary" onClick={() => setVisibleCount((count) => count + BATCH_SIZE)}>
-          Afficher plus de resultats
+          Afficher plus de résultats
         </Button>
       ) : null}
     </div>

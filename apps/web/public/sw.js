@@ -12,7 +12,7 @@
 // Changer CACHE_VERSION a chaque modification de ce fichier : les anciens
 // caches sont supprimes a l'activation.
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v3";
 const STATIC_CACHE = `topsoum-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `topsoum-pages-${CACHE_VERSION}`;
 const API_CACHE = `topsoum-api-${CACHE_VERSION}`;

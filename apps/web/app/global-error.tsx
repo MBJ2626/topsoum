@@ -14,16 +14,16 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html lang="fr">
-      <body className="bg-white text-gray-900 antialiased">
+      <body className="bg-gray-100 text-gray-900 antialiased">
         <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
           <p className="text-base font-medium text-gray-900">TopSoum est temporairement indisponible.</p>
-          <p className="text-sm text-gray-500">Merci de reessayer dans un instant.</p>
+          <p className="text-sm text-gray-500">Merci de réessayer dans un instant.</p>
           <button
             type="button"
             onClick={reset}
-            className="min-h-[44px] min-w-[44px] rounded-full bg-accent px-5 text-sm font-medium text-accent-foreground"
+            className="min-h-[44px] min-w-[44px] rounded-key bg-accent px-5 text-sm font-medium text-accent-foreground"
           >
-            Reessayer
+            Réessayer
           </button>
         </div>
       </body>

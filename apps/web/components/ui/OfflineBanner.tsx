@@ -25,15 +25,15 @@ export function OfflineBanner() {
   const recentlyViewed = recentlyViewedQuery.data ?? [];
 
   return (
-    <div className="sticky top-0 z-20 flex flex-col gap-2 border-b border-gray-200 bg-gray-50 p-3">
-      <p className="text-sm font-medium text-gray-900">
-        Connexion perdue — affichage des derniers produits consultes.
+    <div role="status" className="sticky top-0 z-30 flex flex-col gap-2 bg-gray-900 px-4 py-3 text-white">
+      <p className="text-sm font-medium">
+        Connexion perdue — affichage des derniers produits consultés.
       </p>
       {recentlyViewed.length > 0 ? (
         <ul className="flex gap-3 overflow-x-auto">
           {recentlyViewed.map((item) => (
             <li key={item.id} className="flex-none">
-              <Link href={`/product/${item.id}`} className="text-xs text-gray-700 underline">
+              <Link href={`/product/${item.id}`} className="tabular inline-flex min-h-[44px] items-center text-xs text-gray-200 underline underline-offset-2">
                 {item.name} — {formatPrice(item.price, item.currency)}
               </Link>
             </li>

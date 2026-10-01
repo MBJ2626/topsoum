@@ -10,7 +10,7 @@ import type { ProductSearchResponse } from "@/lib/api-types";
 async function fetchProductPicker(query: string): Promise<ProductSearchResponse> {
   const response = await fetch(`/api/products/search?q=${encodeURIComponent(query)}&limit=8`);
   if (!response.ok) {
-    throw new Error("La recherche de produit a echoue.");
+    throw new Error("La recherche de produit a échoué.");
   }
   return response.json();
 }

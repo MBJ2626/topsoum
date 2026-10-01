@@ -14,7 +14,7 @@ interface SearchPageProps {
 async function fetchProductSearchServer(query: string): Promise<ProductSearchResponse> {
   const response = await apiFetch(`/products/search?q=${encodeURIComponent(query)}&limit=20`, { auth: false });
   if (!response.ok) {
-    throw new Error("La recherche a echoue.");
+    throw new Error("La recherche a échoué.");
   }
   return response.json();
 }

@@ -1,5 +1,8 @@
 "use client";
 
+import { ErrorState } from "@/components/ui/ErrorState";
+import { Panel } from "@/components/ui/Panel";
+
 import { useMemo, useState } from "react";
 
 import { fromQuery } from "@/components/ui/async-state";
@@ -76,34 +79,32 @@ export function SearchPageClient({ query }: SearchPageClientProps) {
   }));
 
   if (query.trim().length === 0) {
-    return <p className="p-6 text-center text-sm text-gray-500">Tape une recherche pour commencer.</p>;
+    return <p className="mx-auto max-w-3xl p-6 text-center text-sm text-gray-500">Tapez une recherche pour commencer.</p>;
   }
 
   if (searchQuery.status === "error") {
     return (
-      <div className="p-6">
-        <p className="mb-3 text-sm text-gray-600">Impossible de charger les resultats.</p>
-        <button
-          type="button"
-          onClick={() => searchQuery.refetch()}
-          className="min-h-[44px] rounded-full border border-accent px-4 text-sm font-medium text-accent"
-        >
-          Reessayer
-        </button>
-      </div>
+      <main className="mx-auto max-w-3xl p-4">
+        <ErrorState message="Impossible de charger les résultats." onRetry={() => searchQuery.refetch()} />
+      </main>
     );
   }
 
   if (searchQuery.status === "success" && results.length === 0) {
     return (
-      <p className="p-6 text-center text-sm text-gray-500">
-        Aucun produit trouve pour « {query} ». Essaie une autre recherche.
-      </p>
+      <main className="mx-auto max-w-3xl p-4">
+        <div className="rounded-card border border-gray-200 bg-white p-6 text-center">
+          <p className="text-base font-medium text-gray-900">Aucun produit trouvé pour « {query} ».</p>
+          <p className="mt-1 text-sm text-gray-500">Essayez un autre nom de modèle ou une marque.</p>
+        </div>
+      </main>
     );
   }
 
   return (
-    <main className="mx-auto flex max-w-xl flex-col gap-6 p-4">
+    <main className="mx-auto flex max-w-3xl flex-col gap-4 px-4 pb-12 pt-4 sm:gap-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="min-w-0 flex-1 truncate text-lg font-medium text-gray-900">« {query} »</h1>
       <FilterPanel
         optionsState={optionsState}
         values={filterValues}
@@ -111,9 +112,12 @@ export function SearchPageClient({ query }: SearchPageClientProps) {
         onChange={setFilterValues}
         onRetryOptions={() => searchQuery.refetch()}
       />
+      </div>
 
       {searchQuery.status === "success" && filteredResults.length === 0 ? (
-        <p className="text-center text-sm text-gray-500">Aucun resultat pour ces filtres.</p>
+        <p className="rounded-card border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">
+          Aucun résultat pour ces filtres.
+        </p>
       ) : (
         <>
           <BestDealCard
@@ -123,22 +127,21 @@ export function SearchPageClient({ query }: SearchPageClientProps) {
             favoriteSlot={dominant ? <FavoriteToggle productId={dominant.id} initialFavorite={null} /> : undefined}
           />
 
-          <section>
-            <h2 className="mb-2 text-sm font-medium text-gray-900">Autres vendeurs</h2>
+          <Panel title="Autres vendeurs">
             <OfferList
               state={offersState}
               onRetry={() => productDetailQuery.refetch()}
               onViewOffer={(offerId) => offerClick.mutate(offerId)}
             />
-          </section>
+          </Panel>
 
           {filteredResults.length > 1 ? (
-            <section>
-              <h2 className="mb-2 text-sm font-medium text-gray-900">
-                Autres resultats ({filteredResults.length - 1})
-              </h2>
+            <Panel
+              title="Autres résultats"
+              aside={<span className="tabular text-sm text-gray-500">{filteredResults.length - 1}</span>}
+            >
               <ResultList state={otherResultsState} onRetry={() => searchQuery.refetch()} />
-            </section>
+            </Panel>
           ) : null}
         </>
       )}

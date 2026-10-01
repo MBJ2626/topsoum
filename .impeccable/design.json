@@ -1,0 +1,463 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-01T13:13:55.219331+00:00",
+  "title": "Design System: TopSoum",
+  "extensions": {
+    "colorMeta": {
+      "ultramarine": {
+        "role": "primary",
+        "displayName": "Electric Ultramarine",
+        "canonical": "#3a5bff",
+        "tonalRamp": [
+          "#101a5c",
+          "#1a2a94",
+          "#2a47e0",
+          "#3a5bff",
+          "#6b84ff",
+          "#9fb0ff",
+          "#d9e0ff",
+          "#eef1ff"
+        ]
+      },
+      "ultramarine-pressed": {
+        "role": "primary",
+        "displayName": "Pressed Ultramarine",
+        "canonical": "#2a47e0",
+        "tonalRamp": [
+          "#101a5c",
+          "#1a2a94",
+          "#2a47e0",
+          "#3a5bff",
+          "#6b84ff",
+          "#9fb0ff",
+          "#d9e0ff",
+          "#eef1ff"
+        ]
+      },
+      "on-ultramarine": {
+        "role": "primary",
+        "displayName": "On-Ultramarine White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "selection-wash": {
+        "role": "primary",
+        "displayName": "Selection Wash",
+        "canonical": "#d9e0ff",
+        "tonalRamp": [
+          "#101a5c",
+          "#1a2a94",
+          "#2a47e0",
+          "#3a5bff",
+          "#6b84ff",
+          "#9fb0ff",
+          "#d9e0ff",
+          "#eef1ff"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#15171c",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "ink-raised": {
+        "role": "neutral",
+        "displayName": "Raised Ink",
+        "canonical": "#23262c",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "graphite": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "#363a41",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "slate": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "canonical": "#4a4f57",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#5f646d",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "dust": {
+        "role": "neutral",
+        "displayName": "Dust",
+        "canonical": "#9aa0a9",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "edge-strong": {
+        "role": "neutral",
+        "displayName": "Strong Edge",
+        "canonical": "#cdd1d7",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "edge": {
+        "role": "neutral",
+        "displayName": "Edge",
+        "canonical": "#e2e5e9",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "shelf": {
+        "role": "neutral",
+        "displayName": "Shelf",
+        "canonical": "#eef0f3",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "wash": {
+        "role": "neutral",
+        "displayName": "Wash",
+        "canonical": "#f6f7f9",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "box-face": {
+        "role": "neutral",
+        "displayName": "Box Face",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#15171c",
+          "#23262c",
+          "#363a41",
+          "#5f646d",
+          "#9aa0a9",
+          "#cdd1d7",
+          "#e2e5e9",
+          "#f6f7f9"
+        ]
+      },
+      "savings-green": {
+        "role": "semantic",
+        "displayName": "Savings Green",
+        "canonical": "#0f7a55",
+        "tonalRamp": [
+          "#05301f",
+          "#0a4f37",
+          "#0f7a55",
+          "#1f9a6e",
+          "#4fbf93",
+          "#8fdbbd",
+          "#c9efdf",
+          "#ebf8f2"
+        ]
+      },
+      "alert-red": {
+        "role": "semantic",
+        "displayName": "Alert Red",
+        "canonical": "#d92d2d",
+        "tonalRamp": [
+          "#4d0d0d",
+          "#8a1717",
+          "#b72222",
+          "#d92d2d",
+          "#e85c5c",
+          "#f29393",
+          "#f9c8c8",
+          "#fdecec"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Home headline only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Landing-page and 404 titles."
+      },
+      "price": {
+        "displayName": "Price",
+        "purpose": "Best-deal amount; largest number on any screen, tabular."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Best-deal product name, search query heading, wordmark."
+      },
+      "section-title": {
+        "displayName": "Section Title",
+        "purpose": "Box-face titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Intro paragraphs and search input (16px minimum)."
+      },
+      "body-sm": {
+        "displayName": "Body Small",
+        "purpose": "List rows, offer rows, keys, captions."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Side-label column headers, Meilleur prix tab, shipping and stock notes."
+      }
+    },
+    "shadows": [
+      {
+        "name": "tray-float",
+        "value": "0 12px 32px -12px rgba(21,23,28,0.18)",
+        "purpose": "Search suggestions tray only; box faces never carry a shadow."
+      }
+    ],
+    "focus": [
+      {
+        "name": "focus-ring",
+        "value": "outline: 2px solid #3a5bff; outline-offset: 2px",
+        "purpose": "Single global keyboard focus ring (:focus-visible)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "tray-out",
+        "value": "200ms cubic-bezier(0.22, 1, 0.36, 1); clip-path inset(0 0 100% 0 round 16px) + translateY(-6px) to rest",
+        "purpose": "Suggestions tray and filter drawer slide out of their key like a drawer from a box; no animation under prefers-reduced-motion."
+      },
+      {
+        "name": "key-press",
+        "value": "transform: scale(0.98) over 150ms",
+        "purpose": "Tap feedback on every key (0.97 on search keys, 0.95 on the favorite key)."
+      },
+      {
+        "name": "disclosure",
+        "value": "rotate(180deg) over 200ms",
+        "purpose": "Specs chevron when the spec sheet opens."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Key",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The screen's single primary action (Voir l'offre, Chercher).",
+      "html": "<button class=\"ds-btn-primary\">Voir l'offre <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 17 17 7M8 7h9v9\"/></svg></button>",
+      "css": ".ds-btn-primary { font-family: 'Readex Pro', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 20px; border: none; border-radius: 12px; background: #3a5bff; color: #ffffff; font-size: 16px; font-weight: 500; cursor: pointer; transition: background-color 150ms, transform 150ms; } .ds-btn-primary:hover { background: #2a47e0; } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-primary:focus-visible { outline: 2px solid #3a5bff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Key",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Every non-primary key: per-row offer, show more, back home.",
+      "html": "<button class=\"ds-btn-secondary\">Voir l'offre <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 17 17 7M8 7h9v9\"/></svg></button>",
+      "css": ".ds-btn-secondary { font-family: 'Readex Pro', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 16px; border: 1px solid #cdd1d7; border-radius: 12px; background: #ffffff; color: #15171c; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms, border-color 150ms, transform 150ms; } .ds-btn-secondary:hover { border-color: #9aa0a9; background: #f6f7f9; } .ds-btn-secondary:active { transform: scale(0.98); } .ds-btn-secondary:focus-visible { outline: 2px solid #3a5bff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Hero Search",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Home search shell with the attached ultramarine Chercher key.",
+      "html": "<form class=\"ds-search\" role=\"search\"><span class=\"ds-search-icon\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m16 16 4.5 4.5\"/></svg></span><input class=\"ds-search-input\" type=\"search\" placeholder=\"iPhone 15, PC portable…\"><button class=\"ds-search-key\" type=\"submit\">Chercher</button></form>",
+      "css": ".ds-search { font-family: 'Readex Pro', ui-sans-serif, system-ui, sans-serif; display: flex; align-items: stretch; gap: 6px; padding: 6px; background: #ffffff; border: 1px solid #cdd1d7; border-radius: 16px; transition: border-color 150ms; max-width: 560px; } .ds-search:focus-within { border-color: #3a5bff; } .ds-search-icon { display: flex; align-items: center; padding-inline-start: 10px; color: #5f646d; } .ds-search-input { flex: 1; min-width: 0; min-height: 48px; border: none; background: transparent; font: inherit; font-size: 16px; color: #15171c; outline: none; caret-color: #3a5bff; } .ds-search-input::placeholder { color: #5f646d; } .ds-search-key { font: inherit; min-height: 48px; padding: 0 16px; border: none; border-radius: 12px; background: #3a5bff; color: #ffffff; font-size: 16px; font-weight: 500; cursor: pointer; transition: background-color 150ms, transform 150ms; } .ds-search-key:hover { background: #2a47e0; } .ds-search-key:active { transform: scale(0.97); } .ds-search-key:focus-visible { outline: 2px solid #3a5bff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Header Bar",
+      "kind": "nav",
+      "refersTo": "search-key-compact",
+      "description": "Sticky shelf header: wordmark plus compact search with an ink key.",
+      "html": "<header class=\"ds-header\"><a class=\"ds-wordmark\" href=\"#\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"/><path d=\"M3.5 9.5h17M10 9.5v3h4v-3\"/></svg>TopSoum</a><form class=\"ds-hsearch\" role=\"search\"><span class=\"ds-hsearch-icon\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m16 16 4.5 4.5\"/></svg></span><input class=\"ds-hsearch-input\" type=\"search\" placeholder=\"Rechercher un produit\"><button class=\"ds-hsearch-key\" aria-label=\"Chercher\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m16 16 4.5 4.5\"/></svg></button></form></header>",
+      "css": ".ds-header { font-family: 'Readex Pro', ui-sans-serif, system-ui, sans-serif; display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: #eef0f3; border-bottom: 1px solid #e2e5e9; } .ds-wordmark { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 18px; font-weight: 500; letter-spacing: -0.03em; color: #15171c; text-decoration: none; border-radius: 12px; } .ds-wordmark:focus-visible { outline: 2px solid #3a5bff; outline-offset: 2px; } .ds-hsearch { flex: 1; display: flex; gap: 6px; padding: 6px; background: #ffffff; border: 1px solid #e2e5e9; border-radius: 16px; } .ds-hsearch:focus-within { border-color: #3a5bff; } .ds-hsearch-icon { display: flex; align-items: center; padding-inline-start: 10px; color: #5f646d; } .ds-hsearch-input { flex: 1; min-width: 0; min-height: 36px; border: none; background: transparent; font: inherit; font-size: 16px; color: #15171c; outline: none; } .ds-hsearch-key { display: flex; align-items: center; justify-content: center; min-height: 36px; min-width: 44px; padding: 0 12px; border: none; border-radius: 12px; background: #15171c; color: #ffffff; cursor: pointer; transition: background-color 150ms, transform 150ms; } .ds-hsearch-key:hover { background: #23262c; } .ds-hsearch-key:active { transform: scale(0.97); } .ds-hsearch-key:focus-visible { outline: 2px solid #3a5bff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Best Deal Face",
+      "kind": "card",
+      "refersTo": "best-deal-tab",
+      "description": "The single boxed answer: 2px ultramarine edge, Meilleur prix pull-tab, 40px tabular price, savings figure, primary key.",
+      "html": "<article class=\"ds-deal\"><span class=\"ds-deal-tab\">Meilleur prix</span><h3 class=\"ds-deal-name\">Smartphone Lesia Young 6 4Go / 16Go</h3><p class=\"ds-deal-vendor\">chez Spacenet</p><div class=\"ds-deal-price-row\"><span class=\"ds-deal-price\">189,000 TND</span><span class=\"ds-deal-save\">-6% vs moyenne</span></div><button class=\"ds-deal-cta\">Voir l'offre <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 17 17 7M8 7h9v9\"/></svg></button></article>",
+      "css": ".ds-deal { font-family: 'Readex Pro', ui-sans-serif, system-ui, sans-serif; position: relative; margin-top: 12px; padding: 24px; background: #ffffff; border: 2px solid #3a5bff; border-radius: 16px; max-width: 520px; color: #15171c; } .ds-deal-tab { position: absolute; top: -13px; inset-inline-start: 24px; padding: 4px 12px 3px; background: #3a5bff; color: #ffffff; font-size: 12px; font-weight: 500; border-radius: 12px 12px 0 0; } .ds-deal-name { margin: 8px 0 0; font-size: 18px; font-weight: 500; line-height: 1.375; } .ds-deal-vendor { margin: 4px 0 0; font-size: 14px; color: #5f646d; } .ds-deal-price-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e5e9; } .ds-deal-price { font-size: 40px; font-weight: 500; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; } .ds-deal-save { font-size: 14px; font-weight: 500; color: #0f7a55; } .ds-deal-cta { font: inherit; display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; min-height: 52px; border: none; border-radius: 12px; background: #3a5bff; color: #ffffff; font-size: 16px; font-weight: 500; cursor: pointer; transition: background-color 150ms, transform 150ms; } .ds-deal-cta:hover { background: #2a47e0; } .ds-deal-cta:active { transform: scale(0.98); } .ds-deal-cta:focus-visible { outline: 2px solid #3a5bff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Side-Label Offer List",
+      "kind": "custom",
+      "refersTo": "box-face",
+      "description": "Printed comparison: 2px ink top rule, muted column headers, hairline rows, right-aligned tabular prices, inside a white box face.",
+      "html": "<section class=\"ds-face\"><h2 class=\"ds-face-title\">Autres vendeurs</h2><div class=\"ds-label\"><div class=\"ds-label-head\"><span>Revendeur</span><span>Prix</span></div><ul class=\"ds-label-rows\"><li><span class=\"ds-label-vendor\">Tunisianet</span><span class=\"ds-label-price\">189,000 TND</span></li><li><span class=\"ds-label-vendor\">MyTek</span><span class=\"ds-label-price\">189,900 TND</span></li></ul></div></section>",
+      "css": ".ds-face { font-family: 'Readex Pro', ui-sans-serif, system-ui, sans-serif; padding: 24px; background: #ffffff; border: 1px solid #e2e5e9; border-radius: 16px; max-width: 520px; color: #15171c; } .ds-face-title { margin: 0 0 12px; font-size: 16px; font-weight: 500; } .ds-label { border-top: 2px solid #15171c; } .ds-label-head { display: flex; justify-content: space-between; padding: 8px 0; font-size: 12px; color: #5f646d; border-bottom: 1px solid #e2e5e9; } .ds-label-rows { list-style: none; margin: 0; padding: 0; } .ds-label-rows li { display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 12px 0; border-bottom: 1px solid #e2e5e9; } .ds-label-rows li:last-child { border-bottom: none; } .ds-label-vendor { font-size: 14px; font-weight: 500; } .ds-label-price { font-size: 14px; font-weight: 500; text-align: end; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Filter Key",
+      "kind": "chip",
+      "refersTo": "filter-count",
+      "description": "The single collapsed-filters key; ultramarine count badge only when filters are active.",
+      "html": "<button class=\"ds-filter\" aria-expanded=\"false\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 7h10M18 7h2M4 17h4M12 17h8\"/><circle cx=\"16\" cy=\"7\" r=\"2\"/><circle cx=\"10\" cy=\"17\" r=\"2\"/></svg>Filtres<span class=\"ds-filter-count\">2</span></button>",
+      "css": ".ds-filter { font-family: 'Readex Pro', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid #cdd1d7; border-radius: 12px; background: #ffffff; color: #15171c; font-size: 14px; font-weight: 500; cursor: pointer; transition: border-color 150ms, transform 150ms; } .ds-filter:hover { border-color: #9aa0a9; } .ds-filter:active { transform: scale(0.98); } .ds-filter:focus-visible { outline: 2px solid #3a5bff; outline-offset: 2px; } .ds-filter-count { display: inline-flex; align-items: center; justify-content: center; height: 20px; min-width: 20px; padding: 0 4px; border-radius: 9999px; background: #3a5bff; color: #ffffff; font-size: 12px; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Popular Search Link",
+      "kind": "chip",
+      "refersTo": "chip-link",
+      "description": "White key links on the shelf, below the home fold.",
+      "html": "<a class=\"ds-chip\" href=\"#\">Smartphones pas chers</a>",
+      "css": ".ds-chip { font-family: 'Readex Pro', ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid #e2e5e9; border-radius: 12px; background: #ffffff; color: #363a41; font-size: 14px; text-decoration: none; transition: border-color 150ms, color 150ms; } .ds-chip:hover { border-color: #cdd1d7; color: #15171c; } .ds-chip:focus-visible { outline: 2px solid #3a5bff; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Boîte",
+    "overview": "TopSoum presents every product the way electronics arrive: a clean white box face carries the answer, and a printed side-label carries the comparison. Matte white faces (16px corners, a crisp 1px edge, never a shadow) sit on a cool shelf-gray ground. One electric ultramarine accent marks the single thing to do on a screen and the single best deal. Everything else is ink, muted gray and hairlines, the way a retail package is mostly white card and black print.\n\nDensity is calm and vertical: one column of faces, each holding one job (the answer, the price history, the other resellers, the specs, similar products). Comparisons never become grids of tiles; they become side-labels: a 2px ink rule across the top, hairline rules between rows, small muted column headers, prices right-aligned in tabular figures. Controls read as hardware keys: 12px-cornered rectangles that press in by 2% on tap, never pills.\n\nThe world is light only (dark mode is undecided). A barcode/EAN motif is deliberately withheld because the product has no EAN data; the packaging metaphor is carried by faces, edges, tabs and side-labels, not by fake packaging graphics.",
+    "keyCharacteristics": [
+      "Cool shelf-gray ground, matte white box faces, 1px edges, no resting shadows.",
+      "One ultramarine accent, rationed to the screen's primary key and the \"Meilleur prix\" deal.",
+      "Printed side-labels for every comparison: 2px ink top rule, hairline rows, tabular prices.",
+      "Hardware-key controls: 12px corners, 44px minimum, 2% press.",
+      "Readex Pro in two weights only, tight tracking on large type, tabular figures on every TND amount."
+    ],
+    "rules": [
+      {
+        "name": "The One Ultramarine Rule",
+        "body": "Ultramarine marks the screen's one primary action and the one best deal, plus focus and native control accents. The price-history line, the header search key, secondary keys, result lists and similar products stay ink and gray. If two ultramarine fills compete on one viewport, one of them is wrong.",
+        "section": "colors"
+      },
+      {
+        "name": "The Printed Ink Rule",
+        "body": "Hierarchy comes from ink versus muted gray, never from extra hues. No second accent, no tinted panels.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Weights Rule",
+        "body": "400 and 500 only. Emphasis comes from size, ink versus muted, and tracking, never from 600 or 700.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Price Rule",
+        "body": "Every TND amount, count and price range uses tabular figures so columns of prices align.",
+        "section": "typography"
+      },
+      {
+        "name": "The Box Face Rule",
+        "body": "Every content block is a white face with a 16px corner and a 1px edge on the shelf. Faces never carry a shadow; only the floating suggestions tray does.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** put every content block on a white face (16px corners, 1px edge) over the shelf gray.",
+      "**Do** open every comparison with the 2px ink rule and separate rows with hairlines, prices right-aligned in tabular figures.",
+      "**Do** keep ultramarine to the screen's single primary key, the single best deal (tab plus 2px edge), the active-filter count, focus and native control accents.",
+      "**Do** make every control a 12px-cornered key at least 44 by 44px that scales to 0.98 on tap.",
+      "**Do** set every TND amount in tabular figures.",
+      "**Do** use logical properties (start/end) for all direction-sensitive spacing and alignment.",
+      "**Do** honor reduced motion: the tray and filter drawer appear instantly."
+    ],
+    "donts": [
+      "**Don't** draw the price-history line, the header search key, result rows or similar products in ultramarine.",
+      "**Don't** add a second accent hue or tinted panels; savings green and alert red are signals, not decoration.",
+      "**Don't** use weights other than 400 and 500, or a second typeface.",
+      "**Don't** put shadows on box faces; the suggestions tray is the only floating element.",
+      "**Don't** shape controls as pills.",
+      "**Don't** set text in dust on white; muted is the lightest text tone.",
+      "**Don't** fabricate a barcode or EAN motif; the product has no EAN data.",
+      "**Don't** introduce dark-mode values until dark mode is decided.",
+      "**Don't** add uppercase kickers or eyebrow labels above headings."
+    ]
+  }
+}

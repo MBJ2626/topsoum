@@ -9,6 +9,7 @@ export function HomeSearchClient() {
 
   return (
     <SearchBar
+      placeholder="iPhone 15, PC portable…"
       onSubmit={(query) => {
         if (query.length > 0) {
           router.push(`/search?q=${encodeURIComponent(query)}`);

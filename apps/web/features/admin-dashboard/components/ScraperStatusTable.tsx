@@ -11,9 +11,9 @@ interface ScraperStatusTableProps {
 }
 
 const STATUS_LABELS: Record<ScraperRunStatus, string> = {
-  success: "Succes",
+  success: "Succès",
   partial: "Partiel",
-  failed: "Echec",
+  failed: "Échec",
   running: "En cours",
 };
 
@@ -25,7 +25,7 @@ function formatDate(value: string | null): string {
 export function ScraperStatusTable({ state, onRetry }: ScraperStatusTableProps) {
   if (state.status === "loading") {
     return (
-      <ul className="divide-y divide-gray-100 rounded-card border border-gray-100">
+      <ul className="divide-y divide-gray-200 rounded-card border border-gray-200 bg-white">
         {[0, 1, 2, 3].map((row) => (
           <li key={row} className="flex flex-col gap-2 p-4">
             <SkeletonLine className="w-1/3" />
@@ -43,11 +43,11 @@ export function ScraperStatusTable({ state, onRetry }: ScraperStatusTableProps) 
   const { data } = state;
 
   if (data.length === 0) {
-    return <p className="text-sm text-gray-500">Aucun scraper enregistre pour le moment.</p>;
+    return <p className="text-sm text-gray-500">Aucun scraper enregistré pour le moment.</p>;
   }
 
   return (
-    <ul className="divide-y divide-gray-100 rounded-card border border-gray-100">
+    <ul className="divide-y divide-gray-200 rounded-card border border-gray-200 bg-white">
       {data.map((vendor) => (
         <li key={vendor.vendor_name} className="flex flex-col gap-2 p-4">
           <div className="flex items-center justify-between gap-2">
@@ -61,15 +61,15 @@ export function ScraperStatusTable({ state, onRetry }: ScraperStatusTableProps) 
 
           <div className="grid grid-cols-3 gap-2 text-xs text-gray-500">
             <div>
-              <p className="text-gray-400">Dernier run</p>
+              <p className="text-gray-500">Dernier run</p>
               <p className="text-gray-700">{formatDate(vendor.last_run_started_at)}</p>
             </div>
             <div>
-              <p className="text-gray-400">Produits collectes</p>
+              <p className="text-gray-500">Produits collectés</p>
               <p className="text-gray-700">{vendor.products_collected ?? "—"}</p>
             </div>
             <div>
-              <p className="text-gray-400">Taux d&apos;echec</p>
+              <p className="text-gray-500">Taux d&apos;échec</p>
               <p className={vendor.failure_rate != null && vendor.failure_rate > 0.5 ? "text-red-600" : "text-gray-700"}>
                 {vendor.failure_rate != null ? `${Math.round(vendor.failure_rate * 100)}%` : "—"}
               </p>

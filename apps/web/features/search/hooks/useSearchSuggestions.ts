@@ -7,7 +7,7 @@ import type { ProductSearchResponse } from "@/lib/api-types";
 async function fetchSuggestions(query: string): Promise<ProductSearchResponse> {
   const response = await fetch(`/api/products/search?q=${encodeURIComponent(query)}&limit=5`);
   if (!response.ok) {
-    throw new Error("La recherche de suggestions a echoue");
+    throw new Error("La recherche de suggestions a échoué");
   }
   return response.json();
 }

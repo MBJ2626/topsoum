@@ -32,7 +32,7 @@ export function AdminPageClient() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-gray-900">Matching a valider</h2>
+        <h2 className="text-sm font-medium text-gray-900">Matching à valider</h2>
         <MatchingQueue state={pendingMatchesState} onRetry={() => pendingMatchesQuery.refetch()} />
       </section>
     </main>

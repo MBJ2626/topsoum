@@ -11,7 +11,8 @@ test("recherche -> resultats -> fiche produit -> clic offre -> redirection vende
   );
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "TopSoum" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "TopSoum" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
   const searchInput = page.getByTestId("search-input");
   await searchInput.fill("iPhone 15");

@@ -1,5 +1,8 @@
 "use client";
 
+import { ChevronDownIcon } from "@/components/ui/icons";
+import { Panel } from "@/components/ui/Panel";
+
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -63,7 +66,7 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
   );
 
   return (
-    <main className="mx-auto flex max-w-xl flex-col gap-8 p-4">
+    <main className="mx-auto flex max-w-3xl flex-col gap-4 px-4 pb-12 pt-4 sm:gap-5">
       <BestDealCard
         state={bestDealState}
         onRetry={() => productQuery.refetch()}
@@ -73,36 +76,38 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
         }
       />
 
-      <section>
-        <h2 className="mb-2 text-sm font-medium text-gray-900">Historique de prix</h2>
+      <Panel title="Historique de prix">
         <PriceHistoryChart state={historyState} onRetry={() => productQuery.refetch()} />
-      </section>
+      </Panel>
 
-      <section>
-        <h2 className="mb-2 text-sm font-medium text-gray-900">Autres vendeurs</h2>
+      <Panel title="Autres vendeurs">
         <OfferList
           state={offersState}
           onRetry={() => productQuery.refetch()}
           onViewOffer={(offerId) => offerClick.mutate(offerId)}
         />
-      </section>
+      </Panel>
 
       {productQuery.status === "success" ? (
-        <section>
+        <section className="rounded-card border border-gray-200 bg-white px-4 sm:px-6">
           <button
             type="button"
             onClick={() => setShowSpecs((open) => !open)}
             aria-expanded={showSpecs}
-            className="flex min-h-[44px] items-center gap-2 text-sm font-medium text-gray-900"
+            className="flex min-h-[56px] w-full items-center justify-between gap-2 text-base font-medium text-gray-900"
           >
-            Caracteristiques {showSpecs ? "▲" : "▼"}
+            Caractéristiques
+            <ChevronDownIcon
+              size={20}
+              className={`text-gray-500 transition-transform duration-200 ${showSpecs ? "rotate-180" : ""}`}
+            />
           </button>
           {showSpecs ? (
-            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700">
+            <dl className="mb-4 divide-y divide-gray-200 border-t-2 border-gray-900 text-sm">
               {Object.entries(productQuery.data.specs).map(([key, value]) => (
-                <div key={key} className="contents">
+                <div key={key} className="grid grid-cols-2 gap-4 py-2.5">
                   <dt className="text-gray-500">{key}</dt>
-                  <dd>{String(value)}</dd>
+                  <dd className="text-gray-900">{String(value)}</dd>
                 </div>
               ))}
             </dl>
@@ -110,10 +115,9 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
         </section>
       ) : null}
 
-      <section>
-        <h2 className="mb-2 text-sm font-medium text-gray-900">Produits similaires</h2>
+      <Panel title="Produits similaires">
         <SimilarProducts state={similarState} onRetry={() => similarQuery.refetch()} />
-      </section>
+      </Panel>
     </main>
   );
 }
