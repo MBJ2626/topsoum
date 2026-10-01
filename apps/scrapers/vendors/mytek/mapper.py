@@ -9,6 +9,7 @@ ScrapedOffer) :
 from __future__ import annotations
 
 import re
+import unicodedata
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -72,11 +73,29 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# MyTek glisse des telephones basiques ("Téléphone Portable LOGICOM P 197E")
+# dans sa page smartphone.html, et son fil d'ariane smartphone-mobile-tunisie
+# est un parent commun aux deux. Ses smartphones sont, eux, toujours nommes
+# "Smartphone ..." : le prefixe du nom est le seul signal fiable.
+_FEATURE_PHONE_PREFIXES = ("telephone portable",)
+
+
+def is_out_of_category(product_name: str, category: str) -> bool:
+    """Vrai si le produit n'appartient pas a la categorie scrapee (ex: un
+    telephone basique remonte sous "smartphones")."""
+    if category != "smartphones":
+        return False
+    normalized = unicodedata.normalize("NFKD", product_name).encode("ascii", "ignore").decode().strip().lower()
+    return normalized.startswith(_FEATURE_PHONE_PREFIXES)
+
+
 def map_listing_item(raw: dict[str, Any], *, category: str) -> dict[str, Any] | None:
     price = parse_price(raw.get("final_price"))
     external_id = raw.get("external_id")
     url = raw.get("url")
     if price is None or not external_id or not url:
+        return None
+    if is_out_of_category(raw.get("name") or "", category):
         return None
 
     return {
@@ -100,6 +119,8 @@ def map_product_page(raw: dict[str, Any], *, category: str, url: str) -> dict[st
     price = parse_price(raw.get("price_text"))
     external_id = raw.get("external_id")
     if price is None or not external_id:
+        return None
+    if is_out_of_category(raw.get("name") or "", category):
         return None
 
     return {

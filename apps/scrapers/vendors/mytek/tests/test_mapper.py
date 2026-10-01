@@ -103,3 +103,35 @@ def test_map_product_page_builds_standard_offer():
     assert offer["price"] == 1899.0
     assert offer["stock_status"] == "in_stock"
     assert offer["url"] == url
+
+
+def test_map_listing_item_skips_feature_phone_listed_as_smartphone():
+    raw = {
+        "external_id": "70512",
+        "name": "Téléphone Portable LOGICOM P 197E - Gris",
+        "url": "https://www.mytek.tn/telephone-portable-logicom-p-197e-gris.html",
+        "final_price": "40.9",
+        "stock_text": "En stock",
+        "brand": "LOGICOM",
+    }
+
+    assert mapper.map_listing_item(raw, category="smartphones") is None
+
+
+def test_map_product_page_skips_feature_phone_listed_as_smartphone():
+    raw = {
+        "external_id": "70512",
+        "name": "TELEPHONE PORTABLE Logicom P 197E - Gris",
+        "price_text": "40,900",
+        "availability_href": "https://schema.org/InStock",
+    }
+    url = "https://www.mytek.tn/telephone-portable-logicom-p-197e-gris.html"
+
+    assert mapper.map_product_page(raw, category="smartphones", url=url) is None
+
+
+def test_is_out_of_category_keeps_smartphones_and_other_categories():
+    assert not mapper.is_out_of_category("Smartphone SAMSUNG Galaxy A56 5G", "smartphones")
+    assert mapper.is_out_of_category("Téléphone Portable Nokia 105", "smartphones")
+    # La regle ne vise que la categorie smartphones.
+    assert not mapper.is_out_of_category("Téléphone Portable Nokia 105", "unknown")
