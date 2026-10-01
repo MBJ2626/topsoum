@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { JsonLd, siteJsonLd } from "@/lib/json-ld";
 import { LANDING_PAGES, type LandingPage } from "@/lib/landing-pages";
 import { fetchLandingResults } from "@/lib/landing-results";
-import { ProductImage } from "@/components/ui/ProductImage";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { BASE_OPEN_GRAPH, COMPARED_VENDORS } from "@/lib/site";
 
@@ -19,32 +19,32 @@ export const metadata: Metadata = {
 // Liens "Recherches populaires" rafraichis au plus toutes les heures (ISR).
 export const revalidate = 3600;
 
-interface HomeData {
-  landings: LandingPage[];
-  /** Photo de l'appareil le plus compare (le plus d'offres), affichee sur la face de boite. */
-  showcaseImage: string | null;
-}
-
-/** Landing pages ayant des produits ; rien si l'API est indisponible (l'accueil ne doit jamais tomber). */
-async function homeData(): Promise<HomeData> {
+/** Landing pages ayant des produits ; aucune si l'API est indisponible (l'accueil ne doit jamais tomber). */
+async function popularLandings(): Promise<LandingPage[]> {
   try {
     const results = await Promise.all(LANDING_PAGES.map((page) => fetchLandingResults(page)));
-    const withImage = results.flat().filter((result) => result.image_url != null);
-    const showcase = withImage.sort((a, b) => b.offers_count - a.offers_count)[0];
-    return {
-      landings: LANDING_PAGES.filter((_, index) => results[index].length > 0),
-      showcaseImage: showcase?.image_url ?? null,
-    };
+    return LANDING_PAGES.filter((_, index) => results[index].length > 0);
   } catch {
-    return { landings: [], showcaseImage: null };
+    return [];
   }
 }
+
+/**
+ * Appareils poses sur la face de boite : rendus officiels (fond transparent,
+ * 1000 px a l'origine) heberges dans public/showcase, donc toujours nets et
+ * jamais casses par une URL revendeur qui disparait. Image d'ambiance : ni
+ * lien ni texte alternatif (jamais une seconde action sur l'accueil).
+ */
+const SHOWCASE = [
+  { src: "/showcase/iphone-17-pro-max-orange.webp", box: "start-0 z-0 h-[86%] w-[60%]" },
+  { src: "/showcase/galaxy-s26-ultra.webp", box: "end-0 z-10 h-full w-[66%]" },
+] as const;
 
 // Philosophie "search-first" : une seule action possible au-dessus du fold.
 // La face de boite occupe l'ecran ; les liens vers les landing pages (maillage
 // interne SEO) sont SOUS le fold et n'apparaissent qu'en faisant defiler.
 export default async function HomePage() {
-  const { landings, showcaseImage } = await homeData();
+  const landings = await popularLandings();
 
   return (
     <>
@@ -55,7 +55,7 @@ export default async function HomePage() {
 
           <div className="grid flex-1 items-center gap-6 py-8 sm:py-10 md:grid-cols-[1fr_minmax(0,20rem)] md:gap-10">
           <div className="flex flex-col gap-5 sm:gap-7">
-            <h1 className="max-w-[16ch] text-balance text-[2.125rem] font-medium leading-[1.08] tracking-display text-gray-900 sm:text-6xl sm:leading-[1.04]">
+            <h1 className="max-w-[18ch] text-balance text-[2.125rem] font-medium leading-[1.08] tracking-display text-gray-900 sm:text-6xl sm:leading-[1.04] md:text-[3.25rem]">
               Le meilleur prix, sans faire le tour des boutiques.
             </h1>
             <p className="max-w-[46ch] text-base text-gray-500 sm:text-lg">
@@ -67,13 +67,21 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* L'appareil pose sur la face de boite : image d'ambiance (vraie photo
-              revendeur), jamais une seconde action -> ni lien ni texte alternatif. */}
-          {showcaseImage ? (
-            <div aria-hidden="true" className="relative mx-auto h-56 w-full max-w-[18rem] sm:h-64 md:h-[26rem] md:max-w-none">
-              <ProductImage src={showcaseImage} alt="" sizes="(min-width: 768px) 320px, 288px" priority />
-            </div>
-          ) : null}
+          {/* Deux appareils cote a cote, poses sur la meme ligne de base. */}
+          <div aria-hidden="true" className="relative mx-auto h-56 w-full max-w-[20rem] sm:h-72 md:h-[24rem] md:max-w-none">
+            {SHOWCASE.map((device) => (
+              <div key={device.src} className={`absolute bottom-0 ${device.box}`}>
+                <Image
+                  src={device.src}
+                  alt=""
+                  fill
+                  priority
+                  sizes="(min-width: 768px) 224px, 200px"
+                  className="object-contain object-bottom"
+                />
+              </div>
+            ))}
+          </div>
           </div>
 
           {/* Etiquette laterale de la boite : qui est compare. */}
