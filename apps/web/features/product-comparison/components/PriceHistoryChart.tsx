@@ -62,10 +62,10 @@ export function PriceHistoryChart({ state, currency = "TND", onRetry }: PriceHis
     const since = new Date(Math.min(...times)).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
     return (
       <p className="tabular text-sm text-gray-600">
-        Suivi depuis le {since} :{" "}
+        Meilleur prix suivi depuis le {since} :{" "}
         {min === max
-          ? `prix stable à ${formatPrice(min, currency)}.`
-          : `entre ${formatPrice(min, currency)} et ${formatPrice(max, currency)} selon les revendeurs.`}{" "}
+          ? `stable à ${formatPrice(min, currency)}.`
+          : `entre ${formatPrice(min, currency)} et ${formatPrice(max, currency)}.`}{" "}
         La courbe apparaîtra après quelques jours de relevés.
       </p>
     );
