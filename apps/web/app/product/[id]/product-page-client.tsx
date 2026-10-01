@@ -76,7 +76,7 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
         }
       />
 
-      <Panel title="Historique de prix">
+      <Panel title="Historique du meilleur prix">
         <PriceHistoryChart state={historyState} onRetry={() => productQuery.refetch()} />
       </Panel>
 
