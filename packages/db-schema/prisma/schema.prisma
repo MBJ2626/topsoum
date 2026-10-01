@@ -205,6 +205,10 @@ model PendingMatch {
   createdProduct   Product @relation("PendingMatchCreatedProduct", fields: [createdProductId], references: [id], onDelete: Cascade)
   candidateProduct Product @relation("PendingMatchCandidateProduct", fields: [candidateProductId], references: [id], onDelete: Cascade)
 
+  // Une suggestion par annonce et par produit suggere, quel que soit son
+  // statut : recharger l'ETL ne doit ni dupliquer une suggestion en attente,
+  // ni faire revenir une suggestion deja rejetee par l'admin.
+  @@unique([vendorSlug, externalId, candidateProductId])
   @@index([status])
   @@map("pending_matches")
 }

@@ -167,7 +167,6 @@ export async function loadOffers(offers: ScrapedOffer[], deps: Partial<LoadDeps>
             `[MATCHING_REVIEW] ${offer.vendor}:${offer.externalId} proche de ${matchResult.candidate.id} ` +
               `(confiance ${matchResult.confidence.toFixed(2)}, strategie ${matchResult.strategy})`,
           );
-          summary.productsPendingReview += 1;
         }
 
         const canonicalName = canonicalNameFor(offer);
@@ -198,19 +197,26 @@ export async function loadOffers(offers: ScrapedOffer[], deps: Partial<LoadDeps>
           // Persiste la file de validation admin (Etape 7) : sans ca, le
           // console.warn ci-dessus est la seule trace, invisible pour
           // quiconque n'a pas les logs du run sous les yeux.
-          await prisma.pendingMatch.create({
-            data: {
-              vendorSlug: offer.vendor,
-              externalId: offer.externalId,
-              reference: offer.reference,
-              offerProductName: offer.productName,
-              category: offer.category,
-              createdProductId: created.id,
-              candidateProductId: matchResult.candidate.id,
-              confidence: matchResult.confidence,
-              strategy: matchResult.strategy ?? "fuzzy",
-            },
+          // Idempotent : une suggestion deja connue pour cette annonce et ce
+          // candidat (en attente, ou deja tranchee par l'admin) n'est ni
+          // dupliquee ni rouverte (contrainte unique, cf. schema).
+          const pending = await prisma.pendingMatch.createMany({
+            data: [
+              {
+                vendorSlug: offer.vendor,
+                externalId: offer.externalId,
+                reference: offer.reference,
+                offerProductName: offer.productName,
+                category: offer.category,
+                createdProductId: created.id,
+                candidateProductId: matchResult.candidate.id,
+                confidence: matchResult.confidence,
+                strategy: matchResult.strategy ?? "fuzzy",
+              },
+            ],
+            skipDuplicates: true,
           });
+          summary.productsPendingReview += pending.count;
         }
 
         // Garde le cache in-run coherent : les offres suivantes de cette
