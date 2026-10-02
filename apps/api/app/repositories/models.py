@@ -9,8 +9,8 @@ from __future__ import annotations
 import datetime
 import decimal
 
-from sqlalchemy import Enum, ForeignKey, Numeric, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Enum, ForeignKey, Numeric, String, func
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -151,3 +151,30 @@ class ManualOverride(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(server_default=func.now())
 
     product: Mapped[Product] = relationship()
+
+
+class ScanJob(Base):
+    """Scan demande (dashboard ou planification), execute par le worker etl-pipeline."""
+
+    __tablename__ = "scan_jobs"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    status: Mapped[str]
+    trigger: Mapped[str]
+    vendors: Mapped[list[str]] = mapped_column(ARRAY(String))
+    scheduled_for: Mapped[datetime.datetime | None]
+    requested_at: Mapped[datetime.datetime]
+    started_at: Mapped[datetime.datetime | None]
+    finished_at: Mapped[datetime.datetime | None]
+    results: Mapped[list | None] = mapped_column(JSONB)
+    error: Mapped[str | None]
+
+
+class ScanSchedule(Base):
+    __tablename__ = "scan_schedules"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    enabled: Mapped[bool]
+    times: Mapped[list[str]] = mapped_column(ARRAY(String))
+    configured_at: Mapped[datetime.datetime]
+    worker_seen_at: Mapped[datetime.datetime | None]

@@ -28,3 +28,11 @@ class PendingMatchNotFoundError(Exception):
 
 class PendingMatchAlreadyResolvedError(Exception):
     pass
+
+
+class ScanAlreadyActiveError(Exception):
+    pass
+
+
+class InvalidScanRequestError(Exception):
+    pass

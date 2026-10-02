@@ -136,3 +136,38 @@ export interface ProductSitemapResponse {
   count: number;
   results: ProductSitemapEntry[];
 }
+
+export type ScanJobStatus = "queued" | "running" | "success" | "partial" | "failed";
+
+export interface VendorScanResult {
+  vendor: string;
+  offers_collected: number | null;
+  scan_failures: number;
+  offers_loaded: number | null;
+  error: string | null;
+}
+
+export interface ScanJobOut {
+  id: string;
+  status: ScanJobStatus;
+  trigger: "manual" | "scheduled";
+  vendors: string[];
+  requested_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  results: VendorScanResult[];
+  error: string | null;
+}
+
+export interface ScanListResponse {
+  jobs: ScanJobOut[];
+  worker_online: boolean;
+  worker_seen_at: string | null;
+}
+
+export interface ScanScheduleOut {
+  enabled: boolean;
+  times: string[];
+  timezone: string;
+  next_run_at: string | null;
+}

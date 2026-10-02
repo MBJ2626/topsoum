@@ -13,6 +13,7 @@ from app.routes.favorites import router as favorites_router
 from app.routes.matching import router as matching_router
 from app.routes.offers import router as offers_router
 from app.routes.products import router as products_router
+from app.routes.scans import router as scans_router
 
 init_sentry()
 
@@ -29,6 +30,7 @@ app.include_router(favorites_router)
 app.include_router(admin_router)
 app.include_router(matching_router)
 app.include_router(offers_router)
+app.include_router(scans_router)
 
 
 @app.get("/health")
