@@ -8,20 +8,36 @@ import "server-only";
 
 import { auth } from "@/auth";
 import { mintBackendToken } from "@/lib/auth-token";
+import { CLIENT_IP_HEADER, CLIENT_IP_SIGNATURE_HEADER, currentClientIp, signClientIp } from "@/lib/client-ip";
 
 interface ApiFetchOptions extends RequestInit {
   /** Attache un Bearer token si une session existe. Defaut true. */
   auth?: boolean;
+  /**
+   * Transmet l'IP du visiteur (signee) pour que l'API limite par visiteur et
+   * non par serveur Next. Defaut true. false pour les pages mises en cache
+   * (ISR) : il n'y a pas de visiteur, et lire les en-tetes les rendrait dynamiques.
+   */
+  forwardClientIp?: boolean;
 }
 
 export async function apiFetch(path: string, init: ApiFetchOptions = {}): Promise<Response> {
-  const { auth: withAuth = true, ...requestInit } = init;
+  const { auth: withAuth = true, forwardClientIp = true, ...requestInit } = init;
   const headers = new Headers(requestInit.headers);
 
   if (withAuth) {
     const session = await auth();
     if (session) {
       headers.set("Authorization", `Bearer ${await mintBackendToken(session)}`);
+    }
+  }
+
+  const secret = process.env.API_AUTH_SECRET;
+  if (forwardClientIp && secret) {
+    const ip = await currentClientIp();
+    if (ip) {
+      headers.set(CLIENT_IP_HEADER, ip);
+      headers.set(CLIENT_IP_SIGNATURE_HEADER, signClientIp(ip, secret));
     }
   }
 

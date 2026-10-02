@@ -35,7 +35,7 @@ async function popularLandings(): Promise<LandingPage[]> {
 /** Top 5 telephones ; null si l'API est indisponible (l'accueil ne doit jamais tomber). */
 async function topProducts(): Promise<TopProductsResponse | null> {
   try {
-    const response = await apiFetch("/products/top?limit=5", { auth: false });
+    const response = await apiFetch("/products/top?limit=5", { auth: false, forwardClientIp: false });
     return response.ok ? ((await response.json()) as TopProductsResponse) : null;
   } catch {
     return null;
