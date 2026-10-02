@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import Link from "next/link";
 
+import { buttonClasses } from "@/components/ui/Button";
+
 export const metadata: Metadata = { title: "Page introuvable", robots: { index: false, follow: false } };
 
 // 404 dans le meme monde que le reste du site (jamais la page anglaise par defaut).
@@ -15,10 +17,7 @@ export default function NotFound() {
         <p className="max-w-[50ch] text-base text-gray-600">
           Le lien est peut-être ancien ou mal copié. Cherchez directement le produit, ou revenez à l&apos;accueil.
         </p>
-        <Link
-          href="/"
-          className="inline-flex min-h-[44px] items-center rounded-key border border-gray-300 bg-white px-4 text-sm font-medium text-gray-900 transition-colors hover:border-gray-400"
-        >
+        <Link href="/" className={buttonClasses({ variant: "secondary" })}>
           Retour à l&apos;accueil
         </Link>
       </div>

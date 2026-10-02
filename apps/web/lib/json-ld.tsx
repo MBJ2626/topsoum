@@ -1,5 +1,5 @@
 // Donnees structurees schema.org (JSON-LD) : lues par Google pour les
-// extraits enrichis (prix, disponibilite) - docs/PROJET.md, prompt 11.
+// extraits enrichis (prix, disponibilite).
 import type { ProductDetailResponse } from "@/lib/api-types";
 import { productDisplayName } from "@/lib/product-name";
 import { SITE_NAME, SITE_URL } from "@/lib/site";

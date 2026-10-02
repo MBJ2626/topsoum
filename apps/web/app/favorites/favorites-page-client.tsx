@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ProductImage } from "@/components/ui/ProductImage";
@@ -9,24 +10,24 @@ import { FavoriteToggle } from "@/features/favorites/components/FavoriteToggle";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 import { formatPrice } from "@/lib/format";
 
-export function FavoritesPageClient() {
+export function FavoritesPageClient({ signOutSlot }: { signOutSlot: ReactNode }) {
   const favoritesQuery = useFavorites();
 
   if (favoritesQuery.status === "pending") {
     return (
-      <div className="mx-auto flex max-w-3xl flex-col gap-3 p-4">
+      <main className="mx-auto flex max-w-3xl flex-col gap-3 p-4">
         {[0, 1, 2].map((row) => (
           <SkeletonBlock key={row} className="h-20 w-full" />
         ))}
-      </div>
+      </main>
     );
   }
 
   if (favoritesQuery.status === "error") {
     return (
-      <div className="mx-auto max-w-3xl p-4">
-        <ErrorState message="Impossible de charger tes favoris." onRetry={() => favoritesQuery.refetch()} />
-      </div>
+      <main className="mx-auto max-w-3xl p-4">
+        <ErrorState message="Impossible de charger vos favoris." onRetry={() => favoritesQuery.refetch()} />
+      </main>
     );
   }
 
@@ -34,10 +35,14 @@ export function FavoritesPageClient() {
 
   if (results.length === 0) {
     return (
-      <main className="mx-auto max-w-3xl p-4">
+      <main className="mx-auto flex max-w-3xl flex-col gap-4 px-4 pb-12 pt-4">
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-lg font-medium text-gray-900">Mes favoris</h1>
+          {signOutSlot}
+        </div>
         <div className="rounded-card border border-gray-200 bg-white p-6 text-center">
           <p className="text-base font-medium text-gray-900">Aucun favori pour l&apos;instant.</p>
-          <p className="mt-1 text-sm text-gray-500">Ajoute un produit avec l&apos;étoile pour le retrouver ici.</p>
+          <p className="mt-1 text-sm text-gray-500">Ajoutez un produit avec l&apos;étoile pour le retrouver ici.</p>
         </div>
       </main>
     );
@@ -45,7 +50,10 @@ export function FavoritesPageClient() {
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-4 px-4 pb-12 pt-4">
-      <h1 className="text-lg font-medium text-gray-900">Mes favoris</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-lg font-medium text-gray-900">Mes favoris</h1>
+        {signOutSlot}
+      </div>
       <ul className="flex flex-col gap-3">
         {results.map((favorite) => (
           <li
@@ -63,7 +71,7 @@ export function FavoritesPageClient() {
                 {favorite.best_offer_price != null ? (
                   <p className="tabular text-sm text-gray-500">
                     {formatPrice(favorite.best_offer_price, "TND")}
-                    {favorite.best_offer_vendor ? ` — ${favorite.best_offer_vendor}` : ""}
+                    {favorite.best_offer_vendor ? ` chez ${favorite.best_offer_vendor}` : ""}
                   </p>
                 ) : (
                   <p className="text-sm text-gray-500">Prix en cours de mise à jour</p>

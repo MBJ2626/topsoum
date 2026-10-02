@@ -19,11 +19,11 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
   lg: "min-h-[52px] px-5 text-base",
 };
 
+/** Classes d'une touche, aussi pour les liens qui doivent ressembler a un bouton. */
+export function buttonClasses({ variant = "primary", size = "md" }: { variant?: ButtonVariant; size?: ButtonSize } = {}) {
+  return `inline-flex min-w-[44px] items-center justify-center gap-2 rounded-key font-medium transition-[background-color,border-color,transform,opacity] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 ${SIZE_CLASSES[size]} ${VARIANT_CLASSES[variant]}`;
+}
+
 export function Button({ variant = "primary", size = "md", className = "", ...props }: ButtonProps) {
-  return (
-    <button
-      className={`inline-flex min-w-[44px] items-center justify-center gap-2 rounded-key font-medium transition-[background-color,border-color,transform,opacity] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 ${SIZE_CLASSES[size]} ${VARIANT_CLASSES[variant]} ${className}`}
-      {...props}
-    />
-  );
+  return <button className={`${buttonClasses({ variant, size })} ${className}`} {...props} />;
 }

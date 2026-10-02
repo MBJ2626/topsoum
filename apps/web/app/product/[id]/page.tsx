@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { Metadata } from "next";
 
-import { auth } from "@/auth";
 import { apiFetch } from "@/lib/api-client";
-import type { FavoriteListResponse, ProductDetailResponse } from "@/lib/api-types";
+import type { ProductDetailResponse } from "@/lib/api-types";
+import { loadFavoriteContext } from "@/lib/favorites-server";
 import { formatPrice } from "@/lib/format";
 import { getQueryClient } from "@/lib/get-query-client";
 import { JsonLd, productJsonLd } from "@/lib/json-ld";
@@ -32,30 +32,6 @@ const fetchProductDetailServer = cache(async (id: string): Promise<ProductDetail
   }
   return response.json();
 });
-
-interface FavoriteContext {
-  isAuthenticated: boolean;
-  initialFavorite: { favoriteId: string; priceTracking: boolean } | null;
-}
-
-async function loadFavoriteContext(productId: string): Promise<FavoriteContext> {
-  const session = await auth();
-  if (!session) {
-    return { isAuthenticated: false, initialFavorite: null };
-  }
-
-  const response = await apiFetch("/favorites");
-  if (!response.ok) {
-    return { isAuthenticated: true, initialFavorite: null };
-  }
-
-  const data: FavoriteListResponse = await response.json();
-  const match = data.results.find((favorite) => favorite.product_id === productId);
-  return {
-    isAuthenticated: true,
-    initialFavorite: match ? { favoriteId: match.id, priceTracking: match.price_tracking } : null,
-  };
-}
 
 /** Extrait Google : prix le plus bas, vendeur et nombre de revendeurs. Jamais de prix douteux (<= 0). */
 function productDescription(detail: ProductDetailResponse): string {
@@ -92,7 +68,7 @@ export default async function ProductPage({ params }: ProductPageParams) {
   const { id } = await params;
 
   const detail = await fetchProductDetailServer(id);
-  const favoriteContext = await loadFavoriteContext(id);
+  const favoriteContext = await loadFavoriteContext();
 
   const queryClient = getQueryClient();
   queryClient.setQueryData(["product", id], detail);
@@ -104,7 +80,7 @@ export default async function ProductPage({ params }: ProductPageParams) {
       <ProductPageClient
         productId={id}
         isAuthenticated={favoriteContext.isAuthenticated}
-        initialFavorite={favoriteContext.initialFavorite}
+        initialFavorite={favoriteContext.favoritesByProduct[id] ?? null}
       />
     </HydrationBoundary>
   );

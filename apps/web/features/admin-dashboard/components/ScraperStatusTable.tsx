@@ -66,12 +66,12 @@ export function ScraperStatusTable({ state, onRetry }: ScraperStatusTableProps) 
             </div>
             <div>
               <p className="text-gray-500">Produits collectés</p>
-              <p className="text-gray-700">{vendor.products_collected ?? "—"}</p>
+              <p className="text-gray-700">{vendor.products_collected ?? "n/d"}</p>
             </div>
             <div>
               <p className="text-gray-500">Taux d&apos;échec</p>
               <p className={vendor.failure_rate != null && vendor.failure_rate > 0.5 ? "text-red-600" : "text-gray-700"}>
-                {vendor.failure_rate != null ? `${Math.round(vendor.failure_rate * 100)}%` : "—"}
+                {vendor.failure_rate != null ? `${Math.round(vendor.failure_rate * 100)}%` : "n/d"}
               </p>
             </div>
           </div>

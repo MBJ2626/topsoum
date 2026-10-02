@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock, SkeletonLine } from "@/components/ui/Skeleton";
-import { formatPrice } from "@/lib/format";
+import { displayPrice } from "@/lib/format";
 
 export interface ResultListItem {
   id: string;
@@ -88,7 +88,7 @@ export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }:
                 </p>
               </div>
               <span className="tabular flex-none text-end text-sm font-medium text-gray-900">
-                {item.price > 0 ? formatPrice(item.price, item.currency) : "Prix en cours de mise à jour"}
+                {displayPrice(item.price, item.currency)}
               </span>
             </Link>
           </li>

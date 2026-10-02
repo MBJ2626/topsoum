@@ -1,11 +1,11 @@
 "use client";
 
 import type { AsyncState } from "@/components/ui/async-state";
-import { Button } from "@/components/ui/Button";
+import { buttonClasses } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ArrowUpRightIcon } from "@/components/ui/icons";
 import { SkeletonLine } from "@/components/ui/Skeleton";
-import { formatPrice } from "@/lib/format";
+import { displayPrice, formatPrice } from "@/lib/format";
 
 export interface OfferRow {
   offerId: string;
@@ -79,21 +79,20 @@ export function OfferList({ state, onRetry, onViewOffer }: OfferListProps) {
               <span
                 className={`tabular text-end text-sm font-medium ${offer.price > 0 ? "text-gray-900" : "text-gray-500"}`}
               >
-                {offer.price > 0 ? formatPrice(offer.price, offer.currency) : "Prix en cours de mise à jour"}
+                {displayPrice(offer.price, offer.currency)}
               </span>
-              <Button
+              <a
                 data-testid="offer-row-view-offer"
-                variant="secondary"
-                className="px-3"
-                aria-label={`Voir l'offre chez ${offer.vendorName}`}
-                onClick={() => {
-                  onViewOffer?.(offer.offerId);
-                  window.open(offer.url, "_blank", "noopener,noreferrer");
-                }}
+                href={offer.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Voir l'offre chez ${offer.vendorName} (nouvel onglet)`}
+                onClick={() => onViewOffer?.(offer.offerId)}
+                className={`${buttonClasses({ variant: "secondary" })} px-3`}
               >
                 <span className="hidden sm:inline">Voir l&apos;offre</span>
                 <ArrowUpRightIcon size={18} />
-              </Button>
+              </a>
             </div>
           </li>
         ))}
