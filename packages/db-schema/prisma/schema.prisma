@@ -101,6 +101,7 @@ model Product {
   pendingMatchesAsCreated   PendingMatch[]   @relation("PendingMatchCreatedProduct")
   pendingMatchesAsCandidate PendingMatch[]   @relation("PendingMatchCandidateProduct")
   manualOverrides           ManualOverride[]
+  events                    ProductEvent[]
 
   @@index([category])
   @@index([brand, model])
@@ -262,4 +263,19 @@ model ScanSchedule {
   workerSeenAt DateTime? @map("worker_seen_at")
 
   @@map("scan_schedules")
+}
+
+// Audience TopSoum, anonyme : ni utilisateur ni IP. Alimente le classement
+// "Les plus consultes" de l'accueil.
+model ProductEvent {
+  id        String   @id @default(cuid())
+  productId String   @map("product_id")
+  /// view (fiche produit ouverte) | offer_click (clic "Voir l'offre")
+  type      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([type, createdAt])
+  @@map("product_events")
 }

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
 from app.errors import OfferNotFoundError
-from app.repositories import offers_repository
+from app.repositories import offers_repository, product_events_repository
 
 logger = logging.getLogger("topsoum.offers")
 
@@ -22,10 +23,9 @@ def record_offer_click(session: Session, offer_id: str) -> ClickResultData:
     if offer is None:
         raise OfferNotFoundError(offer_id)
 
-    # Pas de persistance d'un evenement de clic (pas de table ClickEvent
-    # dans le schema actuel, non demandee) - seulement un log structure.
-    # Gap connu pour la V2 si l'exploitation analytique du tracking
-    # d'affiliation devient necessaire.
+    product_events_repository.add_event(
+        session, product_id=offer.product_id, event_type="offer_click", at=datetime.now(UTC).replace(tzinfo=None)
+    )
     logger.info(
         "offer_click",
         extra={"offer_id": offer.id, "product_id": offer.product_id, "vendor_id": offer.vendor_id},

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -26,6 +28,24 @@ class ProductSearchResult(BaseModel):
     image_url: str | None
     best_deal: OfferSummary
     offers_count: int
+
+
+class TopProduct(BaseModel):
+    id: str
+    canonical_name: str
+    brand: str
+    model: str
+    image_url: str | None
+    best_deal: OfferSummary
+    offers_count: int
+    price_spread: Decimal | None
+    views: int | None
+
+
+class TopProductsResponse(BaseModel):
+    mode: Literal["most_viewed", "most_compared"]
+    period_days: int | None
+    results: list[TopProduct]
 
 
 class ProductSearchResponse(BaseModel):

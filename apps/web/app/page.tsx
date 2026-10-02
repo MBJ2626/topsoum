@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { TopProducts } from "@/features/product-listing/components/TopProducts";
+import { apiFetch } from "@/lib/api-client";
+import type { TopProductsResponse } from "@/lib/api-types";
 import { JsonLd, siteJsonLd } from "@/lib/json-ld";
 import { LANDING_PAGES, type LandingPage } from "@/lib/landing-pages";
 import { fetchLandingResults } from "@/lib/landing-results";
@@ -16,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: { ...BASE_OPEN_GRAPH, url: "/" },
 };
 
-// Liens "Comparatifs" rafraichis au plus toutes les heures (ISR).
+// Top 5 et liens "Comparatifs" rafraichis au plus toutes les heures (ISR).
 export const revalidate = 3600;
 
 /** Landing pages ayant des produits ; aucune si l'API est indisponible (l'accueil ne doit jamais tomber). */
@@ -26,6 +29,16 @@ async function popularLandings(): Promise<LandingPage[]> {
     return LANDING_PAGES.filter((_, index) => results[index].length > 0);
   } catch {
     return [];
+  }
+}
+
+/** Top 5 telephones ; null si l'API est indisponible (l'accueil ne doit jamais tomber). */
+async function topProducts(): Promise<TopProductsResponse | null> {
+  try {
+    const response = await apiFetch("/products/top?limit=5", { auth: false });
+    return response.ok ? ((await response.json()) as TopProductsResponse) : null;
+  } catch {
+    return null;
   }
 }
 
@@ -41,10 +54,10 @@ const SHOWCASE = [
 ] as const;
 
 // Philosophie "search-first" : une seule action possible au-dessus du fold.
-// La face de boite occupe l'ecran ; les liens vers les landing pages (maillage
-// interne SEO) sont SOUS le fold et n'apparaissent qu'en faisant defiler.
+// La face de boite occupe l'ecran ; le top 5 et les liens vers les landing
+// pages (maillage interne SEO) sont SOUS le fold, en faisant defiler.
 export default async function HomePage() {
-  const landings = await popularLandings();
+  const [landings, top] = await Promise.all([popularLandings(), topProducts()]);
 
   return (
     <>
@@ -99,25 +112,29 @@ export default async function HomePage() {
         </section>
       </main>
 
-      {landings.length > 0 ? (
-        <nav aria-labelledby="popular-searches" className="mx-auto w-full max-w-4xl px-3 pb-12 pt-4 sm:px-6">
-          <h2 id="popular-searches" className="mb-3 px-2 text-sm font-medium text-gray-500">
-            Comparatifs
-          </h2>
-          <ul className="flex flex-wrap gap-2">
-            {landings.map((page) => (
-              <li key={page.slug}>
-                <Link
-                  href={`/meilleur-prix/${page.slug}`}
-                  className="inline-flex min-h-[44px] items-center rounded-key border border-gray-200 bg-white px-4 text-sm text-gray-700 transition-colors hover:border-gray-300 hover:text-gray-900"
-                >
-                  {page.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      ) : null}
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-3 pb-12 pt-4 sm:px-6">
+        {top ? <TopProducts data={top} /> : null}
+
+        {landings.length > 0 ? (
+          <nav aria-labelledby="popular-searches">
+            <h2 id="popular-searches" className="mb-3 px-2 text-sm font-medium text-gray-500">
+              Comparatifs
+            </h2>
+            <ul className="flex flex-wrap gap-2">
+              {landings.map((page) => (
+                <li key={page.slug}>
+                  <Link
+                    href={`/meilleur-prix/${page.slug}`}
+                    className="inline-flex min-h-[44px] items-center rounded-key border border-gray-200 bg-white px-4 text-sm text-gray-700 transition-colors hover:border-gray-300 hover:text-gray-900"
+                  >
+                    {page.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
+      </div>
     </>
   );
 }

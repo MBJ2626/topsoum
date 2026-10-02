@@ -78,6 +78,15 @@ def get_price_history_for_product(
     return list(session.execute(stmt).scalars())
 
 
+def get_products_with_offers(session: Session, product_ids: list[str]) -> list[Product]:
+    stmt = (
+        select(Product)
+        .where(Product.id.in_(product_ids))
+        .options(selectinload(Product.offers).joinedload(Offer.vendor))
+    )
+    return list(session.execute(stmt).unique().scalars())
+
+
 def product_exists(session: Session, product_id: str) -> bool:
     stmt = select(Product.id).where(Product.id == product_id)
     return session.execute(stmt).scalar_one_or_none() is not None

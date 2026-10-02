@@ -14,7 +14,14 @@ from app.schemas import (
     ProductSitemapEntry,
     ProductSitemapResponse,
 )
-from app.services.products_service import get_product_detail, list_sitemap_entries, search_products
+from app.schemas.products import TopProduct, TopProductsResponse
+from app.services.products_service import (
+    get_product_detail,
+    get_top_products,
+    list_sitemap_entries,
+    record_product_view,
+    search_products,
+)
 
 
 def _offer_summary(offer: Offer) -> OfferSummary:
@@ -55,6 +62,32 @@ def search_products_controller(
         for result in results
     ]
     return ProductSearchResponse(count=len(out), results=out)
+
+
+def get_top_products_controller(session: Session, *, limit: int) -> TopProductsResponse:
+    top = get_top_products(session, limit=limit)
+    return TopProductsResponse(
+        mode=top.mode,
+        period_days=top.period_days,
+        results=[
+            TopProduct(
+                id=item.product.id,
+                canonical_name=item.product.canonical_name,
+                brand=item.product.brand,
+                model=item.product.model,
+                image_url=item.product.image_url,
+                best_deal=_offer_summary(item.best_deal),
+                offers_count=item.offers_count,
+                price_spread=item.price_spread,
+                views=item.views,
+            )
+            for item in top.items
+        ],
+    )
+
+
+def record_product_view_controller(session: Session, product_id: str) -> None:
+    record_product_view(session, product_id)
 
 
 def get_product_detail_controller(session: Session, product_id: str) -> ProductDetailResponse:
