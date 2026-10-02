@@ -13,10 +13,12 @@ export const metadata: Metadata = { title: "Dashboard admin", robots: { index: f
 export default async function AdminPage() {
   const queryClient = getQueryClient();
 
-  const [scrapersResponse, pendingMatchesResponse, statsResponse] = await Promise.all([
+  const [scrapersResponse, pendingMatchesResponse, statsResponse, scansResponse, scheduleResponse] = await Promise.all([
     apiFetch("/admin/scrapers/status"),
     apiFetch("/admin/matching/pending"),
     apiFetch("/admin/stats"),
+    apiFetch("/admin/scans"),
+    apiFetch("/admin/scans/schedule"),
   ]);
 
   if (scrapersResponse.ok) {
@@ -27,6 +29,12 @@ export default async function AdminPage() {
   }
   if (statsResponse.ok) {
     queryClient.setQueryData(["admin-stats"], await statsResponse.json());
+  }
+  if (scansResponse.ok) {
+    queryClient.setQueryData(["admin-scans"], await scansResponse.json());
+  }
+  if (scheduleResponse.ok) {
+    queryClient.setQueryData(["admin-scan-schedule"], await scheduleResponse.json());
   }
 
   return (

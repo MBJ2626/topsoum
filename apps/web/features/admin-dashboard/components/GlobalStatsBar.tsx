@@ -12,7 +12,7 @@ interface GlobalStatsBarProps {
 
 function formatLastUpdated(value: string | null): string {
   if (!value) return "Jamais";
-  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Tunis" }).format(new Date(value));
 }
 
 export function GlobalStatsBar({ state, onRetry }: GlobalStatsBarProps) {

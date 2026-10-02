@@ -19,7 +19,7 @@ const STATUS_LABELS: Record<ScraperRunStatus, string> = {
 
 function formatDate(value: string | null): string {
   if (!value) return "Jamais";
-  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Tunis" }).format(new Date(value));
 }
 
 export function ScraperStatusTable({ state, onRetry }: ScraperStatusTableProps) {

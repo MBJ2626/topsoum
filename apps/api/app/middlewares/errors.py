@@ -14,6 +14,8 @@ from app.errors import (
     PendingMatchAlreadyResolvedError,
     PendingMatchNotFoundError,
     ProductNotFoundError,
+    ScanAlreadyActiveError,
+    InvalidScanRequestError,
 )
 
 
@@ -41,3 +43,11 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(PendingMatchAlreadyResolvedError)
     def _pending_match_already_resolved(request: Request, exc: PendingMatchAlreadyResolvedError) -> JSONResponse:
         return JSONResponse(status_code=409, content={"detail": f"Match deja resolu: {exc}"})
+
+    @app.exception_handler(ScanAlreadyActiveError)
+    def _scan_already_active(request: Request, exc: ScanAlreadyActiveError) -> JSONResponse:
+        return JSONResponse(status_code=409, content={"detail": "Un scan est deja en file ou en cours."})
+
+    @app.exception_handler(InvalidScanRequestError)
+    def _invalid_scan_request(request: Request, exc: InvalidScanRequestError) -> JSONResponse:
+        return JSONResponse(status_code=422, content={"detail": str(exc)})

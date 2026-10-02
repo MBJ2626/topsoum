@@ -225,3 +225,41 @@ model ManualOverride {
 
   @@map("manual_overrides")
 }
+
+// File des scans demandes depuis le dashboard admin ou par la planification.
+// L'API ne fait qu'inserer une ligne "queued" ; le worker
+// (apps/etl-pipeline/src/worker.ts) lance les scrapers puis l'ETL.
+model ScanJob {
+  id           String    @id @default(cuid())
+  /// queued | running | success | partial | failed
+  status       String    @default("queued")
+  /// manual | scheduled
+  trigger      String
+  /// Slugs vendeurs (dossiers apps/scrapers/vendors/) ; vide = tous.
+  vendors      String[]
+  /// Creneau planifie a l'origine du scan : unique, un creneau ne part qu'une fois.
+  scheduledFor DateTime? @unique @map("scheduled_for")
+  requestedAt  DateTime  @default(now()) @map("requested_at")
+  startedAt    DateTime? @map("started_at")
+  finishedAt   DateTime? @map("finished_at")
+  /// Resultat par vendeur : offres collectees, echecs de scan, offres chargees, erreur.
+  results      Json?
+  error        String?
+
+  @@index([status, requestedAt])
+  @@map("scan_jobs")
+}
+
+// Planification des scans : une seule ligne (id "default"), heures de Tunis.
+model ScanSchedule {
+  id           String    @id @default("default")
+  enabled      Boolean   @default(false)
+  /// Heures "HH:MM" (Africa/Tunis), triees.
+  times        String[]
+  /// Derniere modification par l'admin : un creneau anterieur ne se declenche pas.
+  configuredAt DateTime  @default(now()) @map("configured_at")
+  /// Dernier battement du worker, pour signaler un worker arrete.
+  workerSeenAt DateTime? @map("worker_seen_at")
+
+  @@map("scan_schedules")
+}
