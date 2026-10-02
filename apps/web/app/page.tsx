@@ -53,9 +53,9 @@ const SHOWCASE = [
   { src: "/showcase/galaxy-s26-ultra.webp", box: "end-0 z-10 h-full w-[66%]" },
 ] as const;
 
-// Philosophie "search-first" : une seule action possible au-dessus du fold.
-// La face de boite occupe l'ecran ; le top 5 et les liens vers les landing
-// pages (maillage interne SEO) sont SOUS le fold, en faisant defiler.
+// Philosophie "search-first" : la recherche reste la seule action forte. Le
+// top 5 la suit en etiquette discrete (decision du 2 octobre 2026) ; les liens
+// vers les landing pages (maillage interne SEO) sont SOUS le fold.
 export default async function HomePage() {
   const [landings, top] = await Promise.all([popularLandings(), topProducts()]);
 
@@ -66,7 +66,7 @@ export default async function HomePage() {
         <section className="mx-auto flex w-full max-w-4xl flex-1 flex-col rounded-card border border-gray-200 bg-white px-5 pb-5 pt-3 sm:px-12 sm:pb-10 sm:pt-6">
           <Wordmark />
 
-          <div className="grid flex-1 items-center gap-6 py-8 sm:py-10 md:grid-cols-[1fr_minmax(0,20rem)] md:gap-10">
+          <div className="grid flex-1 grid-cols-[minmax(0,1fr)] items-center gap-6 py-8 sm:py-10 md:grid-cols-[minmax(0,1fr)_minmax(0,15rem)] md:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
           <div className="flex flex-col gap-5 sm:gap-7">
             <h1 className="max-w-[18ch] text-balance text-[2.125rem] font-medium leading-[1.08] tracking-display text-gray-900 sm:text-6xl sm:leading-[1.04] md:text-[3.25rem]">
               Le meilleur prix, sans faire le tour des boutiques.
@@ -78,6 +78,11 @@ export default async function HomePage() {
             <div className="max-w-2xl">
               <HomeSearchClient />
             </div>
+            {top ? (
+              <div className="max-w-2xl">
+                <TopProducts data={top} />
+              </div>
+            ) : null}
           </div>
 
           {/* Deux appareils cote a cote, poses sur la meme ligne de base. */}
@@ -113,8 +118,6 @@ export default async function HomePage() {
       </main>
 
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-3 pb-12 pt-4 sm:px-6">
-        {top ? <TopProducts data={top} /> : null}
-
         {landings.length > 0 ? (
           <nav aria-labelledby="popular-searches">
             <h2 id="popular-searches" className="mb-3 px-2 text-sm font-medium text-gray-500">

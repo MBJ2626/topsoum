@@ -216,7 +216,7 @@ A cool, cardboard-and-shelf neutral ramp printed in near-black ink, with one ele
 
 Mobile-first single column. Inner pages (search, product, landing, favorites, 404) use a 768px max column with 16px side gutters, 16px top padding, 48px bottom padding, and 16px gaps between faces (20px from 640px). Faces pad 16px on mobile and 24px from 640px.
 
-The home page is one box face filling the viewport height (100svh) inside a 12px shelf margin (24px from 640px), max 896px wide, with 20px inner padding on mobile and 48px from 640px. From 768px its content splits into the text-and-search column plus a 20rem device column. The "Comparatifs" links sit on the shelf beneath that face, below the fold.
+The home page is one box face filling the viewport height (100svh) inside a 12px shelf margin (24px from 640px), max 896px wide, with 20px inner padding on mobile and 48px from 640px. From 768px its content splits into the text-and-search column plus a device column (15rem, 20rem from 1024px). Directly under the hero search sits the compact "Les plus comparés" side-label (see Components). The "Comparatifs" links sit on the shelf beneath that face, below the fold.
 
 Inner pages carry a sticky header on the shelf ground with a 1px bottom edge: wordmark at the start, compact search filling the middle, the favorites star key at the end. The home page has no header; its face is the header.
 
@@ -266,6 +266,9 @@ The answer, boxed. A face with a 2px ultramarine edge (the only accent edge in t
 
 ### Side-Label (signature)
 Every comparison reads as a printed label: 2px ink rule on top, 12px muted column headers ("Revendeur" / "Prix"), hairline rows of at least 44px, vendor name in ink 500 at start, tabular price right-aligned at end. Used for other resellers, the spec sheet, similar products and the home "Comparé chez" strip. Unknown prices read "Prix en cours de mise à jour" in muted, never 0 TND.
+
+### Home Top 5 (compact side-label)
+Under the hero search, inside the text-and-search column: the side-label pattern at its quietest. 2px ink rule, 12px muted column headers (the title "Les plus comparés", or "Les plus consultés (7 j)" once TopSoum has 7 days of views, and "Meilleur prix"), five hairline rows of at least 44px with a muted rank, the product name in ink on up to two lines (one line hid the color that tells variants apart), the vendor count in label muted from 1024px, and the tabular best price at the end. No thumbnails, no ultramarine: the search key stays the screen's only accent. Hidden when the ranking is unavailable.
 
 ### Lists
 Result rows: 56px thumbnail with 12px corners, two-line name in body-small ink, vendor count in label muted, tabular price at end; hairline dividers; the whole row is a link with a wash hover. Similar products: two columns on mobile, four from 640px, under a side-label rule. Neither ever carries ultramarine.
