@@ -75,7 +75,7 @@ Aucun acteur local sérieux n'existe en Tunisie (contrairement à idealo/Google 
 
 ### 2.3 Design (validé)
 Les mockups mobile et web interactifs ont été **validés** ("j'aime bien les mockups proposés"). Direction retenue :
-- Philosophie "Search-first" : une seule barre de recherche centrale, rien d'autre au-dessus du fold
+- Philosophie "Search-first" : une seule barre de recherche centrale, seule action forte au-dessus du fold (depuis le 2 octobre 2026, suivie d'un top 5 discret "Les plus comparés", sans accent)
 - Le meilleur deal en grand format (badge "Meilleur prix" + bordure accent), alternatives en liste secondaire discrète
 - Filtres masqués derrière un seul bouton (panneau repliable)
 - Un seul CTA dominant par écran
@@ -268,7 +268,7 @@ L'utilisateur ne compare pas, il cherche une réponse. Il tape "iPhone 15" et ve
 | Filtres complexes ouverts | Cachés derrière un seul bouton |
 
 ### 5.2 Hiérarchie par écran
-- **Homepage** : 1 seule action possible — chercher
+- **Homepage** : 1 seule action forte — chercher ; sous la barre, le top 5 "Les plus comparés" en étiquette discrète (liens vers les fiches, sans accent)
 - **Résultats** : 1 réponse dominante (badge "Meilleur prix", bordure accent 2px) + liste courte vendeur/prix
 - **Page produit (scroll progressif)** :
   1. Above the fold : photo, nom, prix, CTA — rien d'autre
