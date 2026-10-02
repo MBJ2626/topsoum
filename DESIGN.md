@@ -169,11 +169,12 @@ A cool, cardboard-and-shelf neutral ramp printed in near-black ink, with one ele
 ### Neutral
 - **Ink** (`ink`): headings, product names, prices, the 2px side-label rule, the header search key, the price-history line, the offline banner ground, the favorited star.
 - **Raised Ink** (`ink-raised`): hover of ink keys.
-- **Graphite** (`graphite`): secondary text on popular-search links and filter labels.
+- **Graphite** (`graphite`): secondary text on the home "Comparatifs" links and filter labels.
 - **Slate** (`slate`): supporting paragraphs on landing, 404 and favorites copy.
-- **Muted** (`muted`): captions, "chez {vendeur}", side-label column headers, placeholders, resting icon color. The lowest text tone allowed on white.
-- **Dust** (`dust`): chart axis ticks and hover borders only. Not a text color on white.
-- **Strong Edge** (`edge-strong`): borders of interactive keys and fields (secondary key, filter key, selects, hero search field), scrollbar thumb.
+- **Muted** (`muted`): captions, "chez {vendeur}", side-label column headers, placeholders, chart axis ticks, resting icon color. The lowest text tone allowed on white.
+- **Dust** (`dust`): hover borders only. Not a text color on white.
+- **Field Edge** (`field`): the 1px border of text fields, selects and both search shells. At least 3:1 against white and shelf so a field is findable (WCAG 1.4.11).
+- **Strong Edge** (`edge-strong`): borders of interactive keys (secondary key, filter key, header favorites key), scrollbar thumb.
 - **Edge** (`edge`): the 1px edge of every box face, hairline row rules, chart grid, header bottom rule.
 - **Shelf** (`shelf`): the page ground, the sticky header ground, browser theme color, skeleton fill.
 - **Wash** (`wash`): row and key hover fill inside faces, chart skeleton.
@@ -215,9 +216,9 @@ A cool, cardboard-and-shelf neutral ramp printed in near-black ink, with one ele
 
 Mobile-first single column. Inner pages (search, product, landing, favorites, 404) use a 768px max column with 16px side gutters, 16px top padding, 48px bottom padding, and 16px gaps between faces (20px from 640px). Faces pad 16px on mobile and 24px from 640px.
 
-The home page is one box face filling the viewport height (100svh) inside a 12px shelf margin (24px from 640px), max 896px wide, with 20px inner padding on mobile and 48px from 640px. From 768px its content splits into the text-and-search column plus a 20rem device column. Popular searches sit on the shelf beneath that face, below the fold.
+The home page is one box face filling the viewport height (100svh) inside a 12px shelf margin (24px from 640px), max 896px wide, with 20px inner padding on mobile and 48px from 640px. From 768px its content splits into the text-and-search column plus a 20rem device column. The "Comparatifs" links sit on the shelf beneath that face, below the fold.
 
-Inner pages carry a sticky header on the shelf ground with a 1px bottom edge: wordmark at the start, compact search filling the rest. The home page has no header; its face is the header.
+Inner pages carry a sticky header on the shelf ground with a 1px bottom edge: wordmark at the start, compact search filling the middle, the favorites star key at the end. The home page has no header; its face is the header.
 
 Rhythm runs on 4px steps, mostly 8, 12, 16 and 24. All direction-sensitive spacing uses logical properties (start/end, padding-inline-start) so the Arabic layout can mirror without rework. Breakpoints: 640px (padding and type step up), 768px (home two-column).
 
@@ -247,9 +248,10 @@ Hardware keys: firm rectangles that press in.
 - **Secondary:** white face, strong-edge 1px border, ink 500 text; hover moves the border to dust and the fill to wash. Used for per-row "Voir l'offre", "Afficher plus", "Retour à l'accueil", the filter key.
 
 ### Search
-- **Hero (home):** a 16px-cornered white shell with a strong-edge border and 6px inner padding, a 22px outline search icon, a 48px input at 16 to 18px, and an attached ultramarine "Chercher" key at the end.
-- **Compact (header):** same shell with an edge border, 36px input, and an ink icon key (never ultramarine, so it never competes with "Voir l'offre").
-- **Focus:** the shell border turns ultramarine (focus-within).
+- **Hero (home):** a 16px-cornered white shell with a field-edge border and 6px inner padding, a 22px outline search icon, a 48px input at 16 to 18px, and an attached ultramarine "Chercher" key at the end.
+- **Compact (header):** same shell with a field-edge border, 4px inner padding, 44px input, and a 44px ink icon key (never ultramarine, so it never competes with "Voir l'offre").
+- **Focus:** the shell border turns ultramarine (focus-within) and the shell carries the global 2px ultramarine ring while the input has focus.
+- **Keyboard:** the field is a combobox: arrow keys move through suggestions, Enter opens the highlighted one, Escape closes the tray.
 - **Suggestions tray:** a white 16px face 8px below the field, sliding out like a drawer from a box: clip-path plus 6px translate reveal, 200ms cubic-bezier(0.22, 1, 0.36, 1), instant under reduced motion. Rows are 44px with name at start and tabular price at end.
 
 ### Cards / Containers
@@ -260,7 +262,7 @@ Hardware keys: firm rectangles that press in.
 - **Internal Padding:** 16px mobile, 24px from 640px; titled faces put a 16px section title above their content with 12px spacing.
 
 ### Best Deal (signature)
-The answer, boxed. A face with a 2px ultramarine edge (the only accent edge in the product), the "Meilleur prix" pull-tab hanging from its top edge at the start, a contained product photo (192px, 224px from 640px), product title and "chez {vendeur}" in muted, a hairline rule, the 40px tabular price with "-X% vs moyenne" in savings green beside it, then the full-width large primary key "Voir l'offre" with an outline up-right arrow. There is at most one per screen.
+The answer, boxed. A face with a 2px ultramarine edge (the only accent edge in the product), the "Meilleur prix" pull-tab hanging from its top edge at the start, a contained product photo (192px, 224px from 640px), product title and "chez {vendeur}" in muted, a hairline rule, the 40px tabular price with "-X% vs moyenne" in savings green beside it, then the full-width large primary key "Voir l'offre" with an outline up-right arrow. When the score picked this offer over a cheaper one (out of stock, unconfirmed stock, shipping, lower-rated reseller), one muted line under the price names the cheaper offer and the reason; the badge never hides a lower price. There is at most one per screen.
 
 ### Side-Label (signature)
 Every comparison reads as a printed label: 2px ink rule on top, 12px muted column headers ("Revendeur" / "Prix"), hairline rows of at least 44px, vendor name in ink 500 at start, tabular price right-aligned at end. Used for other resellers, the spec sheet, similar products and the home "Comparé chez" strip. Unknown prices read "Prix en cours de mise à jour" in muted, never 0 TND.
@@ -269,10 +271,10 @@ Every comparison reads as a printed label: 2px ink rule on top, 12px muted colum
 Result rows: 56px thumbnail with 12px corners, two-line name in body-small ink, vendor count in label muted, tabular price at end; hairline dividers; the whole row is a link with a wash hover. Similar products: two columns on mobile, four from 640px, under a side-label rule. Neither ever carries ultramarine.
 
 ### Chips
-- **Style:** popular-search links are white keys (12px, 44px tall, edge border, graphite 14px text) on the shelf; hover strengthens the border and the text to ink.
+- **Style:** the home "Comparatifs" links are white keys (12px, 44px tall, edge border, graphite 14px text) on the shelf; hover strengthens the border and the text to ink.
 
 ### Inputs / Fields
-- **Style:** selects and fields are white with a strong-edge 1px border, 12px corners, 44px tall.
+- **Style:** selects and fields are white with a field-edge 1px border, 12px corners, 44px tall.
 - **Native controls:** range slider and checkbox take ultramarine through `accent-color`.
 - **Focus:** global 2px ultramarine outline, 2px offset.
 
@@ -280,13 +282,13 @@ Result rows: 56px thumbnail with 12px corners, two-line name in body-small ink, 
 Collapsed by default behind one secondary key ("Filtres" with an outline sliders icon). When filters are active, a 20px round ultramarine count badge sits in the key. The panel opens as a full-width face below with the same drawer reveal as the suggestions tray.
 
 ### Navigation
-Sticky header on the shelf with a 1px bottom edge, wordmark (outline box glyph plus "TopSoum", 18px, 500, -0.03em) and compact search. No nav links, no menu.
+Sticky header on the shelf with a 1px bottom edge, wordmark (outline box glyph plus "TopSoum", 18px, 500, -0.03em), compact search (below 420px the wordmark shows its glyph only, the name stays as the link's accessible label), and one 44px outline star key (secondary style, never ultramarine) to the favorites, which leads through the French sign-in page when needed. No other nav links, no menu.
 
 ### States
 Loading uses skeleton blocks and lines in shelf gray with the face's own shape (12px blocks, round text lines). Empty states are a white face with a centered ink line and a muted suggestion. Offline shows a sticky ink banner with white text and the recently viewed products as underlined links.
 
 ### Price History
-A Recharts step line in ink at 2px, no dots, edge-colored grid and cursor, dust axis ticks. Single-price products show a sentence summary instead of a flat line.
+A Recharts step line in ink at 2px, no dots, edge-colored grid and cursor, muted axis ticks. Single-price products show a sentence summary instead of a flat line.
 
 ## Do's and Don'ts
 

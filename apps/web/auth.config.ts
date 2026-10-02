@@ -26,6 +26,7 @@ if (process.env.AUTH_FACEBOOK_ID && process.env.AUTH_FACEBOOK_SECRET) {
 
 export const authConfig: NextAuthConfig = {
   providers: oauthProviders,
+  pages: { signIn: "/connexion" },
   callbacks: {
     authorized({ auth }) {
       return !!auth?.user;

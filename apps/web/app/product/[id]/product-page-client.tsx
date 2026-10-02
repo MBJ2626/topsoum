@@ -60,7 +60,7 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
         id: result.id,
         productName: productDisplayName(result),
         imageUrl: result.image_url,
-        price: result.best_deal.price,
+        price: Number(result.best_deal.price),
         currency: result.best_deal.currency,
       })),
   );
@@ -68,6 +68,7 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-4 px-4 pb-12 pt-4 sm:gap-5">
       <BestDealCard
+        headingLevel="h1"
         state={bestDealState}
         onRetry={() => productQuery.refetch()}
         onViewOffer={(offerId) => offerClick.mutate(offerId)}
@@ -106,8 +107,8 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
             <dl className="mb-4 divide-y divide-gray-200 border-t-2 border-gray-900 text-sm">
               {Object.entries(productQuery.data.specs).map(([key, value]) => (
                 <div key={key} className="grid grid-cols-2 gap-4 py-2.5">
-                  <dt className="text-gray-500">{key}</dt>
-                  <dd className="text-gray-900">{String(value)}</dd>
+                  <dt className="min-w-0 break-words text-gray-500">{key}</dt>
+                  <dd className="min-w-0 break-words text-gray-900">{String(value)}</dd>
                 </div>
               ))}
             </dl>

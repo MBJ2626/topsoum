@@ -6,7 +6,7 @@ import type { AsyncState } from "@/components/ui/async-state";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
-import { formatPrice } from "@/lib/format";
+import { displayPrice } from "@/lib/format";
 
 export interface SimilarProductItem {
   id: string;
@@ -21,11 +21,11 @@ interface SimilarProductsProps {
   onRetry: () => void;
 }
 
-// Discret par design (pas de bordure accent) : ne doit jamais concurrencer le
-// BestDealCard, seul detenteur de l'accent "meilleur prix" sur la page.
 /** Deux rangees sur ordinateur, quatre sur mobile : jamais de defilement coupe. */
 const MAX_ITEMS = 8;
 
+// Discret par design (pas de bordure accent) : ne doit jamais concurrencer le
+// BestDealCard, seul detenteur de l'accent "meilleur prix" sur la page.
 export function SimilarProducts({ state, onRetry }: SimilarProductsProps) {
   if (state.status === "loading") {
     return (
@@ -58,7 +58,9 @@ export function SimilarProducts({ state, onRetry }: SimilarProductsProps) {
               ) : null}
             </div>
             <p className="line-clamp-2 text-xs text-gray-700">{item.productName}</p>
-            <p className="tabular mt-auto text-sm font-medium text-gray-900">{formatPrice(item.price, item.currency)}</p>
+            <p className={`tabular mt-auto text-sm ${item.price > 0 ? "font-medium text-gray-900" : "text-gray-500"}`}>
+              {displayPrice(item.price, item.currency)}
+            </p>
           </Link>
         </li>
       ))}

@@ -21,9 +21,10 @@ export function AdminPageClient() {
     <main className="mx-auto flex max-w-3xl flex-col gap-8 p-4">
       <h1 className="text-lg font-medium text-gray-900">Dashboard admin</h1>
 
+      {/* Ordre = travail de l'admin : valider le matching, puis reperer un scraper en echec. */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-gray-900">Stats globales</h2>
-        <GlobalStatsBar state={statsState} onRetry={() => statsQuery.refetch()} />
+        <h2 className="text-sm font-medium text-gray-900">Matching à valider</h2>
+        <MatchingQueue state={pendingMatchesState} onRetry={() => pendingMatchesQuery.refetch()} />
       </section>
 
       <section className="flex flex-col gap-3">
@@ -32,8 +33,8 @@ export function AdminPageClient() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-gray-900">Matching à valider</h2>
-        <MatchingQueue state={pendingMatchesState} onRetry={() => pendingMatchesQuery.refetch()} />
+        <h2 className="text-sm font-medium text-gray-900">Stats globales</h2>
+        <GlobalStatsBar state={statsState} onRetry={() => statsQuery.refetch()} />
       </section>
     </main>
   );

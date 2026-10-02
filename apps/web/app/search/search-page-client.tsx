@@ -6,7 +6,7 @@ import { Panel } from "@/components/ui/Panel";
 import { useMemo, useState } from "react";
 
 import { fromQuery } from "@/components/ui/async-state";
-import { FavoriteToggle } from "@/features/favorites/components/FavoriteToggle";
+import { FavoriteToggle, type FavoriteState } from "@/features/favorites/components/FavoriteToggle";
 import { OfferList } from "@/features/product-comparison/components/OfferList";
 import { useProductDetail } from "@/features/product-comparison/hooks/useProductDetail";
 import { toBestDealCardData, toOfferRows } from "@/features/product-comparison/lib/map-product-detail";
@@ -19,11 +19,13 @@ import { useOfferClick } from "@/lib/use-offer-click";
 
 interface SearchPageClientProps {
   query: string;
+  isAuthenticated: boolean;
+  favoritesByProduct: Record<string, FavoriteState>;
 }
 
 const EMPTY_FILTERS: FilterValues = { maxBudget: null, brand: null, ram: null };
 
-export function SearchPageClient({ query }: SearchPageClientProps) {
+export function SearchPageClient({ query, isAuthenticated, favoritesByProduct }: SearchPageClientProps) {
   const searchQuery = useProductSearch(query);
   const offerClick = useOfferClick();
   const [filterValues, setFilterValues] = useState<FilterValues>(EMPTY_FILTERS);
@@ -73,13 +75,16 @@ export function SearchPageClient({ query }: SearchPageClientProps) {
 
   const optionsState = fromQuery(searchQuery, (data) => ({
     brands: Array.from(new Set(data.results.map((result) => result.brand))),
-    // RAM indisponible dans la reponse de recherche (pas de specs) : filtre
-    // affiche mais sans effet tant que l'API n'expose pas ce champ.
+    // RAM absente de la reponse de recherche : liste vide, donc filtre masque.
     ramOptions: [] as string[],
   }));
 
   if (query.trim().length === 0) {
-    return <p className="mx-auto max-w-3xl p-6 text-center text-sm text-gray-500">Tapez une recherche pour commencer.</p>;
+    return (
+      <main className="mx-auto max-w-3xl p-6">
+        <p className="text-center text-sm text-gray-500">Tapez une recherche pour commencer.</p>
+      </main>
+    );
   }
 
   if (searchQuery.status === "error") {
@@ -105,13 +110,13 @@ export function SearchPageClient({ query }: SearchPageClientProps) {
     <main className="mx-auto flex max-w-3xl flex-col gap-4 px-4 pb-12 pt-4 sm:gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="min-w-0 flex-1 truncate text-lg font-medium text-gray-900">« {query} »</h1>
-      <FilterPanel
-        optionsState={optionsState}
-        values={filterValues}
-        budgetRange={budgetRange}
-        onChange={setFilterValues}
-        onRetryOptions={() => searchQuery.refetch()}
-      />
+        <FilterPanel
+          optionsState={optionsState}
+          values={filterValues}
+          budgetRange={budgetRange}
+          onChange={setFilterValues}
+          onRetryOptions={() => searchQuery.refetch()}
+        />
       </div>
 
       {searchQuery.status === "success" && filteredResults.length === 0 ? (
@@ -124,7 +129,16 @@ export function SearchPageClient({ query }: SearchPageClientProps) {
             state={bestDealState}
             onRetry={() => productDetailQuery.refetch()}
             onViewOffer={(offerId) => offerClick.mutate(offerId)}
-            favoriteSlot={dominant ? <FavoriteToggle productId={dominant.id} initialFavorite={null} /> : undefined}
+            favoriteSlot={
+              dominant && isAuthenticated ? (
+                // key : un filtre qui change la reponse dominante repart de son vrai etat favori.
+                <FavoriteToggle
+                  key={dominant.id}
+                  productId={dominant.id}
+                  initialFavorite={favoritesByProduct[dominant.id] ?? null}
+                />
+              ) : undefined
+            }
           />
 
           <Panel title="Autres vendeurs">

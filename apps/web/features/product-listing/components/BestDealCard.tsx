@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 
 import type { AsyncState } from "@/components/ui/async-state";
-import { Button } from "@/components/ui/Button";
+import { buttonClasses } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ArrowUpRightIcon } from "@/components/ui/icons";
 import { ProductImage } from "@/components/ui/ProductImage";
@@ -19,6 +19,15 @@ export interface BestDealCardData {
   currency: string;
   averagePrice: number | null;
   offerUrl: string;
+  /** Offre moins chere ecartee par le score (stock, livraison, fiabilite) : signalee, jamais cachee. */
+  cheaperOffer?: CheaperOffer | null;
+}
+
+export interface CheaperOffer {
+  vendorName: string;
+  price: number;
+  currency: string;
+  reason: string;
 }
 
 interface BestDealCardProps {
@@ -27,9 +36,13 @@ interface BestDealCardProps {
   onViewOffer?: (offerId: string) => void;
   /** Slot pour <FavoriteToggle /> : product-listing ne doit jamais importer favorites directement. */
   favoriteSlot?: ReactNode;
+  /** h1 sur la fiche produit (seul titre de la page), h2 sous un h1 existant. */
+  headingLevel?: "h1" | "h2";
 }
 
-export function BestDealCard({ state, onRetry, onViewOffer, favoriteSlot }: BestDealCardProps) {
+export function BestDealCard({ state, onRetry, onViewOffer, favoriteSlot, headingLevel = "h2" }: BestDealCardProps) {
+  const Heading = headingLevel;
+
   if (state.status === "loading") {
     return (
       <div className="rounded-card border border-gray-200 bg-white p-4 sm:p-6">
@@ -67,7 +80,7 @@ export function BestDealCard({ state, onRetry, onViewOffer, favoriteSlot }: Best
 
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-lg font-medium leading-snug text-gray-900">{data.productName}</h3>
+          <Heading className="text-lg font-medium leading-snug text-gray-900">{data.productName}</Heading>
           <p className="mt-1 text-sm text-gray-500">chez {data.vendorName}</p>
         </div>
         {favoriteSlot}
@@ -82,18 +95,25 @@ export function BestDealCard({ state, onRetry, onViewOffer, favoriteSlot }: Best
         ) : null}
       </div>
 
-      <Button
+      {data.cheaperOffer ? (
+        <p className="tabular mt-2 text-sm text-gray-500">
+          Moins cher chez {data.cheaperOffer.vendorName} : {formatPrice(data.cheaperOffer.price, data.cheaperOffer.currency)}{" "}
+          ({data.cheaperOffer.reason})
+        </p>
+      ) : null}
+
+      <a
         data-testid="best-deal-view-offer"
-        size="lg"
-        className="mt-5 w-full"
-        onClick={() => {
-          onViewOffer?.(data.offerId);
-          window.open(data.offerUrl, "_blank", "noopener,noreferrer");
-        }}
+        href={data.offerUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => onViewOffer?.(data.offerId)}
+        className={`${buttonClasses({ size: "lg" })} mt-5 w-full`}
       >
         Voir l&apos;offre
+        <span className="sr-only"> chez {data.vendorName} (nouvel onglet)</span>
         <ArrowUpRightIcon size={18} />
-      </Button>
+      </a>
     </article>
   );
 }

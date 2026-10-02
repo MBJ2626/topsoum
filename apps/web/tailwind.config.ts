@@ -27,6 +27,8 @@ const config: Config = {
           800: "#23262c",
           900: "#15171c",
         },
+        // Bord des champs de saisie : 3:1 minimum sur blanc et sur etagere (WCAG 1.4.11).
+        field: "#80868f",
         green: { 700: "#0f7a55" },
         red: { 600: "#d92d2d" },
       },

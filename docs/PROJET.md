@@ -501,7 +501,7 @@ Optimise mon app Next.js (site TopSoum, domaine topsoum.com) pour le SEO tunisie
 - Landing pages statiques générées par requête populaire
   ("meilleur prix iphone 15 tunisie", "pc portable pas cher tunisie")
 - Metadata dynamiques par produit (title format "{produit} au meilleur prix
-  — TopSoum"), Open Graph, JSON-LD (schema.org Product + Offer, prix TND,
+  | TopSoum"), Open Graph, JSON-LD (schema.org Product + Offer, prix TND,
   organisation TopSoum)
 - Sitemap dynamique sur topsoum.com/sitemap.xml
 - next/image + WebP/AVIF, lazy loading

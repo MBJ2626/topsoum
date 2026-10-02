@@ -47,7 +47,7 @@ function MergePicker({ matchId, onDone }: { matchId: string; onDone: () => void 
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Chercher le produit cible..."
-        className="min-h-[44px] rounded-key border border-gray-300 bg-white px-4 text-sm"
+        className="min-h-[44px] rounded-key border border-field bg-white px-4 text-base"
       />
 
       {pickerQuery.status === "pending" && query.trim().length > 1 ? (
@@ -95,13 +95,12 @@ function PendingMatchRow({ match }: { match: PendingMatchOut }) {
       </div>
 
       <p className="text-xs text-gray-500">
-        Confiance {Math.round(match.confidence * 100)}% — stratégie {match.strategy} — {match.vendor_slug}
+        Confiance {Math.round(match.confidence * 100)} % · stratégie {match.strategy} · {match.vendor_slug}
       </p>
 
       <div className="flex flex-wrap gap-2">
         <Button
-          variant="primary"
-          className="text-xs"
+          variant="secondary"
           disabled={approveMatch.isPending}
           onClick={() => approveMatch.mutate(match.id)}
         >
@@ -109,13 +108,12 @@ function PendingMatchRow({ match }: { match: PendingMatchOut }) {
         </Button>
         <Button
           variant="secondary"
-          className="text-xs"
           disabled={rejectMatch.isPending}
           onClick={() => rejectMatch.mutate(match.id)}
         >
           Rejeter
         </Button>
-        <Button variant="secondary" className="text-xs" onClick={() => setMergeOpen((open) => !open)}>
+        <Button variant="secondary" aria-expanded={mergeOpen} onClick={() => setMergeOpen((open) => !open)}>
           Fusionner
         </Button>
       </div>

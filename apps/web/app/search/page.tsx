@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import { apiFetch } from "@/lib/api-client";
 import type { ProductSearchResponse } from "@/lib/api-types";
+import { loadFavoriteContext } from "@/lib/favorites-server";
 import { getQueryClient } from "@/lib/get-query-client";
 
 import { SearchPageClient } from "./search-page-client";
@@ -35,6 +36,7 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q = "" } = await searchParams;
   const queryClient = getQueryClient();
+  const favoriteContext = await loadFavoriteContext();
 
   if (q.trim().length > 0) {
     const searchData = await fetchProductSearchServer(q);
@@ -51,7 +53,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <SearchPageClient query={q} />
+      <SearchPageClient
+        query={q}
+        isAuthenticated={favoriteContext.isAuthenticated}
+        favoritesByProduct={favoriteContext.favoritesByProduct}
+      />
     </HydrationBoundary>
   );
 }

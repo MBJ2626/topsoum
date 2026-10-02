@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: { ...BASE_OPEN_GRAPH, url: "/" },
 };
 
-// Liens "Recherches populaires" rafraichis au plus toutes les heures (ISR).
+// Liens "Comparatifs" rafraichis au plus toutes les heures (ISR).
 export const revalidate = 3600;
 
 /** Landing pages ayant des produits ; aucune si l'API est indisponible (l'accueil ne doit jamais tomber). */
@@ -85,22 +85,24 @@ export default async function HomePage() {
           </div>
 
           {/* Etiquette laterale de la boite : qui est compare. */}
-          <dl className="grid grid-cols-[auto_1fr] items-baseline gap-x-6 border-t-2 border-gray-900 pt-3 text-sm sm:grid-cols-[auto_1fr_auto]">
-            <dt className="text-gray-500">Comparé chez</dt>
-            <dd className="flex flex-wrap gap-x-3 gap-y-1 font-medium text-gray-900">
-              {COMPARED_VENDORS.map((vendor) => (
-                <span key={vendor}>{vendor}</span>
-              ))}
-            </dd>
-            <dd className="hidden text-gray-500 sm:block">Prix en dinars (TND)</dd>
-          </dl>
+          <div className="flex items-baseline justify-between gap-6 border-t-2 border-gray-900 pt-3 text-sm">
+            <dl className="flex items-baseline gap-x-6">
+              <dt className="flex-none text-gray-500">Comparé chez</dt>
+              <dd className="flex flex-wrap gap-x-3 gap-y-1 font-medium text-gray-900">
+                {COMPARED_VENDORS.map((vendor) => (
+                  <span key={vendor}>{vendor}</span>
+                ))}
+              </dd>
+            </dl>
+            <p className="hidden flex-none text-gray-500 sm:block">Prix en dinars (TND)</p>
+          </div>
         </section>
       </main>
 
       {landings.length > 0 ? (
         <nav aria-labelledby="popular-searches" className="mx-auto w-full max-w-4xl px-3 pb-12 pt-4 sm:px-6">
           <h2 id="popular-searches" className="mb-3 px-2 text-sm font-medium text-gray-500">
-            Recherches populaires
+            Comparatifs
           </h2>
           <ul className="flex flex-wrap gap-2">
             {landings.map((page) => (

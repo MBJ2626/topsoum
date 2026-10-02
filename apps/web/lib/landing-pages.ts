@@ -1,13 +1,13 @@
-// Landing pages SEO (docs/PROJET.md, prompt 11) : une page par requete
+// Landing pages SEO : une page par requete
 // populaire, servie a /meilleur-prix/{slug}. Ajouter une requete = ajouter
 // une entree ici. Une page sans produit est en noindex et absente du sitemap :
 // elle s'active d'elle-meme quand le catalogue couvre la requete.
 
 export interface LandingPage {
   slug: string;
-  /** Libelle court du lien "Recherches populaires" de l'accueil. */
+  /** Libelle court du lien "Comparatifs" de l'accueil. */
   label: string;
-  /** Titre de l'onglet et de Google (suffixe " — TopSoum" ajoute par le layout). */
+  /** Titre de l'onglet et de Google (suffixe " | TopSoum" ajoute par le layout). */
   title: string;
   h1: string;
   description: string;

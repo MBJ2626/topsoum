@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import type { AsyncState } from "@/components/ui/async-state";
 import { formatPrice } from "@/lib/format";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { SkeletonBlock } from "@/components/ui/Skeleton";
 
 export interface PricePoint {
   recordedAt: string;
@@ -18,15 +19,7 @@ interface PriceHistoryChartProps {
 }
 
 function ChartSkeleton() {
-  return (
-    <div className="h-48 w-full animate-pulse rounded-key bg-gray-50">
-      <div className="flex h-full items-end gap-2 p-4">
-        {[40, 65, 50, 80, 60, 90].map((height, index) => (
-          <div key={index} className="flex-1 rounded-t bg-gray-100" style={{ height: `${height}%` }} />
-        ))}
-      </div>
-    </div>
-  );
+  return <SkeletonBlock className="h-48 w-full" />;
 }
 
 // Recharts (~100 Ko) hors du bundle initial de la fiche produit : le graphique

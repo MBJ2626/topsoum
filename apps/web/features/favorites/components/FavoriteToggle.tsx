@@ -73,11 +73,11 @@ export function FavoriteToggle({ productId, initialFavorite }: FavoriteTogglePro
           favorite ? "border-gray-900 text-gray-900" : "border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-900"
         }`}
       >
-        <StarIcon size={20} filled={favorite != null} className={isFavoritePending ? "animate-pulse" : undefined} />
+        <StarIcon size={20} filled={favorite != null} className={isFavoritePending ? "animate-pulse motion-reduce:animate-none" : undefined} />
       </button>
 
       {favoriteError ? (
-        <button type="button" onClick={handleFavoriteClick} className="text-xs text-red-600 underline">
+        <button type="button" onClick={handleFavoriteClick} className="min-h-[44px] text-xs text-red-600 underline underline-offset-2">
           Échec, réessayer
         </button>
       ) : null}
@@ -96,7 +96,7 @@ export function FavoriteToggle({ productId, initialFavorite }: FavoriteTogglePro
       ) : null}
 
       {trackingError ? (
-        <button type="button" onClick={handleTrackingChange} className="text-xs text-red-600 underline">
+        <button type="button" onClick={handleTrackingChange} className="min-h-[44px] text-xs text-red-600 underline underline-offset-2">
           Échec du suivi, réessayer
         </button>
       ) : null}

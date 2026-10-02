@@ -17,7 +17,7 @@ const sans = Readex_Pro({
   display: "swap",
 });
 
-const DEFAULT_TITLE = "TopSoum — Comparateur de prix électronique en Tunisie";
+const DEFAULT_TITLE = "TopSoum | Comparateur de prix électronique en Tunisie";
 const DEFAULT_DESCRIPTION =
   "Comparez les prix des téléphones, PC et TV chez les revendeurs tunisiens et trouvez le meilleur prix.";
 
@@ -25,7 +25,7 @@ const DEFAULT_DESCRIPTION =
 // toutes les pages. Chaque page indexable declare sa propre URL canonique.
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: DEFAULT_TITLE, template: `%s — ${SITE_NAME}` },
+  title: { default: DEFAULT_TITLE, template: `%s | ${SITE_NAME}` },
   description: DEFAULT_DESCRIPTION,
   applicationName: SITE_NAME,
   manifest: "/manifest.json",

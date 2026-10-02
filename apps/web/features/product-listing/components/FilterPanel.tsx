@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type { AsyncState } from "@/components/ui/async-state";
+import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { SlidersIcon } from "@/components/ui/icons";
 import { SkeletonLine } from "@/components/ui/Skeleton";
@@ -34,12 +35,7 @@ export function FilterPanel({ optionsState, values, budgetRange, onChange, onRet
   // rangee parente (flex-wrap), le panneau ouvert passe a la ligne en pleine largeur.
   return (
     <div className="contents">
-      <button
-        type="button"
-        onClick={() => setIsOpen((open) => !open)}
-        aria-expanded={isOpen}
-        className="flex min-h-[44px] items-center gap-2 rounded-key border border-gray-300 bg-white px-4 text-sm font-medium text-gray-900 transition-colors hover:border-gray-400 active:scale-[0.98]"
-      >
+      <Button type="button" variant="secondary" onClick={() => setIsOpen((open) => !open)} aria-expanded={isOpen}>
         <SlidersIcon size={18} />
         Filtres
         {activeCount > 0 ? (
@@ -47,7 +43,7 @@ export function FilterPanel({ optionsState, values, budgetRange, onChange, onRet
             {activeCount}
           </span>
         ) : null}
-      </button>
+      </Button>
 
       {isOpen ? (
         <div className="animate-tray basis-full rounded-card border border-gray-200 bg-white p-4 sm:p-6">
@@ -81,7 +77,7 @@ export function FilterPanel({ optionsState, values, budgetRange, onChange, onRet
                 <select
                   value={values.brand ?? ""}
                   onChange={(event) => onChange({ ...values, brand: event.target.value || null })}
-                  className="min-h-[44px] rounded-key border border-gray-300 bg-white px-3 text-gray-900"
+                  className="min-h-[44px] rounded-key border border-field bg-white px-3 text-gray-900"
                 >
                   <option value="">Toutes les marques</option>
                   {optionsState.data.brands.map((brand) => (
@@ -92,21 +88,24 @@ export function FilterPanel({ optionsState, values, budgetRange, onChange, onRet
                 </select>
               </label>
 
-              <label className="flex flex-col gap-1 text-sm text-gray-700">
-                RAM
-                <select
-                  value={values.ram ?? ""}
-                  onChange={(event) => onChange({ ...values, ram: event.target.value || null })}
-                  className="min-h-[44px] rounded-key border border-gray-300 bg-white px-3 text-gray-900"
-                >
-                  <option value="">Toutes</option>
-                  {optionsState.data.ramOptions.map((ram) => (
-                    <option key={ram} value={ram}>
-                      {ram}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {/* Masque tant que l'API n'expose pas la RAM : jamais de filtre sans effet. */}
+              {optionsState.data.ramOptions.length > 0 ? (
+                <label className="flex flex-col gap-1 text-sm text-gray-700">
+                  RAM
+                  <select
+                    value={values.ram ?? ""}
+                    onChange={(event) => onChange({ ...values, ram: event.target.value || null })}
+                    className="min-h-[44px] rounded-key border border-field bg-white px-3 text-gray-900"
+                  >
+                    <option value="">Toutes</option>
+                    {optionsState.data.ramOptions.map((ram) => (
+                      <option key={ram} value={ram}>
+                        {ram}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
             </div>
           )}
         </div>

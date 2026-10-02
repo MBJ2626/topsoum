@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { Metadata } from "next";
 
-import { auth } from "@/auth";
+import { auth, signOut } from "@/auth";
+import { buttonClasses } from "@/components/ui/Button";
 import { apiFetch } from "@/lib/api-client";
 import { getQueryClient } from "@/lib/get-query-client";
 
@@ -17,7 +18,7 @@ export const metadata: Metadata = { title: "Mes favoris", robots: { index: false
 export default async function FavoritesPage() {
   const session = await auth();
   if (!session) {
-    redirect("/api/auth/signin?callbackUrl=/favorites");
+    redirect("/connexion?callbackUrl=/favorites");
   }
 
   const queryClient = getQueryClient();
@@ -28,7 +29,20 @@ export default async function FavoritesPage() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <FavoritesPageClient />
+      <FavoritesPageClient
+        signOutSlot={
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/" });
+            }}
+          >
+            <button type="submit" className={buttonClasses({ variant: "secondary" })}>
+              Se déconnecter
+            </button>
+          </form>
+        }
+      />
     </HydrationBoundary>
   );
 }
