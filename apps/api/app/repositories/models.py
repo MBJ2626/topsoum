@@ -178,3 +178,14 @@ class ScanSchedule(Base):
     times: Mapped[list[str]] = mapped_column(ARRAY(String))
     configured_at: Mapped[datetime.datetime]
     worker_seen_at: Mapped[datetime.datetime | None]
+
+
+class ProductEvent(Base):
+    """Evenement d'audience anonyme (view | offer_click) pour "Les plus consultes"."""
+
+    __tablename__ = "product_events"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    type: Mapped[str]
+    created_at: Mapped[datetime.datetime]

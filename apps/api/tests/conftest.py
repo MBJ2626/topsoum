@@ -92,6 +92,7 @@ def seeded_catalog() -> Iterator[SeededCatalog]:
             "or candidate_product_id = any(:product_ids)",
             "delete from manual_overrides where product_id = any(:product_ids)",
             "delete from favorites where product_id = any(:product_ids)",
+            "delete from product_events where product_id = any(:product_ids)",
             "delete from products where id = any(:product_ids)",
             "delete from vendors where id = :vendor_id",
         ):

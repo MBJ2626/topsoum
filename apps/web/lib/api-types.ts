@@ -171,3 +171,22 @@ export interface ScanScheduleOut {
   timezone: string;
   next_run_at: string | null;
 }
+
+export interface TopProduct {
+  id: string;
+  canonical_name: string;
+  brand: string;
+  model: string;
+  image_url: string | null;
+  best_deal: OfferSummary;
+  offers_count: number;
+  price_spread: number | null;
+  views: number | null;
+}
+
+export interface TopProductsResponse {
+  /** most_viewed : consultations TopSoum ; most_compared : vendus chez le plus de revendeurs. */
+  mode: "most_viewed" | "most_compared";
+  period_days: number | null;
+  results: TopProduct[];
+}

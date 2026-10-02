@@ -22,6 +22,7 @@ import { useSimilarProducts } from "@/features/product-listing/hooks/useSimilarP
 import { pushRecentlyViewed } from "@/lib/recently-viewed";
 import { productDisplayName } from "@/lib/product-name";
 import { useOfferClick } from "@/lib/use-offer-click";
+import { useRecordProductView } from "@/lib/use-record-view";
 
 interface ProductPageClientProps {
   productId: string;
@@ -34,6 +35,8 @@ export function ProductPageClient({ productId, isAuthenticated, initialFavorite 
   const offerClick = useOfferClick();
   const queryClient = useQueryClient();
   const [showSpecs, setShowSpecs] = useState(false);
+
+  useRecordProductView(productId, productQuery.status === "success");
 
   useEffect(() => {
     if (productQuery.status !== "success") return;
