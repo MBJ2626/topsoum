@@ -17,7 +17,7 @@ export const fetchLandingResults = cache(async (page: LandingPage): Promise<Prod
   if (page.query) params.set("q", page.query);
   if (page.category) params.set("category", page.category);
 
-  const response = await apiFetch(`/products/search?${params.toString()}`, { auth: false });
+  const response = await apiFetch(`/products/search?${params.toString()}`, { auth: false, forwardClientIp: false });
   if (!response.ok) {
     throw new Error(`Landing ${page.slug} : recherche impossible (API ${response.status})`);
   }
