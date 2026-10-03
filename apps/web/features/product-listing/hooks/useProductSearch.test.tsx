@@ -4,6 +4,8 @@ import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { QUERY_DEFAULTS } from "@/lib/query-retry";
+
 import { useProductSearch } from "./useProductSearch";
 
 // Caracterisation (2026-10-03) : un hook client passe par la route Next
@@ -63,5 +65,43 @@ describe("useProductSearch", () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(result.current.status).toBe("pending");
     expect(result.current.fetchStatus).toBe("idle");
+  });
+});
+
+describe("useProductSearch — relances silencieuses (politique de l'application)", () => {
+  function appWrapper({ children }: { children: ReactNode }) {
+    // Meme politique que app/providers.tsx, backoff ramene a 0 pour le test.
+    const client = new QueryClient({ defaultOptions: { queries: { ...QUERY_DEFAULTS.queries, retryDelay: 0 } } });
+    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  }
+
+  it("un 503 passager est relance sans jamais montrer d'erreur", async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response("{}", { status: 503 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ results: [] }), { status: 200 }));
+
+    const { result } = renderHook(() => useProductSearch("iphone"), { wrapper: appWrapper });
+
+    await waitFor(() => expect(result.current.status).toBe("success"));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("une coupure persistante finit en erreur apres 3 tentatives", async () => {
+    fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    const { result } = renderHook(() => useProductSearch("iphone"), { wrapper: appWrapper });
+
+    await waitFor(() => expect(result.current.status).toBe("error"));
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("une erreur definitive (400) n'est pas relancee et garde le message utilisateur", async () => {
+    fetchMock.mockResolvedValue(new Response("{}", { status: 400 }));
+
+    const { result } = renderHook(() => useProductSearch("iphone"), { wrapper: appWrapper });
+
+    await waitFor(() => expect(result.current.status).toBe("error"));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result.current.error?.message).toBe("La recherche a échoué.");
   });
 });

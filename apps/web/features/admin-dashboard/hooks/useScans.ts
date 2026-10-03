@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { ScanJobOut, ScanListResponse, ScanScheduleOut } from "@/lib/api-types";
+import { HttpError } from "@/lib/http-error";
 
 /** Message de l'API ("detail") si present, sinon le message par defaut. */
 async function errorMessage(response: Response, fallback: string): Promise<string> {
@@ -26,7 +27,7 @@ export function useScans() {
     queryKey: SCANS_QUERY_KEY,
     queryFn: async (): Promise<ScanListResponse> => {
       const response = await fetch("/api/admin/scans");
-      if (!response.ok) throw new Error("Impossible de charger les scans.");
+      if (!response.ok) throw new HttpError("Impossible de charger les scans.", response.status);
       return response.json();
     },
     // Suivi en direct pendant un scan, rafraichissement lent sinon.
@@ -56,7 +57,7 @@ export function useScanSchedule() {
     queryKey: SCAN_SCHEDULE_QUERY_KEY,
     queryFn: async (): Promise<ScanScheduleOut> => {
       const response = await fetch("/api/admin/scans/schedule");
-      if (!response.ok) throw new Error("Impossible de charger la planification.");
+      if (!response.ok) throw new HttpError("Impossible de charger la planification.", response.status);
       return response.json();
     },
   });
