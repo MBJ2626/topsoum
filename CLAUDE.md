@@ -26,3 +26,13 @@ toute décision d'architecture.
 - Dev : pnpm dev
 - Build : pnpm build
 - Tests : pnpm test
+## Superpowers (méthode de travail)
+- Chaque prompt numéroté de la roadmap = spec ET plan déjà approuvés. Ne pas relancer brainstorming ni writing-plans dessus : exécuter directement (executing-plans) avec TDD et review.
+- Ne jamais rouvrir les décisions de PRODUCT.md, DESIGN.md et docs/PROJET.md.
+- Brainstorming autorisé uniquement pour une feature hors roadmap.
+- TDD : nouveau code uniquement. Ne jamais supprimer de code existant au motif qu'il n'a pas de test ; ajouter les tests manquants.
+- Bug : écrire d'abord un test qui reproduit le bug et échoue.
+- Scrapers : tests sur fixtures HTML dans apps/scrapers/vendors/{nom}/fixtures/, jamais sur les sites live.
+- Worktrees : dans .worktrees/, puis lancer `bash scripts/worktree-setup.sh`. Un seul docker-compose partagé (celui du worktree principal).
+- Mode d'exécution par défaut : executing-plans (économique). subagent-driven-development seulement si je le demande.
+- Les rapports de fin de tâche sont en français.
