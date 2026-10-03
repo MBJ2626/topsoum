@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
@@ -43,10 +44,22 @@ def search_products_controller(
     *,
     query: str | None,
     category: str | None,
+    brand: str | None = None,
+    ram_gb: int | None = None,
+    max_price: Decimal | None = None,
     limit: int,
     offset: int,
 ) -> ProductSearchResponse:
-    results = search_products(session, query=query, category=category, limit=limit, offset=offset)
+    results = search_products(
+        session,
+        query=query,
+        category=category,
+        brand=brand,
+        ram_gb=ram_gb,
+        max_price=max_price,
+        limit=limit,
+        offset=offset,
+    )
 
     out = [
         ProductSearchResult(

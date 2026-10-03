@@ -19,6 +19,8 @@ def search_products_candidates(
     *,
     query: str | None = None,
     category: str | None = None,
+    brand: str | None = None,
+    ram_gb: int | None = None,
     max_candidates: int = 500,
 ) -> list[Product]:
     """Ramene les produits candidats pour une recherche, avec leurs offres et
@@ -48,6 +50,13 @@ def search_products_candidates(
 
     if category:
         stmt = stmt.where(Product.category == category)
+
+    if brand:
+        stmt = stmt.where(func.lower(Product.brand) == brand.strip().lower())
+
+    if ram_gb is not None:
+        # specs.ramGb est ecrit par l'ETL (matching/specsParser) ; absent -> pas de correspondance.
+        stmt = stmt.where(Product.specs["ramGb"].as_integer() == ram_gb)
 
     stmt = stmt.limit(max_candidates)
 

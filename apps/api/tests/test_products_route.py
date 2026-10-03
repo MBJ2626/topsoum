@@ -128,3 +128,47 @@ def test_sitemap_excludes_products_without_offers(seeded_catalog: SeededCatalog)
     ids = {entry["id"] for entry in client.get("/products/sitemap").json()["results"]}
     assert seeded_catalog.product_ids[0] not in ids
     assert seeded_catalog.product_ids[1] in ids
+
+
+def _set_ram(product_id: str, ram_gb: int) -> None:
+    session = SessionLocal()
+    try:
+        session.execute(
+            text("update products set specs = jsonb_build_object('ramGb', cast(:ram as int)) where id = :id"),
+            {"id": product_id, "ram": ram_gb},
+        )
+        session.commit()
+    finally:
+        session.close()
+
+
+def _search_ids(**params: object) -> list[str]:
+    response = client.get("/products/search", params=params)
+    assert response.status_code == 200, response.text
+    return [result["id"] for result in response.json()["results"]]
+
+
+def test_search_filters_by_brand_case_insensitively(seeded_catalog: SeededCatalog) -> None:
+    tag = seeded_catalog.tag
+    assert sorted(_search_ids(q=tag, brand="testbrand")) == sorted(seeded_catalog.product_ids)
+    assert _search_ids(q=tag, brand="Samsung") == []
+
+
+def test_search_filters_by_ram_from_product_specs(seeded_catalog: SeededCatalog) -> None:
+    alpha, beta, gamma = seeded_catalog.product_ids
+    _set_ram(alpha, 2)
+    _set_ram(beta, 4)
+
+    assert _search_ids(q=seeded_catalog.tag, ram_gb=4) == [beta]
+
+
+def test_search_filters_by_max_price_on_best_deal(seeded_catalog: SeededCatalog) -> None:
+    # Offres seedees a 100, 101 et 102 TND.
+    alpha, beta, _ = seeded_catalog.product_ids
+    assert _search_ids(q=seeded_catalog.tag, max_price="101") == [alpha, beta]
+
+
+def test_search_rejects_invalid_filters() -> None:
+    assert client.get("/products/search", params={"ram_gb": 0}).status_code == 422
+    assert client.get("/products/search", params={"max_price": "-1"}).status_code == 422
+    assert client.get("/products/search", params={"max_price": "abc"}).status_code == 422

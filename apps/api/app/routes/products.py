@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
@@ -25,11 +26,23 @@ router = APIRouter(prefix="/products", tags=["products"])
 def search(
     q: Annotated[str | None, Query(description="Recherche texte (nom, marque)")] = None,
     category: Annotated[str | None, Query(description="Filtre par categorie")] = None,
+    brand: Annotated[str | None, Query(max_length=100, description="Marque exacte, casse indifferente")] = None,
+    ram_gb: Annotated[int | None, Query(ge=1, le=64, description="RAM en Go (specs du produit)")] = None,
+    max_price: Annotated[Decimal | None, Query(gt=0, description="Budget max (TND) sur le meilleur deal")] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
     session: Session = Depends(get_session),
 ) -> ProductSearchResponse:
-    return search_products_controller(session, query=q, category=category, limit=limit, offset=offset)
+    return search_products_controller(
+        session,
+        query=q,
+        category=category,
+        brand=brand,
+        ram_gb=ram_gb,
+        max_price=max_price,
+        limit=limit,
+        offset=offset,
+    )
 
 
 # Declarees AVANT /{product_id} : sinon "sitemap" ou "top" seraient pris pour un id produit.

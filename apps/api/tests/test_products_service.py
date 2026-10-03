@@ -8,6 +8,7 @@ reelle, `session` est passe en `None`).
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 
 import pytest
 
@@ -102,3 +103,36 @@ def test_get_product_detail_passes_90_day_lookback_to_repository(monkeypatch: py
 
     expected_since = datetime.now(UTC) - timedelta(days=PRICE_HISTORY_LOOKBACK_DAYS)
     assert abs((captured["since"] - expected_since).total_seconds()) < 5
+
+
+def test_search_products_passes_brand_and_ram_filters_to_repository(monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: dict = {}
+
+    def fake_candidates(session, **kwargs):
+        seen.update(kwargs)
+        return []
+
+    monkeypatch.setattr(products_repository, "search_products_candidates", fake_candidates)
+
+    search_products(None, query="galaxy", category=None, brand="Samsung", ram_gb=8, max_price=None, limit=10, offset=0)
+
+    assert seen == {"query": "galaxy", "category": None, "brand": "Samsung", "ram_gb": 8}
+
+
+def test_search_products_max_price_applies_to_reliable_best_deal_before_pagination(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    products = [
+        make_product(id="p-over", offers=[make_offer(price="900", shipping_cost=None, trust_score=3.0, stock_status="in_stock")]),
+        make_product(id="p-under", offers=[make_offer(price="450", shipping_cost=None, trust_score=3.0, stock_status="in_stock")]),
+        make_product(id="p-edge", offers=[make_offer(price="500", shipping_cost=None, trust_score=3.0, stock_status="in_stock")]),
+        make_product(id="p-unpriced", offers=[make_offer(price="0", shipping_cost=None, trust_score=3.0, stock_status="in_stock")]),
+    ]
+    monkeypatch.setattr(products_repository, "search_products_candidates", lambda *a, **kw: products)
+
+    page = search_products(
+        None, query=None, category=None, brand=None, ram_gb=None, max_price=Decimal("500"), limit=1, offset=1
+    )
+
+    # Sous budget : p-under (450) puis p-edge (500, borne incluse) ; ni p-over, ni le produit sans prix fiable.
+    assert [r.product.id for r in page] == ["p-edge"]
