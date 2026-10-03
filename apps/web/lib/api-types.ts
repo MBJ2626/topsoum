@@ -24,6 +24,8 @@ export interface ProductSearchResult {
   image_url: string | null;
   best_deal: OfferSummary;
   offers_count: number;
+  /** RAM en Go (specs.ramGb), null si inconnue. */
+  ram_gb: number | null;
 }
 
 export interface ProductSearchResponse {
