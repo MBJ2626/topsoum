@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- Source de public/og.png (1200x630). Regenerer : node scripts/og-image/render.mjs -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500&display=block" rel="stylesheet">
+<style>
+  :root { --shelf:#eef0f3; --face:#ffffff; --edge:#e2e5e9; --ink:#15171c; --muted:#5f646d; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; }
+  body { background: var(--shelf); font-family: "Readex Pro", system-ui, sans-serif; color: var(--ink); padding: 36px; }
+  .face { position: relative; height: 100%; background: var(--face); border: 2px solid var(--edge); border-radius: 24px;
+          padding: 56px 64px; display: grid; grid-template-columns: 1fr 380px; gap: 24px; overflow: hidden; }
+  .text { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+  .wordmark { display: flex; align-items: center; gap: 12px; font-size: 30px; font-weight: 500; letter-spacing: -0.03em; }
+  h1 { font-size: 66px; font-weight: 500; line-height: 1.06; letter-spacing: -0.03em; max-width: 13ch; text-wrap: balance; }
+  .label { border-top: 3px solid var(--ink); padding-top: 14px; display: flex; gap: 28px; align-items: baseline; font-size: 22px; }
+  .label dt { color: var(--muted); font-weight: 400; }
+  .label dd { font-weight: 500; display: flex; gap: 18px; }
+  .devices { position: relative; }
+  .devices img { position: absolute; bottom: -56px; object-fit: contain; object-position: bottom; }
+  .back { inset-inline-start: -6px; height: 112%; width: 66%; }
+  .front { inset-inline-end: -18px; height: 124%; width: 74%; }
+</style>
+</head>
+<body>
+  <div class="face">
+    <div class="text">
+      <div class="wordmark">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M10 9.5v3h4v-3"/>
+        </svg>
+        TopSoum
+      </div>
+      <h1>Le meilleur prix, sans faire le tour des boutiques.</h1>
+      <dl class="label"><dt>Comparé chez</dt><dd><span>Tunisianet</span><span>MyTek</span><span>Spacenet</span></dd></dl>
+    </div>
+    <div class="devices">
+      <img class="back" src="../../public/showcase/iphone-17-pro-max-orange.webp" alt="">
+      <img class="front" src="../../public/showcase/galaxy-s26-ultra.webp" alt="">
+    </div>
+  </div>
+</body>
+</html>
