@@ -1,7 +1,7 @@
 [project]
 name = "topsoum-scrapers"
 version = "0.0.0"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "playwright>=1.48.0",
     "tenacity>=9.0.0",
