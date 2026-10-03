@@ -69,6 +69,11 @@ jobs:
         working-directory: apps/etl-pipeline
         run: pnpm exec tsx src/scripts/seed-ci-user.ts
 
+      # Les tests des scrapers lancent Chromium sur des fixtures HTML (hors reseau).
+      - name: Installer Chromium (Playwright Python, scrapers)
+        working-directory: apps/scrapers
+        run: uv sync --frozen && uv run playwright install --with-deps chromium
+
       - name: Lint (apps modifiees)
         run: pnpm turbo run lint --filter="${{ env.TURBO_FILTER }}"
 

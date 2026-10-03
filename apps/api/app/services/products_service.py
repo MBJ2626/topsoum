@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.errors import ProductNotFoundError
 from app.repositories import product_events_repository, products_repository
 from app.repositories.models import Offer, PriceHistory, Product
-from app.services.scoring import best_offer, score_offer
+from app.services.scoring import best_deal, best_offer, deal_rank, has_reliable_price, rank_offers
 
 PRICE_HISTORY_LOOKBACK_DAYS = 90
 
@@ -39,6 +39,9 @@ def search_products(
     *,
     query: str | None,
     category: str | None,
+    brand: str | None = None,
+    ram_gb: int | None = None,
+    max_price: Decimal | None = None,
     limit: int,
     offset: int,
 ) -> list[ProductSearchResultData]:
@@ -48,15 +51,24 @@ def search_products(
     # tri pour etre correcte globalement. Au-dela de 500 produits candidats
     # pour une recherche donnee, le tri devient partiel - largement
     # suffisant pour le catalogue V1 (4 vendeurs, marche tunisien).
-    products = products_repository.search_products_candidates(session, query=query, category=category)
+    products = products_repository.search_products_candidates(
+        session, query=query, category=category, brand=brand, ram_gb=ram_gb
+    )
 
-    ranked = sorted(products, key=lambda product: score_offer(best_offer(product.offers)))
+    ranked = sorted(products, key=lambda product: deal_rank(product.offers))
+    if max_price is not None:
+        # Budget sur le meilleur deal FIABLE : un produit sans prix fiable n'est jamais "dans le budget".
+        ranked = [
+            product
+            for product in ranked
+            if has_reliable_price(deal := best_deal(product.offers)) and deal.price <= max_price
+        ]
     page = ranked[offset : offset + limit]
 
     return [
         ProductSearchResultData(
             product=product,
-            best_deal=best_offer(product.offers),
+            best_deal=best_deal(product.offers),
             offers_count=len(product.offers),
         )
         for product in page
@@ -147,13 +159,14 @@ def record_product_view(session: Session, product_id: str) -> None:
 
 def get_product_detail(session: Session, product_id: str) -> ProductDetailData:
     product = products_repository.get_product_by_id(session, product_id)
-    if product is None:
+    # Sans offre (ex : fiche fusionnee par l'admin), rien a comparer : introuvable.
+    if product is None or not product.offers:
         raise ProductNotFoundError(product_id)
 
     since = datetime.now(UTC) - timedelta(days=PRICE_HISTORY_LOOKBACK_DAYS)
     history = products_repository.get_price_history_for_product(session, product_id, since=since)
 
-    offers_sorted = sorted(product.offers, key=score_offer)
+    offers_sorted = rank_offers(product.offers)
 
     return ProductDetailData(
         product=product,

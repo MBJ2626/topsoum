@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.errors import FavoriteAlreadyExistsError, FavoriteNotFoundError, ProductNotFoundError
 from app.repositories import favorites_repository, products_repository
 from app.repositories.models import Favorite
-from app.services.scoring import best_offer
+from app.services.scoring import best_offer, has_reliable_price
 
 
 @dataclass
@@ -19,7 +19,8 @@ class FavoriteResultData:
 
 
 def to_result(favorite: Favorite) -> FavoriteResultData:
-    offers = favorite.product.offers
+    # Prix douteux (<= 0) ignores : sans prix fiable, le web affiche "Prix en cours de mise a jour".
+    offers = [offer for offer in favorite.product.offers if has_reliable_price(offer)]
     if not offers:
         return FavoriteResultData(favorite=favorite, best_offer_price=None, best_offer_vendor=None)
     offer = best_offer(offers)

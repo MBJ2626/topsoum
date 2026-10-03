@@ -1,12 +1,12 @@
 // Donnees structurees schema.org (JSON-LD) : lues par Google pour les
 // extraits enrichis (prix, disponibilite).
+import type { ItemAvailability, Organization, Product, WebSite, WithContext } from "schema-dts";
+
 import type { ProductDetailResponse } from "@/lib/api-types";
 import { productDisplayName } from "@/lib/product-name";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
-type JsonLdObject = Record<string, unknown>;
-
-const AVAILABILITY: Record<string, string | undefined> = {
+const AVAILABILITY: Record<string, ItemAvailability | undefined> = {
   in_stock: "https://schema.org/InStock",
   out_of_stock: "https://schema.org/OutOfStock",
   // unknown : pas de disponibilite declaree plutot qu'une information fausse.
@@ -22,7 +22,7 @@ function schemaPrice(value: number): string {
  * nombre d'offres) et le detail de chaque offre vendeur. Les offres a prix
  * douteux (<= 0) sont exclues : jamais de prix faux dans les resultats Google.
  */
-export function productJsonLd(detail: ProductDetailResponse): JsonLdObject | null {
+export function productJsonLd(detail: ProductDetailResponse): WithContext<Product> | null {
   const offers = detail.offers.filter((offer) => Number(offer.price) > 0);
   if (offers.length === 0) return null;
 
@@ -47,6 +47,8 @@ export function productJsonLd(detail: ProductDetailResponse): JsonLdObject | nul
         "@type": "Offer",
         price: schemaPrice(offer.price),
         priceCurrency: offer.currency,
+        // Revendeurs de neuf : les annonces d'occasion ne sont pas scrapees.
+        itemCondition: "https://schema.org/NewCondition",
         url: offer.url,
         seller: { "@type": "Organization", name: offer.vendor_name },
         ...(AVAILABILITY[offer.stock_status] ? { availability: AVAILABILITY[offer.stock_status] } : {}),
@@ -56,7 +58,7 @@ export function productJsonLd(detail: ProductDetailResponse): JsonLdObject | nul
 }
 
 /** Identite de TopSoum (page d'accueil) : Organization + WebSite. */
-export function siteJsonLd(): JsonLdObject[] {
+export function siteJsonLd(): [WithContext<Organization>, WithContext<WebSite>] {
   return [
     {
       "@context": "https://schema.org",
@@ -80,7 +82,7 @@ export function siteJsonLd(): JsonLdObject[] {
  * de produit scrape contenant "</script>" ne doit jamais pouvoir fermer la
  * balise et injecter du HTML.
  */
-export function JsonLd({ data }: { data: JsonLdObject | JsonLdObject[] }) {
+export function JsonLd({ data }: { data: object }) {
   const json = JSON.stringify(data).replace(/</g, "\\u003c");
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />;
 }

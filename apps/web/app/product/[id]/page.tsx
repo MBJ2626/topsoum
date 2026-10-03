@@ -58,9 +58,10 @@ export async function generateMetadata({ params }: ProductPageParams): Promise<M
       title,
       description,
       url,
-      images: detail.image_url ? [{ url: detail.image_url, alt: productDisplayName(detail) }] : undefined,
+      // Sans photo produit, l'image par defaut de BASE_OPEN_GRAPH reste.
+      ...(detail.image_url ? { images: [{ url: detail.image_url, alt: productDisplayName(detail) }] } : {}),
     },
-    twitter: { card: detail.image_url ? "summary_large_image" : "summary" },
+    twitter: { card: "summary_large_image" },
   };
 }
 
