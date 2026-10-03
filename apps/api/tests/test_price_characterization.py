@@ -167,3 +167,21 @@ def test_favorite_without_reliable_price_has_no_price() -> None:
 def test_top_item_skips_products_with_only_zero_prices() -> None:
     """Seul le top 5 ecarte les prix <= 0."""
     assert _top_item(make_product(offers=[_offer("0", id="a")]), None) is None
+
+
+@pytest.mark.parametrize(
+    ("specs", "expected"),
+    [({"ramGb": 8}, 8), ({}, None), ({"ramGb": None}, None), ({"ramGb": "8"}, None), ({"ramGb": True}, None)],
+)
+def test_search_controller_exposes_ram_only_when_specs_hold_an_integer(
+    monkeypatch: pytest.MonkeyPatch, specs: dict, expected: int | None
+) -> None:
+    offer = _offer("100", id="o")
+    offer.scraped_at = datetime(2026, 10, 4, 8, 0, 0)
+    product = make_product(id="p", offers=[offer])
+    product.specs = specs
+    monkeypatch.setattr(products_repository, "search_products_candidates", lambda *a, **kw: [product])
+
+    response = search_products_controller(None, query="x", category=None, limit=10, offset=0)
+
+    assert response.results[0].ram_gb == expected

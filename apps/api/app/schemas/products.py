@@ -28,6 +28,8 @@ class ProductSearchResult(BaseModel):
     image_url: str | None
     best_deal: OfferSummary
     offers_count: int
+    # RAM en Go (specs.ramGb, ecrit par l'ETL) : alimente le filtre RAM du site.
+    ram_gb: int | None
 
 
 class TopProduct(BaseModel):
