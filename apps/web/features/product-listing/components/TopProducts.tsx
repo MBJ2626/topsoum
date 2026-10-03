@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { LINK_PENDING_CLASS, LinkPending } from "@/components/ui/LinkPending";
 import type { TopProduct, TopProductsResponse } from "@/lib/api-types";
 import { displayPrice } from "@/lib/format";
 import { productDisplayName } from "@/lib/product-name";
@@ -37,8 +38,9 @@ export function TopProducts({ data }: { data: TopProductsResponse }) {
             <li key={item.id}>
               <Link
                 href={`/product/${item.id}`}
-                className="-mx-2 flex min-h-[44px] items-center gap-3 rounded-key px-2 py-2 transition-colors hover:bg-gray-50"
+                className={`-mx-2 flex min-h-[44px] items-center gap-3 rounded-key px-2 py-2 transition-colors hover:bg-gray-50 ${LINK_PENDING_CLASS}`}
               >
+                <LinkPending />
                 <span className="tabular w-3 flex-none text-gray-500" aria-hidden="true">
                   {index + 1}
                 </span>

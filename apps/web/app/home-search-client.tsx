@@ -1,21 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { SearchBar } from "@/features/search/components/SearchBar";
+import { usePendingNavigation } from "@/lib/use-pending-navigation";
 
 export function HomeSearchClient() {
-  const router = useRouter();
+  const { pending, navigate } = usePendingNavigation();
 
   return (
     <SearchBar
       placeholder="iPhone 15, PC portable…"
+      pending={pending}
       onSubmit={(query) => {
         if (query.length > 0) {
-          router.push(`/search?q=${encodeURIComponent(query)}`);
+          navigate(`/search?q=${encodeURIComponent(query)}`);
         }
       }}
-      onSuggestionSelect={(productId) => router.push(`/product/${productId}`)}
+      onSuggestionSelect={(productId) => navigate(`/product/${productId}`)}
     />
   );
 }

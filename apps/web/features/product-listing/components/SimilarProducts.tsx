@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import type { AsyncState } from "@/components/ui/async-state";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { LINK_PENDING_CLASS, LinkPending } from "@/components/ui/LinkPending";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
 import { displayPrice } from "@/lib/format";
@@ -51,7 +52,11 @@ export function SimilarProducts({ state, onRetry }: SimilarProductsProps) {
     <ul className="grid grid-cols-2 gap-x-4 gap-y-2 border-t-2 border-gray-900 pt-3 sm:grid-cols-4">
       {data.slice(0, MAX_ITEMS).map((item) => (
         <li key={item.id}>
-          <Link href={`/product/${item.id}`} className="-mx-2 flex h-full flex-col gap-1.5 rounded-key p-2 transition-colors hover:bg-gray-50">
+          <Link
+            href={`/product/${item.id}`}
+            className={`-mx-2 flex h-full flex-col gap-1.5 rounded-key p-2 transition-colors hover:bg-gray-50 ${LINK_PENDING_CLASS}`}
+          >
+            <LinkPending />
             <div className="relative mb-1 h-24 w-full overflow-hidden">
               {item.imageUrl ? (
                 <ProductImage src={item.imageUrl} alt={item.productName} sizes="120px" />

@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { AsyncState } from "@/components/ui/async-state";
 import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { LINK_PENDING_CLASS, LinkPending } from "@/components/ui/LinkPending";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock, SkeletonLine } from "@/components/ui/Skeleton";
 import { displayPrice } from "@/lib/format";
@@ -75,7 +76,11 @@ export function ResultList({ state, onRetry, initialVisibleCount = BATCH_SIZE }:
       <ul className="divide-y divide-gray-200">
         {data.slice(0, visibleCount).map((item) => (
           <li key={item.id} data-testid="result-row">
-            <Link href={`/product/${item.id}`} className="-mx-2 flex min-h-[44px] items-center gap-3 rounded-key px-2 py-3 transition-colors hover:bg-gray-50">
+            <Link
+              href={`/product/${item.id}`}
+              className={`-mx-2 flex min-h-[44px] items-center gap-3 rounded-key px-2 py-3 transition-colors hover:bg-gray-50 ${LINK_PENDING_CLASS}`}
+            >
+              <LinkPending />
               <div className="relative h-14 w-14 flex-none overflow-hidden rounded-key">
                 {item.imageUrl ? (
                   <ProductImage src={item.imageUrl} alt={item.productName} sizes="56px" />

@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { Suspense } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { StarIcon } from "@/components/ui/icons";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { SearchBar } from "@/features/search/components/SearchBar";
+import { usePendingNavigation } from "@/lib/use-pending-navigation";
 
 function HeaderSearch() {
-  const router = useRouter();
+  const { pending, navigate } = usePendingNavigation();
   const query = useSearchParams().get("q") ?? "";
 
   return (
@@ -18,10 +19,11 @@ function HeaderSearch() {
       size="compact"
       initialValue={query}
       placeholder="Rechercher un produit"
+      pending={pending}
       onSubmit={(next) => {
-        if (next.length > 0) router.push(`/search?q=${encodeURIComponent(next)}`);
+        if (next.length > 0) navigate(`/search?q=${encodeURIComponent(next)}`);
       }}
-      onSuggestionSelect={(productId) => router.push(`/product/${productId}`)}
+      onSuggestionSelect={(productId) => navigate(`/product/${productId}`)}
     />
   );
 }

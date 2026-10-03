@@ -18,6 +18,8 @@ interface SearchBarProps {
   size?: "hero" | "compact";
   onSubmit?: (query: string) => void;
   onSuggestionSelect?: (productId: string) => void;
+  /** Navigation en cours apres une recherche : touche occupee, seconde soumission ignoree. */
+  pending?: boolean;
 }
 
 // Combobox ARIA : le focus reste dans le champ, fleches haut/bas pour parcourir
@@ -28,6 +30,7 @@ export function SearchBar({
   size = "hero",
   onSubmit,
   onSuggestionSelect,
+  pending = false,
 }: SearchBarProps) {
   const inputId = useId();
   const listboxId = useId();
@@ -82,6 +85,7 @@ export function SearchBar({
         role="search"
         onSubmit={(event) => {
           event.preventDefault();
+          if (pending) return;
           close();
           onSubmit?.(value.trim());
         }}
@@ -124,9 +128,11 @@ export function SearchBar({
         <button
           type="submit"
           aria-label="Chercher"
+          disabled={pending}
+          aria-busy={pending || undefined}
           // Accent uniquement sur l'accueil (action principale de l'ecran) ; dans
           // l'en-tete, touche encre pour ne jamais concurrencer "Voir l'offre".
-          className={`flex-none rounded-key font-medium transition-[background-color,transform] duration-150 active:scale-[0.97] ${
+          className={`flex-none rounded-key font-medium transition-[background-color,transform] duration-150 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 ${
             isHero
               ? "min-h-[48px] px-4 text-base text-accent-foreground bg-accent hover:bg-accent-strong sm:px-6"
               : "min-h-[44px] min-w-[44px] px-3 text-sm text-white bg-gray-900 hover:bg-gray-800"
