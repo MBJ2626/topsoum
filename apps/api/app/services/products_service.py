@@ -147,7 +147,8 @@ def record_product_view(session: Session, product_id: str) -> None:
 
 def get_product_detail(session: Session, product_id: str) -> ProductDetailData:
     product = products_repository.get_product_by_id(session, product_id)
-    if product is None:
+    # Sans offre (ex : fiche fusionnee par l'admin), rien a comparer : introuvable.
+    if product is None or not product.offers:
         raise ProductNotFoundError(product_id)
 
     since = datetime.now(UTC) - timedelta(days=PRICE_HISTORY_LOOKBACK_DAYS)

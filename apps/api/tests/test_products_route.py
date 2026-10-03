@@ -57,6 +57,19 @@ def test_get_product_detail_returns_offers_and_history(seeded_catalog: SeededCat
     assert "price_history" in body
 
 
+def test_get_product_detail_returns_404_when_product_has_no_offer(seeded_catalog: SeededCatalog) -> None:
+    session = SessionLocal()
+    try:
+        session.execute(text("delete from offers where id = :id"), {"id": seeded_catalog.offer_ids[0]})
+        session.commit()
+    finally:
+        session.close()
+
+    response = client.get(f"/products/{seeded_catalog.product_ids[0]}")
+
+    assert response.status_code == 404
+
+
 def test_get_product_detail_returns_404_for_unknown_id() -> None:
     response = client.get("/products/does-not-exist-xyz")
     assert response.status_code == 404

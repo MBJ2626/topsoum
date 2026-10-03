@@ -1,13 +1,12 @@
-"""Tests de caracterisation (pas de DB) : score "Meilleur prix" et prix douteux ou absent.
+"""Tests unitaires (pas de DB) : score "Meilleur prix" et prix douteux ou absent.
 
-Ils figent le comportement observe le 2026-10-03, y compris quand il s'ecarte
-d'une regle documentee : ces cas sont signales "ECART" dans leur docstring.
-Corriger l'un d'eux doit faire echouer le test correspondant, a mettre a jour
-avec la correction.
+Ecrits le 2026-10-03 comme tests de caracterisation ; les ecarts qu'ils
+revelaient (prix nul elu meilleur deal, fiche sans offre en erreur 500) sont
+corriges et les tests decrivent desormais le comportement voulu.
 
 La regle "Prix en cours de mise a jour" (docs/PROJET.md 5.4 et 9.2) n'a pas de
-libelle cote API : l'API renvoie le prix tel quel et le web l'affiche via
-displayPrice (apps/web/lib/format.ts).
+libelle cote API : l'API ne choisit jamais un prix douteux comme meilleur deal,
+et le web affiche le libelle via displayPrice (apps/web/lib/format.ts).
 """
 
 from __future__ import annotations
@@ -18,6 +17,7 @@ from decimal import Decimal
 import pytest
 
 from app.controllers.products_controller import search_products_controller
+from app.errors import ProductNotFoundError
 from app.repositories import products_repository
 from app.services.favorites_service import to_result
 from app.services.products_service import _top_item, get_product_detail, search_products
@@ -135,14 +135,14 @@ def test_zero_price_offer_is_never_best_deal_in_product_detail(monkeypatch: pyte
     assert [o.id for o in detail.offers] == ["c", "a", "b"]
 
 
-def test_product_detail_without_offers_raises_index_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    """ECART : une fiche sans aucune offre leve IndexError (500) au lieu d'un etat
-    "Prix en cours de mise a jour"."""
+def test_product_detail_without_offers_is_not_found(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Une fiche sans aucune offre (ex : fusionnee par l'admin dans une autre)
+    n'a rien a comparer : introuvable (404), jamais une erreur 500."""
     product = make_product(id="p1", offers=[])
     monkeypatch.setattr(products_repository, "get_product_by_id", lambda *a, **kw: product)
     monkeypatch.setattr(products_repository, "get_price_history_for_product", lambda *a, **kw: [])
 
-    with pytest.raises(IndexError):
+    with pytest.raises(ProductNotFoundError):
         get_product_detail(None, "p1")
 
 
