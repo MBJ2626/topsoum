@@ -3,11 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 
 import type { ScrapersStatusResponse } from "@/lib/api-types";
+import { HttpError } from "@/lib/http-error";
 
 async function fetchScraperStatus(): Promise<ScrapersStatusResponse> {
   const response = await fetch("/api/admin/scrapers/status");
   if (!response.ok) {
-    throw new Error("Impossible de charger le statut des scrapers.");
+    throw new HttpError("Impossible de charger le statut des scrapers.", response.status);
   }
   return response.json();
 }

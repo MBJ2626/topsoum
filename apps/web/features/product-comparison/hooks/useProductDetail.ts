@@ -3,11 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 
 import type { ProductDetailResponse } from "@/lib/api-types";
+import { HttpError } from "@/lib/http-error";
 
 async function fetchProductDetail(id: string): Promise<ProductDetailResponse> {
   const response = await fetch(`/api/products/${id}`);
   if (!response.ok) {
-    throw new Error("Impossible de charger le produit.");
+    throw new HttpError("Impossible de charger le produit.", response.status);
   }
   return response.json();
 }

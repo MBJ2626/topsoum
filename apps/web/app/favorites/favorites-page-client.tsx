@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { ErrorState } from "@/components/ui/ErrorState";
+import { LINK_PENDING_CLASS, LinkPending } from "@/components/ui/LinkPending";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
 import { FavoriteToggle } from "@/features/favorites/components/FavoriteToggle";
@@ -60,7 +61,8 @@ export function FavoritesPageClient({ signOutSlot }: { signOutSlot: ReactNode })
             key={favorite.id}
             className="flex items-center justify-between gap-3 rounded-card border border-gray-200 bg-white p-3 sm:p-4"
           >
-            <Link href={`/product/${favorite.product_id}`} className="flex flex-1 items-center gap-3">
+            <Link href={`/product/${favorite.product_id}`} className={`flex flex-1 items-center gap-3 ${LINK_PENDING_CLASS}`}>
+              <LinkPending />
               <div className="relative h-14 w-14 flex-none overflow-hidden rounded-key">
                 {favorite.product_image_url ? (
                   <ProductImage src={favorite.product_image_url} alt={favorite.product_name} sizes="56px" />

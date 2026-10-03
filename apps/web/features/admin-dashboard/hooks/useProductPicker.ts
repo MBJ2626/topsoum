@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import type { ProductSearchResponse } from "@/lib/api-types";
+import { HttpError } from "@/lib/http-error";
 
 // Reutilise la route /api/products/search (publique) plutot que d'importer
 // le hook useProductSearch de product-listing : les features restent
@@ -10,7 +11,7 @@ import type { ProductSearchResponse } from "@/lib/api-types";
 async function fetchProductPicker(query: string): Promise<ProductSearchResponse> {
   const response = await fetch(`/api/products/search?q=${encodeURIComponent(query)}&limit=8`);
   if (!response.ok) {
-    throw new Error("La recherche de produit a échoué.");
+    throw new HttpError("La recherche de produit a échoué.", response.status);
   }
   return response.json();
 }
