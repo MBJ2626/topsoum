@@ -73,9 +73,8 @@ def test_unknown_stock_loses_to_in_stock_up_to_ten_percent_more_expensive() -> N
 
 
 def test_out_of_stock_wins_when_much_cheaper_than_in_stock() -> None:
-    """ECART : le docstring de scoring.py annonce qu'une offre out_of_stock n'est
-    choisie que s'il n'existe aucune offre en stock. En realite la penalite est
-    un multiplicateur 1.5 : une rupture plus de ~33 % moins chere l'emporte."""
+    """La penalite de stock est un multiplicateur 1.5 : une rupture plus de ~33 %
+    moins chere l'emporte."""
     out_of_stock = _offer("90", stock="out_of_stock", id="a")
     in_stock = _offer("140", id="b")
     assert best_offer([out_of_stock, in_stock]) is out_of_stock
@@ -84,18 +83,32 @@ def test_out_of_stock_wins_when_much_cheaper_than_in_stock() -> None:
 # -- Prix douteux (0) ou absent -------------------------------------------------
 
 
-def test_zero_price_offer_becomes_best_deal_in_search(monkeypatch: pytest.MonkeyPatch) -> None:
-    """ECART : la recherche ne filtre pas les prix <= 0 (contrairement au top 5) :
-    une offre a 0 TND est le "Meilleur prix" et remonte le produit en tete."""
+def test_zero_price_offer_is_never_best_deal_in_search(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Un prix <= 0 est douteux (docs/PROJET.md 9.2) : le meilleur deal est la
+    meilleure offre a prix fiable, et le classement se fait sur elle."""
     zero = make_product(id="p-zero", offers=[_offer("0", id="z"), _offer("500", id="y")])
     normal = make_product(id="p-normal", offers=[_offer("100", id="n")])
-    monkeypatch.setattr(products_repository, "search_products_candidates", lambda *a, **kw: [normal, zero])
+    monkeypatch.setattr(products_repository, "search_products_candidates", lambda *a, **kw: [zero, normal])
 
     results = search_products(None, query="x", category=None, limit=10, offset=0)
 
-    assert [r.product.id for r in results] == ["p-zero", "p-normal"]
-    assert results[0].best_deal.price == Decimal("0")
-    assert results[0].offers_count == 2
+    assert [r.product.id for r in results] == ["p-normal", "p-zero"]
+    assert results[1].best_deal.id == "y"
+    assert results[1].offers_count == 2
+
+
+def test_product_without_reliable_price_ranks_last_in_search(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Sans aucun prix fiable, le produit reste trouvable mais passe apres tous
+    les autres ; son offre est renvoyee telle quelle (le web affiche "Prix en
+    cours de mise a jour")."""
+    unpriced = make_product(id="p-unpriced", offers=[_offer("0", id="z")])
+    expensive = make_product(id="p-expensive", offers=[_offer("9000", stock="out_of_stock", id="e")])
+    monkeypatch.setattr(products_repository, "search_products_candidates", lambda *a, **kw: [unpriced, expensive])
+
+    results = search_products(None, query="x", category=None, limit=10, offset=0)
+
+    assert [r.product.id for r in results] == ["p-expensive", "p-unpriced"]
+    assert results[1].best_deal.price == Decimal("0")
 
 
 def test_zero_price_is_serialized_as_is_by_the_search_controller(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -110,16 +123,16 @@ def test_zero_price_is_serialized_as_is_by_the_search_controller(monkeypatch: py
     assert response.model_dump(mode="json")["results"][0]["best_deal"]["price"] == "0.000"
 
 
-def test_zero_price_offer_becomes_best_deal_in_product_detail(monkeypatch: pytest.MonkeyPatch) -> None:
-    """ECART : meme comportement que la recherche sur la fiche produit."""
-    product = make_product(id="p1", offers=[_offer("450", id="a"), _offer("0", id="b")])
+def test_zero_price_offer_is_never_best_deal_in_product_detail(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fiche produit : offres a prix fiable par score, puis les prix douteux en fin de liste."""
+    product = make_product(id="p1", offers=[_offer("0", id="b"), _offer("450", id="a"), _offer("300", id="c")])
     monkeypatch.setattr(products_repository, "get_product_by_id", lambda *a, **kw: product)
     monkeypatch.setattr(products_repository, "get_price_history_for_product", lambda *a, **kw: [])
 
     detail = get_product_detail(None, "p1")
 
-    assert detail.best_deal.id == "b"
-    assert [o.id for o in detail.offers] == ["b", "a"]
+    assert detail.best_deal.id == "c"
+    assert [o.id for o in detail.offers] == ["c", "a", "b"]
 
 
 def test_product_detail_without_offers_raises_index_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -139,10 +152,16 @@ def test_favorite_without_offers_has_no_price() -> None:
     assert (result.best_offer_price, result.best_offer_vendor) == (None, None)
 
 
-def test_favorite_best_price_can_be_zero() -> None:
-    """ECART : les favoris non plus ne filtrent pas un prix nul."""
+def test_favorite_best_price_ignores_zero_prices() -> None:
     favorite = make_favorite(product=make_product(offers=[_offer("0", id="a"), _offer("300", id="b")]))
-    assert to_result(favorite).best_offer_price == Decimal("0")
+    assert to_result(favorite).best_offer_price == Decimal("300")
+
+
+def test_favorite_without_reliable_price_has_no_price() -> None:
+    """Le web affiche alors "Prix en cours de mise a jour", jamais "0,000 TND"."""
+    favorite = make_favorite(product=make_product(offers=[_offer("0", id="a")]))
+    result = to_result(favorite)
+    assert (result.best_offer_price, result.best_offer_vendor) == (None, None)
 
 
 def test_top_item_skips_products_with_only_zero_prices() -> None:

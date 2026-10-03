@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.errors import ProductNotFoundError
 from app.repositories import product_events_repository, products_repository
 from app.repositories.models import Offer, PriceHistory, Product
-from app.services.scoring import best_offer, score_offer
+from app.services.scoring import best_deal, best_offer, deal_rank, rank_offers
 
 PRICE_HISTORY_LOOKBACK_DAYS = 90
 
@@ -50,13 +50,13 @@ def search_products(
     # suffisant pour le catalogue V1 (4 vendeurs, marche tunisien).
     products = products_repository.search_products_candidates(session, query=query, category=category)
 
-    ranked = sorted(products, key=lambda product: score_offer(best_offer(product.offers)))
+    ranked = sorted(products, key=lambda product: deal_rank(product.offers))
     page = ranked[offset : offset + limit]
 
     return [
         ProductSearchResultData(
             product=product,
-            best_deal=best_offer(product.offers),
+            best_deal=best_deal(product.offers),
             offers_count=len(product.offers),
         )
         for product in page
@@ -153,7 +153,7 @@ def get_product_detail(session: Session, product_id: str) -> ProductDetailData:
     since = datetime.now(UTC) - timedelta(days=PRICE_HISTORY_LOOKBACK_DAYS)
     history = products_repository.get_price_history_for_product(session, product_id, since=since)
 
-    offers_sorted = sorted(product.offers, key=score_offer)
+    offers_sorted = rank_offers(product.offers)
 
     return ProductDetailData(
         product=product,
