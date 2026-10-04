@@ -13,8 +13,9 @@ import { toBestDealCardData, toOfferRows } from "@/features/product-comparison/l
 import { BestDealCard } from "@/features/product-listing/components/BestDealCard";
 import { FilterPanel, type FilterValues } from "@/features/product-listing/components/FilterPanel";
 import { ResultList } from "@/features/product-listing/components/ResultList";
-import { useProductSearch } from "@/features/product-listing/hooks/useProductSearch";
+import { useProductSearch, type SearchFilters } from "@/features/product-listing/hooks/useProductSearch";
 import { productDisplayName } from "@/lib/product-name";
+import { useDebouncedValue } from "@/lib/use-debounced-value";
 import { useOfferClick } from "@/lib/use-offer-click";
 
 interface SearchPageClientProps {
@@ -26,25 +27,28 @@ interface SearchPageClientProps {
 const EMPTY_FILTERS: FilterValues = { maxBudget: null, brand: null, ram: null };
 
 export function SearchPageClient({ query, isAuthenticated, favoritesByProduct }: SearchPageClientProps) {
-  const searchQuery = useProductSearch(query);
   const offerClick = useOfferClick();
   const [filterValues, setFilterValues] = useState<FilterValues>(EMPTY_FILTERS);
+  // Le curseur de budget bouge en continu : une seule requete 300 ms apres le dernier mouvement.
+  const debouncedBudget = useDebouncedValue(filterValues.maxBudget, 300);
+
+  // Recherche sans filtre (rendue cote serveur) : etat de la page et options des filtres.
+  const searchQuery = useProductSearch(query);
+  // Recherche filtree par l'API, sur tout le catalogue ; sans filtre actif, meme cache que la precedente.
+  const apiFilters: SearchFilters = {
+    brand: filterValues.brand,
+    ramGb: filterValues.ram != null ? Number(filterValues.ram) : null,
+    maxPrice: debouncedBudget,
+  };
+  const filteredQuery = useProductSearch(query, apiFilters);
 
   const results = useMemo(
     () => (searchQuery.status === "success" ? searchQuery.data.results : []),
     [searchQuery.status, searchQuery.data],
   );
-
-  // Filtrage 100% client-side (limitation documentee : /products/search ne
-  // supporte que q/category/limit/offset cote API - pas de brand/ram/budget).
   const filteredResults = useMemo(
-    () =>
-      results.filter((result) => {
-        if (filterValues.maxBudget != null && result.best_deal.price > filterValues.maxBudget) return false;
-        if (filterValues.brand != null && result.brand !== filterValues.brand) return false;
-        return true;
-      }),
-    [results, filterValues],
+    () => (filteredQuery.status === "success" ? filteredQuery.data.results : []),
+    [filteredQuery.status, filteredQuery.data],
   );
 
   // 1er resultat (deja trie par meilleur deal cote API) = reponse dominante.
@@ -55,7 +59,7 @@ export function SearchPageClient({ query, isAuthenticated, favoritesByProduct }:
 
   // Les autres produits trouves, sous la reponse dominante : sans cette liste,
   // une recherche large ("iphone") ne montrerait que le moins cher de tous.
-  const otherResultsState = fromQuery(searchQuery, () =>
+  const otherResultsState = fromQuery(filteredQuery, () =>
     filteredResults.slice(1).map((result) => ({
       id: result.id,
       productName: productDisplayName(result),
@@ -69,14 +73,16 @@ export function SearchPageClient({ query, isAuthenticated, favoritesByProduct }:
   const offersState = fromQuery(productDetailQuery, toOfferRows);
 
   const budgetRange = useMemo(() => {
-    const prices = results.map((result) => result.best_deal.price).filter((price) => price > 0);
+    const prices = results.map((result) => Number(result.best_deal.price)).filter((price) => price > 0);
     return { min: 0, max: prices.length > 0 ? Math.max(...prices) : 0 };
   }, [results]);
 
   const optionsState = fromQuery(searchQuery, (data) => ({
     brands: Array.from(new Set(data.results.map((result) => result.brand))),
-    // RAM absente de la reponse de recherche : liste vide, donc filtre masque.
-    ramOptions: [] as string[],
+    // RAM connue (specs.ramGb) des produits trouves ; aucune -> filtre masque.
+    ramOptions: Array.from(new Set(data.results.flatMap((result) => (result.ram_gb != null ? [result.ram_gb] : []))))
+      .sort((a, b) => a - b)
+      .map(String),
   }));
 
   if (query.trim().length === 0) {
@@ -119,7 +125,9 @@ export function SearchPageClient({ query, isAuthenticated, favoritesByProduct }:
         />
       </div>
 
-      {searchQuery.status === "success" && filteredResults.length === 0 ? (
+      {filteredQuery.status === "error" ? (
+        <ErrorState message="Impossible d'appliquer les filtres." onRetry={() => filteredQuery.refetch()} />
+      ) : filteredQuery.status === "success" && filteredResults.length === 0 ? (
         <p className="rounded-card border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">
           Aucun résultat pour ces filtres.
         </p>

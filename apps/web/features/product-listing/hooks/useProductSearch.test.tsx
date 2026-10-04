@@ -105,3 +105,58 @@ describe("useProductSearch — relances silencieuses (politique de l'application
     expect(result.current.error?.message).toBe("La recherche a échoué.");
   });
 });
+
+describe("useProductSearch — filtres envoyes a l'API", () => {
+  function clientWrapper(client: QueryClient) {
+    return function Wrapper({ children }: { children: ReactNode }) {
+      return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+    };
+  }
+  // Meme fraicheur que l'application (QUERY_DEFAULTS) : pas de relance au montage d'une donnee SSR.
+  const newClient = () => new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 30_000 } } });
+
+  it("transmet marque, RAM et budget a la route de recherche", async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ count: 0, results: [] }), { status: 200 }));
+
+    const { result } = renderHook(
+      () => useProductSearch("iphone 15", { brand: "Apple", ramGb: 8, maxPrice: 1500 }),
+      { wrapper: clientWrapper(newClient()) },
+    );
+
+    await waitFor(() => expect(result.current.status).toBe("success"));
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/products/search?q=iphone%2015&limit=20&brand=Apple&ram_gb=8&max_price=1500",
+    );
+  });
+
+  it("sans filtre actif : reutilise la recherche deja rendue cote serveur (aucune requete)", () => {
+    const client = newClient();
+    const ssr = { count: 1, results: [{ id: "p1" }] };
+    client.setQueryData(["product-search", "iphone"], ssr);
+
+    const { result } = renderHook(
+      () => useProductSearch("iphone", { brand: null, ramGb: null, maxPrice: null }),
+      { wrapper: clientWrapper(client) },
+    );
+
+    expect(result.current.data).toEqual(ssr);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("garde les resultats precedents affiches pendant le chargement d'un nouveau filtre", async () => {
+    const client = newClient();
+    client.setQueryData(["product-search", "phone"], { count: 1, results: [{ id: "tous" }] });
+    fetchMock.mockReturnValue(new Promise(() => {}));
+
+    const { result, rerender } = renderHook(
+      ({ brand }: { brand: string | null }) => useProductSearch("phone", { brand, ramGb: null, maxPrice: null }),
+      { wrapper: clientWrapper(client), initialProps: { brand: null as string | null } },
+    );
+    rerender({ brand: "Samsung" });
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(result.current.status).toBe("success");
+    expect(result.current.isPlaceholderData).toBe(true);
+    expect(result.current.data).toEqual({ count: 1, results: [{ id: "tous" }] });
+  });
+});

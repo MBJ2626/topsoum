@@ -39,6 +39,12 @@ def _offer_summary(offer: Offer) -> OfferSummary:
     )
 
 
+def _ram_gb(specs: dict | None) -> int | None:
+    """specs.ramGb s'il s'agit d'un vrai entier (JSON libre : jamais d'erreur sur une valeur inattendue)."""
+    value = (specs or {}).get("ramGb")
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
 def search_products_controller(
     session: Session,
     *,
@@ -71,6 +77,7 @@ def search_products_controller(
             image_url=result.product.image_url,
             best_deal=_offer_summary(result.best_deal),
             offers_count=result.offers_count,
+            ram_gb=_ram_gb(result.product.specs),
         )
         for result in results
     ]

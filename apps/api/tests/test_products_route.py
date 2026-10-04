@@ -172,3 +172,13 @@ def test_search_rejects_invalid_filters() -> None:
     assert client.get("/products/search", params={"ram_gb": 0}).status_code == 422
     assert client.get("/products/search", params={"max_price": "-1"}).status_code == 422
     assert client.get("/products/search", params={"max_price": "abc"}).status_code == 422
+
+
+def test_search_results_expose_ram_from_specs(seeded_catalog: SeededCatalog) -> None:
+    alpha, beta, gamma = seeded_catalog.product_ids
+    _set_ram(alpha, 4)
+
+    response = client.get("/products/search", params={"q": seeded_catalog.tag})
+
+    ram_by_id = {result["id"]: result["ram_gb"] for result in response.json()["results"]}
+    assert ram_by_id == {alpha: 4, beta: None, gamma: None}

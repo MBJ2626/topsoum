@@ -88,7 +88,7 @@ export function FilterPanel({ optionsState, values, budgetRange, onChange, onRet
                 </select>
               </label>
 
-              {/* Masque tant que l'API n'expose pas la RAM : jamais de filtre sans effet. */}
+              {/* Masque si aucun produit trouve n'a de RAM connue : jamais de filtre sans effet. */}
               {optionsState.data.ramOptions.length > 0 ? (
                 <label className="flex flex-col gap-1 text-sm text-gray-700">
                   RAM
@@ -100,7 +100,7 @@ export function FilterPanel({ optionsState, values, budgetRange, onChange, onRet
                     <option value="">Toutes</option>
                     {optionsState.data.ramOptions.map((ram) => (
                       <option key={ram} value={ram}>
-                        {ram}
+                        {ram} Go
                       </option>
                     ))}
                   </select>
